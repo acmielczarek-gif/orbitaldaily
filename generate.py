@@ -35,10 +35,14 @@ def fetch_kp():
     rows = r.json()
     for row in reversed(rows):
         try:
-            val = float(row[1])
+            if isinstance(row, dict):
+                kp_val = row.get("kp") or row.get("Kp") or row.get("kp_index")
+            else:
+                kp_val = row[1]
+            val = float(kp_val)
             if val >= 0:
                 return val
-        except (IndexError, ValueError, TypeError):
+        except (IndexError, ValueError, TypeError, KeyError):
             continue
     return None
 
