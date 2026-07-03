@@ -2,210 +2,207 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ORBITAL DAILY — Independent Space News</title>
-  <meta name="description" content="Daily space news: launches, auroras, meteor showers, and more.">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Orbital Daily — Independent Space News</title>
+  <meta name="description" content="Daily space intelligence: rocket launches, aurora alerts, astrophotography conditions, meteor showers, and space news.">
+  <meta name="author" content="Orbital Daily">
+  <meta property="og:title" content="Orbital Daily">
+  <meta property="og:description" content="Daily space intelligence: launches, aurora, astrophotography score.">
+  <meta property="og:url" content="https://orbitaldaily.com">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://orbitaldaily.com">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Orbital Daily","url":"https://orbitaldaily.com","description":"Independent daily space news and intelligence.","publisher":{"@type":"Organization","name":"Orbital Daily"}}</script>
+  <!-- Add GA4 ID to generate.py -->
   <style>
-    :root {
-      --bg:      #08090f;
-      --bg2:     #0c0e17;
-      --border:  #1b1f2e;
-      --text:    #d0d2da;
-      --dim:     #6a6f80;
-      --red:     #cc2200;
-      --orange:  #c85a00;
-      --green:   #33cc88;
-      --mono:    'Courier New', Courier, monospace;
-      --serif:   Georgia, 'Times New Roman', serif;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: var(--serif); font-size: 15px; line-height: 1.6; }
-    a { color: var(--text); text-decoration: none; }
-    a:hover { color: #fff; text-decoration: underline; }
-    hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+:root {
+  --bg:     #f5f4ef;
+  --bg2:    #edecea;
+  --border: #ccc9c0;
+  --text:   #191817;
+  --dim:    #6e6a62;
+  --red:    #bf3a1c;
+  --orange: #c85800;
+  --navy:   #1c3461;
+  --green:  #1a6b3c;
+  --mono:   'Courier New', Courier, monospace;
+  --serif:  Georgia, 'Times New Roman', serif;
+  --sans:   system-ui, -apple-system, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+a { color: var(--navy); text-decoration: none; }
+a:hover { text-decoration: underline; }
+hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+.wrapper { max-width: 1000px; margin: 0 auto; padding: 0 14px; }
 
-    /* Masthead */
-    .masthead { text-align: center; padding: 20px 16px 12px; border-bottom: 2px solid var(--red); }
-    .masthead h1 {
-      font-family: var(--serif); font-size: clamp(2rem, 6vw, 3.8rem);
-      font-weight: 700; letter-spacing: .1em; color: #fff; text-transform: uppercase;
-    }
-    .tagline { font-family: var(--mono); font-size: .7rem; color: var(--dim); letter-spacing: .22em; text-transform: uppercase; margin-top: 4px; }
-    .dateline { font-family: var(--mono); font-size: .68rem; color: var(--dim); margin-top: 6px; }
+/* Masthead */
+.masthead { text-align: center; padding: 22px 16px 14px; border-bottom: 2px solid var(--text); }
+.masthead h1 { font-family: var(--serif); font-size: clamp(2rem,6vw,3.6rem); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.masthead-rule { width: 60px; border-top: 1px solid var(--dim); margin: 8px auto; }
+.tagline { font-family: var(--mono); font-size: .68rem; color: var(--dim); letter-spacing: .2em; text-transform: uppercase; }
+.dateline { font-family: var(--mono); font-size: .66rem; color: var(--dim); margin-top: 5px; }
 
-    /* Alert */
-    .alert-banner {
-      background: #150000; border: 1px solid #7a1100; border-left: 4px solid var(--red);
-      padding: 9px 16px; margin: 10px auto; max-width: 960px;
-      font-family: var(--mono); font-size: .78rem;
-    }
-    .alert-title { color: var(--red); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-    .alert-sub { color: #aaa; }
-    .alert-sub a { color: #ff6644; }
+/* Alert */
+.alert-banner { background: #fff0ed; border-top: 3px solid var(--red); border-bottom: 1px solid #e8b8ae; padding: 10px 20px; text-align: center; }
+.alert-title { color: var(--red); font-family: var(--mono); font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.alert-sub { color: #7a3020; font-size: .8rem; }
+.alert-sub a { color: var(--red); }
 
-    /* Wrapper */
-    .wrapper { max-width: 980px; margin: 0 auto; padding: 0 14px; }
+/* History bar */
+.history-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 7px 16px; font-size: .78rem; color: var(--dim); text-align: center; }
+.history-bar strong { color: var(--text); }
 
-    /* Three-column top layout */
-    .top-section {
-      display: grid;
-      grid-template-columns: 210px 1fr 210px;
-      border-bottom: 1px solid var(--border);
-    }
-    @media (max-width: 680px) {
-      .top-section { grid-template-columns: 1fr; }
-      .sidebar { border-right: none !important; border-left: none !important; border-top: 1px solid var(--border); }
-    }
+/* ── METRICS HERO ── */
+.metrics-hero { border-bottom: 1px solid var(--border); }
 
-    .center-col { padding: 18px 20px; border-left: 1px solid var(--border); border-right: 1px solid var(--border); text-align: center; }
-    .sidebar { padding: 14px 12px; font-size: .82rem; }
-    .sidebar-title {
-      font-family: var(--mono); font-size: .62rem; letter-spacing: .2em;
-      text-transform: uppercase; color: var(--dim);
-      border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 10px;
-    }
+.metric-cards { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--border); }
+@media(max-width:600px) { .metric-cards { grid-template-columns: 1fr; } }
 
-    /* Headlines */
-    .headline-1 { font-size: clamp(1.2rem, 3.2vw, 1.9rem); font-weight: 700; line-height: 1.2; margin-bottom: 14px; }
-    .headline-1 a { color: #fff; }
-    .headline-1 a:hover { color: var(--red); text-decoration: none; }
-    .headline-2 { font-size: clamp(.9rem, 2.2vw, 1.08rem); line-height: 1.35; margin-bottom: 10px; color: #9ea2b0; }
-    .headline-2 a { color: #9ea2b0; }
-    .headline-2 a:hover { color: #fff; }
-    .center-divider { width: 36px; border-top: 2px solid var(--red); margin: 14px auto; }
+.metric-card { padding: 20px 18px; border-right: 1px solid var(--border); text-align: center; }
+.metric-card:last-child { border-right: none; }
+.metric-eyebrow { font-family: var(--mono); font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+.metric-value { font-family: var(--serif); font-size: 3rem; font-weight: 700; line-height: 1; }
+.metric-denom { font-size: .8rem; color: var(--dim); }
+.metric-label { font-family: var(--mono); font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; margin-top: 4px; }
+.metric-sub { font-size: .75rem; color: var(--dim); margin-top: 3px; }
+.metric-value-lg { font-family: var(--serif); font-size: 2.2rem; font-weight: 700; line-height: 1.1; }
+.launch-name { font-size: .85rem; color: var(--text); margin-top: 5px; font-weight: 600; }
+.launch-sub { font-size: .75rem; color: var(--dim); }
 
-    /* Kp block */
-    .kp-block { text-align: center; margin-bottom: 14px; padding: 10px 0; }
-    .kp-number { font-family: var(--mono); font-size: 2.5rem; font-weight: 700; line-height: 1; }
-    .kp-status { font-family: var(--mono); font-size: .62rem; letter-spacing: .16em; text-transform: uppercase; margin-top: 3px; }
-    .kp-caption { font-size: .7rem; color: var(--dim); margin-top: 2px; }
+/* Today bar */
+.today-bar { padding: 14px 20px; display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+.today-pills { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
+.pill { font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; padding: 4px 10px; border: 1px solid var(--border); border-radius: 2px; background: var(--bg2); color: var(--dim); white-space: nowrap; }
+.pill strong { color: var(--text); }
+.editorial { font-family: var(--serif); font-style: italic; font-size: .88rem; color: #4a4640; line-height: 1.5; flex: 1; min-width: 200px; }
 
-    /* Event items */
-    .event-item { margin-bottom: 9px; line-height: 1.3; }
-    .event-time { display: block; font-family: var(--mono); font-size: .59rem; letter-spacing: .1em; color: var(--orange); text-transform: uppercase; }
-    .event-item a { font-size: .81rem; }
-    .dim { color: var(--dim); font-size: .72rem; }
+/* Divider */
+.section-bar { font-family: var(--mono); font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); background: var(--bg2); padding: 6px 14px; border-bottom: 1px solid var(--border); }
 
-    /* More news */
-    .section-bar {
-      font-family: var(--mono); font-size: .62rem; letter-spacing: .2em;
-      text-transform: uppercase; color: var(--dim);
-      background: var(--bg2); padding: 6px 14px;
-      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-    }
-    .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
-    @media (max-width: 580px) { .news-grid { grid-template-columns: 1fr; } }
-    .news-col { padding: 12px 14px; border-right: 1px solid var(--border); }
-    .news-col:last-child { border-right: none; }
-    .news-link { margin-bottom: 10px; font-size: .82rem; line-height: 1.35; }
-    .news-link a { color: #9296a8; }
-    .news-link a:hover { color: #fff; }
+/* Headlines (now secondary) */
+.news-section { padding: 14px 0; }
+.top-headlines { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+@media(max-width:580px) { .top-headlines { grid-template-columns: 1fr; } }
+.top-col { padding: 10px 14px; border-right: 1px solid var(--border); }
+.top-col:last-child { border-right: none; }
+.hed-1 { font-family: var(--serif); font-size: 1.05rem; font-weight: 700; line-height: 1.25; margin-bottom: 10px; }
+.hed-1 a { color: var(--text); }
+.hed-1 a:hover { color: var(--red); text-decoration: none; }
+.hed-2 { font-family: var(--serif); font-size: .88rem; line-height: 1.3; margin-bottom: 8px; color: #4a4640; }
+.hed-2 a { color: #4a4640; }
 
-    /* Footer */
-    .footer {
-      text-align: center; padding: 14px; margin-top: 0;
-      font-family: var(--mono); font-size: .63rem; color: var(--dim);
-      border-top: 1px solid var(--border); letter-spacing: .05em;
-    }
-    .footer a { color: var(--dim); }
-    .footer a:hover { color: var(--text); }
-  </style>
+/* More news grid */
+.news-grid { display: grid; grid-template-columns: repeat(3,1fr); }
+@media(max-width:580px) { .news-grid { grid-template-columns:1fr; } }
+.news-col { padding: 10px 14px; border-right: 1px solid var(--border); }
+.news-col:last-child { border-right: none; }
+.news-link { margin-bottom: 8px; font-size: .8rem; line-height: 1.3; }
+.news-link a { color: var(--navy); }
+
+/* Launch sidebar strip */
+.launch-strip { display: flex; gap: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow-x: auto; }
+.launch-strip-item { padding: 8px 16px; border-right: 1px solid var(--border); flex-shrink: 0; min-width: 180px; }
+.ls-time { font-family: var(--mono); font-size: .6rem; color: var(--orange); letter-spacing: .1em; text-transform: uppercase; display: block; }
+.ls-name { font-size: .8rem; color: var(--navy); }
+
+/* Signup */
+.signup-bar { background: var(--navy); color: #c8d4ea; text-align: center; padding: 14px 16px; font-size: .85rem; }
+.signup-bar strong { color: #fff; }
+.signup-form { margin-top: 8px; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.signup-form input[type=email] { padding: 6px 12px; border: none; border-radius: 2px; font-size: .82rem; width: 220px; }
+.signup-form button { padding: 6px 16px; background: var(--orange); color: #fff; border: none; border-radius: 2px; font-family: var(--mono); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+
+/* Footer */
+.footer { text-align: center; padding: 14px; font-family: var(--mono); font-size: .62rem; color: var(--dim); border-top: 1px solid var(--border); }
+.footer a { color: var(--dim); }
+</style>
 </head>
 <body>
 <div class="wrapper">
 
   <div class="masthead">
     <h1>Orbital Daily</h1>
+    <div class="masthead-rule"></div>
     <div class="tagline">Independent Space News &amp; Intelligence</div>
-    <div class="dateline">Updated Thursday, July 2, 2026  ·  12:32 UTC</div>
+    <div class="dateline">Updated Friday, July 3, 2026  ·  01:46 UTC</div>
   </div>
 
   
+  
 
-  <div class="top-section">
+  <!-- ── METRICS HERO ── -->
+  <div class="metrics-hero">
+    <div class="metric-cards">
 
-    <!-- Left: Upcoming Launches -->
-    <div class="sidebar">
-      <div class="sidebar-title">Upcoming Launches</div>
-      <div class="event-item"><span class="event-time">LAUNCHED</span><a href="https://www.rocketlaunch.live/launch/long-march-4b-haiyang-2e" target="_blank">Long March 4B | Haiyang 2E</a></div>
-<div class="event-item"><span class="event-time">LAUNCHED</span><a href="https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-17-46" target="_blank">Falcon 9 Block 5 | Starlink Group 17-46</a></div>
-<div class="event-item"><span class="event-time">LAUNCHED</span><a href="https://www.rocketlaunch.live/launch/atlas-v-551-amazon-leo-la-08" target="_blank">Atlas V 551 | Amazon Leo (LA-08)</a></div>
-<div class="event-item"><span class="event-time">TOMORROW</span><a href="https://www.rocketlaunch.live/launch/long-march-6a-unknown-payload" target="_blank">Long March 6A | Unknown Payload</a></div>
-<div class="event-item"><span class="event-time">IN 2 DAYS · Jul 5</span><a href="https://www.rocketlaunch.live/launch/long-march-8a-spacesail-polar-group-tbd" target="_blank">Long March 8A | SpaceSail Polar Group TBD</a></div>
-
-      <hr>
-      <div style="margin-top:8px">
-        <a href="https://www.rocketlaunch.live" target="_blank" style="color:var(--dim);font-size:.75rem">Full schedule →</a>
+      <div class="metric-card">
+        <div class="metric-eyebrow">Astrophotography Score</div>
+        <div class="metric-value" style="color:#b84000">2.8</div>
+        <div class="metric-denom">/ 10</div>
+        <div class="metric-label" style="color:#b84000">Poor</div>
+        <div class="metric-sub">Moon · Kp · Showers combined</div>
       </div>
+
+      <div class="metric-card">
+        <div class="metric-eyebrow">Space Weather</div>
+        <div class="metric-value" style="color:#1a6b3c">0.7</div>
+        <div class="metric-label" style="color:#1a6b3c">QUIET</div>
+        <div class="metric-sub">Planetary Kp Index · <a href="https://spaceweather.gov" target="_blank">NOAA</a></div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-eyebrow">Next Launch</div>
+        <div class="metric-value-lg" style="color:var(--orange)">LAUNCHED</div><div class="launch-name"><a href="https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-17-46" target="_blank">Falcon 9 Block 5 | Starlink Group 17-46</a></div><div class="launch-sub">5 launches upcoming</div>
+      </div>
+
     </div>
 
-    <!-- Center: Headlines -->
-    <div class="center-col">
-      <div class="headline-1"><a href="https://www.esa.int/Space_Safety/Planetary_Defence/Surface_CubeSat_contracted_for_Ramses_asteroid_mission" target="_blank">Surface CubeSat contracted for Ramses asteroid mission</a></div>
-<div class="headline-2"><a href="https://spacenews.com/final-atlas-5-amazon-leo-mission-launches/" target="_blank">Final Atlas 5 Amazon Leo mission launches</a></div>
-<div class="headline-2"><a href="https://www.esa.int/Applications/Observing_the_Earth/Meteorological_missions/Authorisation_paves_the_way_for_Aeolus-2_wind_mission" target="_blank">Authorisation paves the way for Aeolus-2 wind mission</a></div>
-
-      <div class="center-divider"></div>
-      <a href="https://spaceflightnewsapi.net" target="_blank" style="font-size:.72rem;color:var(--dim)">More headlines →</a>
+    <div class="today-bar">
+      <div class="today-pills"><div class="pill">🌙 <strong>Waning Gibbous</strong> · 90%</div><div class="pill">☄ <strong>Perseids</strong> · 39d · Aug 12</div><div class="pill">☄ <strong>Orionids</strong> · 109d · Oct 21</div></div>
+      <div class="editorial">The Falcon 9 Block 5 carrying Starlink Group 17-46 successfully launched today, continuing SpaceX&#x27;s rapid cadence of constellation deployment missions. With geomagnetic conditions remaining quiet at Kp 0.7 and poor astrophotography conditions (2.8/10), observers should plan activities around the approaching Perseid meteor shower in 39 days when conditions are more favorable.</div>
     </div>
+  </div>
 
-    <!-- Right: Space Weather & Sky Events -->
-    <div class="sidebar">
-      <div class="sidebar-title">Space Weather</div>
-      <div class="kp-block">
-        <div class="kp-number" style="color:#33cc88">1.0</div>
-        <div class="kp-status" style="color:#33cc88">QUIET</div>
-        <div class="kp-caption">Planetary Kp Index</div>
-      </div>
-      <hr>
-      <div class="sidebar-title" style="margin-top:10px">Meteor Showers</div>
-      <div class="event-item"><span class="event-time">Aug 12</span><a href="https://www.amsmeteors.org/meteor-showers/meteor-shower-calendar/" target="_blank">PERSEIDS</a> <span class="dim">(100/hr peak)</span></div>
-<div class="event-item"><span class="event-time">Oct 21</span><a href="https://www.amsmeteors.org/meteor-showers/meteor-shower-calendar/" target="_blank">ORIONIDS</a> <span class="dim">(20/hr peak)</span></div>
-<div class="event-item"><span class="event-time">Nov 17</span><a href="https://www.amsmeteors.org/meteor-showers/meteor-shower-calendar/" target="_blank">LEONIDS</a> <span class="dim">(15/hr peak)</span></div>
+  <!-- Launch strip: remaining launches -->
+  <div class="launch-strip"><div class="launch-strip-item"><span class="ls-time">LAUNCHED</span><div class="ls-name"><a href="https://www.rocketlaunch.live/launch/atlas-v-551-amazon-leo-la-08" target="_blank">Atlas V 551 | Amazon Leo (LA-08)</a></div></div><div class="launch-strip-item"><span class="ls-time">TOMORROW</span><div class="ls-name"><a href="https://www.rocketlaunch.live/launch/long-march-6a-unknown-payload" target="_blank">Long March 6A | Unknown Payload</a></div></div><div class="launch-strip-item"><span class="ls-time">TOMORROW</span><div class="ls-name"><a href="https://www.rocketlaunch.live/launch/long-march-8a-spacesail-polar-group-tbd" target="_blank">Long March 8A | SpaceSail Polar Group TBD</a></div></div><div class="launch-strip-item"><span class="ls-time">IN 2 DAYS · Jul 5</span><div class="ls-name"><a href="https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-10-50" target="_blank">Falcon 9 Block 5 | Starlink Group 10-50</a></div></div><div class="launch-strip-item" style="display:flex;align-items:center"><a href="https://www.rocketlaunch.live" style="font-family:var(--mono);font-size:.68rem;color:var(--dim)">Full schedule →</a></div></div>
 
-      <hr>
-      <div style="margin-top:10px">
-        <div class="event-item"><a href="https://spaceweather.gov" target="_blank">Space Weather Center →</a></div>
-        <div class="event-item"><a href="https://www.timeanddate.com/eclipse/" target="_blank">Eclipse Calendar →</a></div>
-        <div class="event-item"><a href="https://spotthestation.nasa.gov" target="_blank">ISS Sighting Times →</a></div>
-        <div class="event-item"><a href="https://apod.nasa.gov" target="_blank">NASA Photo of the Day →</a></div>
-      </div>
-    </div>
-
-  </div><!-- /.top-section -->
+  <!-- ── HEADLINES (secondary) ── -->
+  <div class="section-bar">Headlines</div>
+  <div class="top-headlines"><div class="top-col"><div class="hed-1"><a href="https://spacenews.com/perovskite-solar-panel-startup-verde-technologies-shifts-focus-to-space/" target="_blank">Perovskite solar panel startup Verde Technologies shifts focus to space</a></div>
+<div class="hed-1"><a href="https://www.nasa.gov/general/nasas-artemis-ii-breaks-agency-streaming-record/" target="_blank">NASA’s Artemis II Breaks Agency Streaming Record</a></div>
+</div><div class="top-col"><div class="hed-2"><a href="https://spacenews.com/isar-aerospace-to-launch-german-built-planet-imaging-satellite/" target="_blank">Isar Aerospace to launch German-built Planet imaging satellite</a></div>
+<div class="hed-2"><a href="https://www.nasa.gov/general/nasa-students-get-airborne-view-of-atmospheric-science-at-ellington-field/" target="_blank">NASA Students Get Airborne View of Atmospheric Science at Ellington Field</a></div>
+</div></div>
 
   <div class="section-bar">More Headlines</div>
-
   <div class="news-grid">
-    <div class="news-col"><div class="news-link"><a href="https://science.nasa.gov/solar-system/whats-up-july-2026-skywatching-tips-from-nasa/" target="_blank">What’s Up: July 2026 Skywatching Tips from NASA</a></div>
-<div class="news-link"><a href="https://www.nasaspaceflight.com/2026/07/nasa-moon-base-update/" target="_blank">NASA announces new lander contracts for Moon Base Phase One</a></div>
-<div class="news-link"><a href="https://spacenews.com/fcc-to-vote-on-satellite-licensing-overhaul-july-22/" target="_blank">FCC to vote on satellite licensing overhaul July 22</a></div>
-<div class="news-link"><a href="https://www.nasa.gov/image-article/link-spacecraft-set-for-mission-to-boost-nasas-swift-observatory/" target="_blank">LINK Spacecraft Set for Mission to Boost NASA’s Swift Observatory</a></div>
-<div class="news-link"><a href="https://science.nasa.gov/blog/curiosity-blog-sols-4934-4940-in-the-land-of-the-polygons/" target="_blank">Curiosity Blog, Sols 4934-4940: In the Land of the Polygons</a></div>
-<div class="news-link"><a href="https://www.nasaspaceflight.com/2026/07/blue-origin-lc-36-recovery-hybrid-plan/" target="_blank">Blue Origin accelerates LC-36 recovery via hybrid plan</a></div>
+    <div class="news-col"><div class="news-link"><a href="https://spacenews.com/polish-space-tech-company-sybilla-technologies-secures-funds-to-enter-u-s-market/" target="_blank">Polish space tech company Sybilla Technologies secures funds to enter U.S. market</a></div>
+<div class="news-link"><a href="https://www.esa.int/ESA_Multimedia/Images/2026/07/3D-printed_metal_unlocking_crew_autonomy" target="_blank">3D-printed metal: unlocking crew autonomy</a></div>
+<div class="news-link"><a href="https://science.nasa.gov/missions/webb/nasas-webb-reveals-stars-sparking-to-life-in-cosmic-celebration/" target="_blank">NASA’s Webb Reveals Stars Sparking to Life in Cosmic Celebration</a></div>
+<div class="news-link"><a href="https://www.esa.int/Space_Safety/Planetary_Defence/Surface_CubeSat_contracted_for_Ramses_asteroid_mission" target="_blank">Surface CubeSat contracted for Ramses asteroid mission</a></div>
+<div class="news-link"><a href="https://science.nasa.gov/solar-system/whats-up-july-2026-skywatching-tips-from-nasa/" target="_blank">What’s Up: July 2026 Skywatching Tips from NASA</a></div>
 </div>
-    <div class="news-col"><div class="news-link"><a href="https://spaceflightnow.com/2026/07/01/live-coverage-ula-to-launch-final-atlas-5-rocket-supporting-amazon-leos-broadband-internet-satellite-constellation/" target="_blank">Live coverage: ULA to launch final Atlas 5 rocket supporting Amazon Leo’s broadband internet satellite constellation</a></div>
-<div class="news-link"><a href="https://science.nasa.gov/missions/chandra/nasas-chandra-examines-milky-way-at-arms-length/" target="_blank">NASA’s Chandra Examines Milky Way at Arms’ Length</a></div>
-<div class="news-link"><a href="https://spaceflightnow.com/2026/07/01/live-coverage-spacex-to-launch-24-starlink-satellites-on-falcon-9-rocket-from-vandenberg-sfb-9/" target="_blank">Live coverage: SpaceX to launch 24 Starlink satellites on Falcon 9 rocket from Vandenberg SFB</a></div>
-<div class="news-link"><a href="https://www.esa.int/Science_Exploration/Space_Science/Webb/Webb_studies_how_a_planet_survived_the_death_of_its_star" target="_blank">Webb studies how a planet survived the death of its star</a></div>
-<div class="news-link"><a href="https://www.nasa.gov/centers-and-facilities/jpl/caltech-welcomes-astrophysicist-ray-jayawardhana-as-new-president/" target="_blank">Caltech Welcomes Astrophysicist Ray Jayawardhana as New President</a></div>
-<div class="news-link"><a href="https://spacenews.com/unseen-threats-overhead-drones-endanger-u-s-rocket-launch-sites/" target="_blank">Unseen threats overhead: Drones endanger U.S. rocket launch sites</a></div>
+    <div class="news-col"><div class="news-link"><a href="https://arstechnica.com/space/2026/07/ars-live-recap-when-are-the-big-rockets-nasa-desperately-needs-going-to-be-ready/" target="_blank">Ars Live recap: When are the big rockets NASA desperately needs going to be ready?</a></div>
+<div class="news-link"><a href="https://www.esa.int/ESA_Multimedia/Videos/2026/06/Timelapse_four_P160C_boosters_for_Ariane_6_from_integration_to_launch" target="_blank">Timelapse: four P160C boosters for Ariane 6 – from integration to launch</a></div>
+<div class="news-link"><a href="https://spacenews.com/making-satellite-communications-more-resilient/" target="_blank">Making satellite communications more resilient</a></div>
+<div class="news-link"><a href="https://spacenews.com/final-atlas-5-amazon-leo-mission-launches/" target="_blank">Final Atlas 5 Amazon Leo mission launches</a></div>
+<div class="news-link"><a href="https://spaceflightnow.com/2026/07/01/live-coverage-ula-to-launch-final-atlas-5-rocket-supporting-amazon-leos-broadband-internet-satellite-constellation/" target="_blank">Live coverage: ULA to launch final Atlas 5 rocket supporting Amazon Leo’s broadband internet satellite constellation</a></div>
 </div>
-    <div class="news-col"><div class="news-link"><a href="https://spacenews.com/report-links-starliner-problems-to-overconfidence-and-unrealistic-schedules/" target="_blank">Report links Starliner problems to overconfidence and unrealistic schedules</a></div>
-<div class="news-link"><a href="https://arstechnica.com/space/2026/07/nasa-chief-praises-progress-blue-origin-is-making-after-launch-failure/" target="_blank">NASA chief praises progress Blue Origin is making after launch failure</a></div>
-<div class="news-link"><a href="https://www.nasa.gov/humans-in-space/nasa-seeks-volunteers-for-new-yearlong-simulated-moon-mars-mission/" target="_blank">NASA Seeks Volunteers for New Yearlong Simulated Moon, Mars Mission</a></div>
-<div class="news-link"><a href="https://science.nasa.gov/missions/webb/nasas-webb-studies-how-planet-survived-death-of-its-star/" target="_blank">NASA’s Webb Studies How Planet Survived Death of its Star</a></div>
-<div class="news-link"><a href="https://www.esa.int/ESA_Multimedia/Images/2026/07/Mediterranean_Sea_breaks_June_surface_heat_record" target="_blank">Mediterranean Sea breaks June surface heat record</a></div>
+    <div class="news-col"><div class="news-link"><a href="https://www.spacescout.info/2026/07/end-of-an-era-for-atlas-v/" target="_blank">End of an Era for Atlas V</a></div>
+<div class="news-link"><a href="https://www.nasa.gov/image-article/good-morning-earth/" target="_blank">Good Morning, Earth!</a></div>
+<div class="news-link"><a href="https://www.esa.int/ESA_Multimedia/Videos/2026/07/3D-printed_metal" target="_blank">3D-printed metal</a></div>
+<div class="news-link"><a href="https://www.esa.int/Applications/Observing_the_Earth/Meteorological_missions/Authorisation_paves_the_way_for_Aeolus-2_wind_mission" target="_blank">Authorisation paves the way for Aeolus-2 wind mission</a></div>
 </div>
   </div>
 
+  <div class="signup-bar"><strong>Morning briefing, free.</strong> Launches, aurora alerts, tonight's score.<div style="font-family:var(--mono);font-size:.7rem;color:#8aa0c8;margin-top:6px">[Set BUTTONDOWN_USERNAME in generate.py]</div></div>
+
   <div class="footer">
     Orbital Daily &nbsp;·&nbsp; Updated automatically every morning &nbsp;·&nbsp;
-    Sources:
-    <a href="https://spaceflightnewsapi.net" target="_blank">SNAPI</a> ·
+    Sources: <a href="https://spaceflightnewsapi.net" target="_blank">SNAPI</a> ·
     <a href="https://thespacedevs.com" target="_blank">The Space Devs</a> ·
     <a href="https://spaceweather.gov" target="_blank">NOAA SWPC</a> ·
-    <a href="https://www.amsmeteors.org" target="_blank">AMS Meteors</a>
+    <a href="https://www.amsmeteors.org" target="_blank">AMS</a> ·
+    <a href="https://en.wikipedia.org" target="_blank">Wikipedia</a>
   </div>
 
 </div>
