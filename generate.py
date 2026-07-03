@@ -18,7 +18,7 @@ from html import escape
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 
-GA_MEASUREMENT_ID   = "G-XXXXXXXXXX"   # ← your GA4 ID
+GA_MEASUREMENT_ID   = "G-WKN4NLN7XC"   # ← your GA4 ID
 BUTTONDOWN_USERNAME = "orbitaldaily"  # ← your Buttondown username
 SITE_URL            = "https://orbitaldaily.com"
 UA = {"User-Agent": "OrbitalDaily/1.0 (orbitaldaily.com)"}
