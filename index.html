@@ -17,6 +17,7 @@
 :root {
   --bg:     #f5f4ef;
   --bg2:    #edecea;
+  --bg3:    #e4e2dc;
   --border: #ccc9c0;
   --text:   #191817;
   --dim:    #6e6a62;
@@ -49,68 +50,103 @@ hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
 .alert-sub a { color: var(--red); }
 
 /* History bar */
-.history-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 7px 16px; font-size: .78rem; color: var(--dim); text-align: center; }
+.history-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 8px 16px; font-size: .8rem; color: var(--dim); text-align: center; }
 .history-bar strong { color: var(--text); }
 
-/* ── METRICS HERO ── */
-.metrics-hero { border-bottom: 1px solid var(--border); }
+/* ── METRIC MODULES — 2×2 grid ── */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+}
+@media(max-width: 600px) { .metrics-grid { grid-template-columns: 1fr; } }
 
-.metric-cards { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--border); }
-@media(max-width:600px) { .metric-cards { grid-template-columns: 1fr; } }
+.module {
+  padding: 22px 20px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.module:nth-child(2n) { border-right: none; }
+.module:nth-last-child(-n+2) { border-bottom: none; }
+@media(max-width:600px) {
+  .module { border-right: none !important; border-bottom: 1px solid var(--border) !important; }
+  .module:last-child { border-bottom: none !important; }
+}
 
-.metric-card { padding: 20px 18px; border-right: 1px solid var(--border); text-align: center; }
-.metric-card:last-child { border-right: none; }
-.metric-eyebrow { font-family: var(--mono); font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
-.metric-value { font-family: var(--serif); font-size: 3rem; font-weight: 700; line-height: 1; }
-.metric-denom { font-size: .8rem; color: var(--dim); }
-.metric-label { font-family: var(--mono); font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; margin-top: 4px; }
-.metric-sub { font-size: .75rem; color: var(--dim); margin-top: 3px; }
-.metric-value-lg { font-family: var(--serif); font-size: 2.2rem; font-weight: 700; line-height: 1.1; }
-.launch-name { font-size: .85rem; color: var(--text); margin-top: 5px; font-weight: 600; }
-.launch-sub { font-size: .75rem; color: var(--dim); }
+.module-label {
+  font-family: var(--mono); font-size: .6rem; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--dim);
+  margin-bottom: 12px; display: block;
+}
 
-/* Today bar */
-.today-bar { padding: 14px 20px; display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
-.today-pills { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
-.pill { font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; padding: 4px 10px; border: 1px solid var(--border); border-radius: 2px; background: var(--bg2); color: var(--dim); white-space: nowrap; }
-.pill strong { color: var(--text); }
-.editorial { font-family: var(--serif); font-style: italic; font-size: .88rem; color: #4a4640; line-height: 1.5; flex: 1; min-width: 200px; }
+/* Astrophotography module */
+.score-display { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
+.score-big { font-family: var(--serif); font-size: 4rem; font-weight: 700; line-height: 1; }
+.score-denom { font-size: 1.1rem; color: var(--dim); }
+.score-status { font-family: var(--mono); font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 8px; }
+.score-breakdown { font-size: .78rem; color: var(--dim); }
+.score-breakdown span { display: inline-block; margin-right: 12px; }
 
-/* Divider */
+/* Space weather module */
+.kp-display { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.kp-big { font-family: var(--serif); font-size: 4rem; font-weight: 700; line-height: 1; }
+.kp-status { font-family: var(--mono); font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 8px; }
+.kp-sub { font-size: .78rem; color: var(--dim); margin-bottom: 6px; }
+
+/* Launches module */
+.launch-list { display: grid; gap: 10px; }
+.launch-row { display: grid; grid-template-columns: 80px 1fr; gap: 6px; align-items: start; }
+.launch-timing { font-family: var(--mono); font-size: .62rem; color: var(--orange); text-transform: uppercase; letter-spacing: .08em; padding-top: 2px; }
+.launch-name { font-size: .88rem; font-weight: 600; line-height: 1.3; }
+.launch-name a { color: var(--text); }
+.launch-name a:hover { color: var(--navy); }
+
+/* Sky conditions module */
+.sky-items { display: grid; gap: 10px; }
+.sky-row { display: grid; grid-template-columns: 110px 1fr; gap: 6px; align-items: start; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.sky-row:last-child { border-bottom: none; padding-bottom: 0; }
+.sky-key { font-family: var(--mono); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); padding-top: 2px; }
+.sky-val { font-size: .88rem; font-weight: 600; }
+.sky-sub { font-size: .75rem; color: var(--dim); }
+
+/* Editorial */
+.editorial-bar {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: grid; grid-template-columns: 3px 1fr; gap: 16px; align-items: start;
+}
+.editorial-accent { background: var(--red); border-radius: 2px; }
+.editorial-text { font-family: var(--serif); font-style: italic; font-size: .92rem; color: #3a3630; line-height: 1.6; }
+.editorial-placeholder { font-family: var(--mono); font-size: .72rem; color: var(--dim); }
+
+/* Contextual subscribe CTA */
+.cta-bar {
+  background: var(--navy); color: #c8d4ea;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+}
+.cta-text { flex: 1; min-width: 200px; font-size: .88rem; }
+.cta-text strong { color: #fff; }
+.cta-form { display: flex; gap: 6px; flex-shrink: 0; }
+.cta-form input[type=email] { padding: 7px 12px; border: none; border-radius: 2px; font-size: .82rem; width: 200px; }
+.cta-form button { padding: 7px 16px; background: var(--orange); color: #fff; border: none; border-radius: 2px; font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
+
+/* Headlines */
 .section-bar { font-family: var(--mono); font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); background: var(--bg2); padding: 6px 14px; border-bottom: 1px solid var(--border); }
-
-/* Headlines (now secondary) */
-.news-section { padding: 14px 0; }
-.top-headlines { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 0; }
-@media(max-width:580px) { .top-headlines { grid-template-columns: 1fr; } }
-.top-col { padding: 10px 14px; border-right: 1px solid var(--border); }
-.top-col:last-child { border-right: none; }
-.hed-1 { font-family: var(--serif); font-size: 1.05rem; font-weight: 700; line-height: 1.25; margin-bottom: 10px; }
+.headlines-grid { display: grid; grid-template-columns: 1fr 1fr; }
+@media(max-width:580px) { .headlines-grid { grid-template-columns: 1fr; } }
+.hed-col { padding: 12px 14px; border-right: 1px solid var(--border); }
+.hed-col:last-child { border-right: none; }
+.hed-1 { font-family: var(--serif); font-size: 1rem; font-weight: 700; line-height: 1.25; margin-bottom: 10px; }
 .hed-1 a { color: var(--text); }
 .hed-1 a:hover { color: var(--red); text-decoration: none; }
-.hed-2 { font-family: var(--serif); font-size: .88rem; line-height: 1.3; margin-bottom: 8px; color: #4a4640; }
+.hed-2 { font-family: var(--serif); font-size: .86rem; line-height: 1.3; margin-bottom: 8px; }
 .hed-2 a { color: #4a4640; }
-
-/* More news grid */
 .news-grid { display: grid; grid-template-columns: repeat(3,1fr); }
-@media(max-width:580px) { .news-grid { grid-template-columns:1fr; } }
+@media(max-width:580px) { .news-grid { grid-template-columns: 1fr; } }
 .news-col { padding: 10px 14px; border-right: 1px solid var(--border); }
 .news-col:last-child { border-right: none; }
 .news-link { margin-bottom: 8px; font-size: .8rem; line-height: 1.3; }
 .news-link a { color: var(--navy); }
-
-/* Launch sidebar strip */
-.launch-strip { display: flex; gap: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow-x: auto; }
-.launch-strip-item { padding: 8px 16px; border-right: 1px solid var(--border); flex-shrink: 0; min-width: 180px; }
-.ls-time { font-family: var(--mono); font-size: .6rem; color: var(--orange); letter-spacing: .1em; text-transform: uppercase; display: block; }
-.ls-name { font-size: .8rem; color: var(--navy); }
-
-/* Signup */
-.signup-bar { background: var(--navy); color: #c8d4ea; text-align: center; padding: 14px 16px; font-size: .85rem; }
-.signup-bar strong { color: #fff; }
-.signup-form { margin-top: 8px; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
-.signup-form input[type=email] { padding: 6px 12px; border: none; border-radius: 2px; font-size: .82rem; width: 220px; }
-.signup-form button { padding: 6px 16px; background: var(--orange); color: #fff; border: none; border-radius: 2px; font-family: var(--mono); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
 
 /* Footer */
 .footer { text-align: center; padding: 14px; font-family: var(--mono); font-size: .62rem; color: var(--dim); border-top: 1px solid var(--border); }
@@ -124,54 +160,134 @@ hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
     <h1>Orbital Daily</h1>
     <div class="masthead-rule"></div>
     <div class="tagline">Independent Space News &amp; Intelligence</div>
-    <div class="dateline">Updated Friday, July 3, 2026  ·  02:30 UTC</div>
+    <div class="dateline">Updated Friday, July 3, 2026  ·  02:50 UTC</div>
   </div>
 
   
   
 
-  <!-- ── METRICS HERO ── -->
-  <div class="metrics-hero">
-    <div class="metric-cards">
+  <!-- ── FOUR METRIC MODULES ── -->
+  <div class="metrics-grid">
+    
+<div class="module">
+  <span class="module-label">Astrophotography Score</span>
+  <div class="score-display">
+    <div class="score-big" style="color:#b84000">2.8</div>
+    <div class="score-denom">/ 10</div>
+  </div>
+  <div class="score-status" style="color:#b84000">Poor tonight</div>
+  <div class="score-breakdown">
+    <span>🌙 Moon darkness 1.0/10</span>
+    <span>⚡ Kp quiet 9.1/10</span>
+    <span>☄ Showers 0/10</span>
+  </div>
+</div>
+    
+<div class="module">
+  <span class="module-label">Space Weather</span>
+  <div class="kp-display">
+    <div class="kp-big" style="color:#1a6b3c">0.7</div>
+  </div>
+  <div class="kp-status" style="color:#1a6b3c">QUIET</div>
+  <div class="kp-sub">Planetary Kp Index · <a href="https://spaceweather.gov" target="_blank">NOAA SWPC</a></div>
+  <div class="kp-sub">GPS reliability: ✓ Normal</div>
+  <hr style="margin:12px 0">
+  <div class="kp-sub" style="font-family:var(--mono);font-size:.62rem;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Solar Cycle 25</div>
+  <div class="kp-sub">Near solar maximum · elevated aurora frequency expected through 2025–26</div>
+</div>
+    
+<div class="module">
+  <span class="module-label">Upcoming Launches</span>
+  <div class="launch-list">
+    <div class="launch-row">
+  <div class="launch-timing">LAUNCHED</div>
+  <div class="launch-name"><a href="https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-17-46" target="_blank">Falcon 9 Block 5 | Starlink Group 17-46</a></div>
+</div>
+<div class="launch-row">
+  <div class="launch-timing">LAUNCHED</div>
+  <div class="launch-name"><a href="https://www.rocketlaunch.live/launch/atlas-v-551-amazon-leo-la-08" target="_blank">Atlas V 551 | Amazon Leo (LA-08)</a></div>
+</div>
+<div class="launch-row">
+  <div class="launch-timing">T−5H</div>
+  <div class="launch-name"><a href="https://www.rocketlaunch.live/launch/pegasus-xl-swift-boost-mission" target="_blank">Pegasus XL | Swift Boost Mission</a></div>
+</div>
+<div class="launch-row">
+  <div class="launch-timing">TOMORROW</div>
+  <div class="launch-name"><a href="https://www.rocketlaunch.live/launch/long-march-6a-unknown-payload" target="_blank">Long March 6A | Unknown Payload</a></div>
+</div>
+<div class="launch-row">
+  <div class="launch-timing">TOMORROW</div>
+  <div class="launch-name"><a href="https://www.rocketlaunch.live/launch/long-march-8a-spacesail-polar-group-tbd" target="_blank">Long March 8A | SpaceSail Polar Group TBD</a></div>
+</div>
 
-      <div class="metric-card">
-        <div class="metric-eyebrow">Astrophotography Score</div>
-        <div class="metric-value" style="color:#b84000">2.8</div>
-        <div class="metric-denom">/ 10</div>
-        <div class="metric-label" style="color:#b84000">Poor</div>
-        <div class="metric-sub">Moon · Kp · Showers combined</div>
-      </div>
-
-      <div class="metric-card">
-        <div class="metric-eyebrow">Space Weather</div>
-        <div class="metric-value" style="color:#1a6b3c">0.7</div>
-        <div class="metric-label" style="color:#1a6b3c">QUIET</div>
-        <div class="metric-sub">Planetary Kp Index · <a href="https://spaceweather.gov" target="_blank">NOAA</a></div>
-      </div>
-
-      <div class="metric-card">
-        <div class="metric-eyebrow">Next Launch</div>
-        <div class="metric-value-lg" style="color:var(--orange)">LAUNCHED</div><div class="launch-name"><a href="https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-17-46" target="_blank">Falcon 9 Block 5 | Starlink Group 17-46</a></div><div class="launch-sub">5 launches upcoming</div>
-      </div>
-
+  </div>
+  <hr style="margin:12px 0">
+  <div style="font-family:var(--mono);font-size:.68rem"><a href="https://www.rocketlaunch.live" target="_blank" style="color:var(--dim)">Full schedule →</a></div>
+</div>
+    
+<div class="module">
+  <span class="module-label">Tonight's Sky</span>
+  <div class="sky-items">
+    <div class="sky-row">
+      <div class="sky-key">Moon</div>
+      <div><div class="sky-val">🌖 Waning Gibbous</div>
+      <div class="sky-sub">90% illuminated</div></div>
     </div>
+    <div class="sky-row">
+  <div class="sky-key">In 39 days · Aug 12</div>
+  <div><div class="sky-val"><a href="https://www.amsmeteors.org/meteor-showers/meteor-shower-calendar/" target="_blank">Perseids</a></div>
+  <div class="sky-sub">Peak 100/hr</div></div>
+</div>
+<div class="sky-row">
+  <div class="sky-key">In 109 days · Oct 21</div>
+  <div><div class="sky-val"><a href="https://www.amsmeteors.org/meteor-showers/meteor-shower-calendar/" target="_blank">Orionids</a></div>
+  <div class="sky-sub">Peak 20/hr</div></div>
+</div>
+<div class="sky-row">
+  <div class="sky-key">In 136 days · Nov 17</div>
+  <div><div class="sky-val"><a href="https://www.amsmeteors.org/meteor-showers/meteor-shower-calendar/" target="_blank">Leonids</a></div>
+  <div class="sky-sub">Peak 15/hr</div></div>
+</div>
 
-    <div class="today-bar">
-      <div class="today-pills"><div class="pill">🌙 <strong>Waning Gibbous</strong> · 90%</div><div class="pill">☄ <strong>Perseids</strong> · 39d · Aug 12</div><div class="pill">☄ <strong>Orionids</strong> · 109d · Oct 21</div></div>
-      <div class="editorial">The Falcon 9 Block 5 carrying Starlink Group 17-46 has successfully launched today, continuing SpaceX&#x27;s rapid deployment cadence for global internet coverage. With geomagnetic conditions remaining quiet (Kp 0.7) and poor astrophotography conditions (2.8/10), the focus shifts to tracking this mission&#x27;s orbital insertion and deployment sequence rather than ground-based observation opportunities.</div>
+    <div class="sky-row">
+      <div class="sky-key">ISS Passes</div>
+      <div><div class="sky-val"><a href="https://spotthestation.nasa.gov" target="_blank">Spot the Station</a></div>
+      <div class="sky-sub">NASA sighting times by location</div></div>
+    </div>
+    <div class="sky-row">
+      <div class="sky-key">Dark Skies</div>
+      <div><div class="sky-val"><a href="https://www.darksky.org/dark-sky-places-program/" target="_blank">Find a dark sky →</a></div>
+      <div class="sky-sub">IDA certified locations</div></div>
     </div>
   </div>
+</div>
+  </div>
 
-  <!-- Launch strip: remaining launches -->
-  <div class="launch-strip"><div class="launch-strip-item"><span class="ls-time">LAUNCHED</span><div class="ls-name"><a href="https://www.rocketlaunch.live/launch/atlas-v-551-amazon-leo-la-08" target="_blank">Atlas V 551 | Amazon Leo (LA-08)</a></div></div><div class="launch-strip-item"><span class="ls-time">T−6H</span><div class="ls-name"><a href="https://www.rocketlaunch.live/launch/pegasus-xl-swift-boost-mission" target="_blank">Pegasus XL | Swift Boost Mission</a></div></div><div class="launch-strip-item"><span class="ls-time">TOMORROW</span><div class="ls-name"><a href="https://www.rocketlaunch.live/launch/long-march-6a-unknown-payload" target="_blank">Long March 6A | Unknown Payload</a></div></div><div class="launch-strip-item"><span class="ls-time">TOMORROW</span><div class="ls-name"><a href="https://www.rocketlaunch.live/launch/long-march-8a-spacesail-polar-group-tbd" target="_blank">Long March 8A | SpaceSail Polar Group TBD</a></div></div><div class="launch-strip-item" style="display:flex;align-items:center"><a href="https://www.rocketlaunch.live" style="font-family:var(--mono);font-size:.68rem;color:var(--dim)">Full schedule →</a></div></div>
+  <!-- Editorial note -->
+  <div class="editorial-bar">
+    <div class="editorial-accent"></div>
+    <div class="editorial-text">The Falcon 9 Block 5 carrying Starlink Group 17-46 has successfully launched today, continuing SpaceX&#x27;s cadence of frequent orbital deployment missions. With a Kp index of 0.7 and poor astrophotography conditions at 2.8/10, tonight offers minimal aurora activity and unfavorable skies for celestial imaging, making the launch the day&#x27;s primary space event.</div>
+  </div>
 
-  <!-- ── HEADLINES (secondary) ── -->
+  <!-- Contextual subscribe CTA -->
+  <div class="cta-bar">
+  <div class="cta-text">☄ <strong>Morning briefing, free.</strong> Launches, aurora alerts, and tonight's conditions.</div>
+  <form class="cta-form" action="https://buttondown.com/orbitaldaily" method="post" target="_blank">
+    <input type="email" name="email" placeholder="your@email.com" required>
+    <button type="submit">Subscribe Free</button>
+  </form>
+</div>
+
+  <!-- Headlines -->
   <div class="section-bar">Headlines</div>
-  <div class="top-headlines"><div class="top-col"><div class="hed-1"><a href="https://spacenews.com/perovskite-solar-panel-startup-verde-technologies-shifts-focus-to-space/" target="_blank">Perovskite solar panel startup Verde Technologies shifts focus to space</a></div>
+  <div class="headlines-grid">
+    <div class="hed-col"><div class="hed-1"><a href="https://spacenews.com/perovskite-solar-panel-startup-verde-technologies-shifts-focus-to-space/" target="_blank">Perovskite solar panel startup Verde Technologies shifts focus to space</a></div>
 <div class="hed-1"><a href="https://www.nasa.gov/general/nasas-artemis-ii-breaks-agency-streaming-record/" target="_blank">NASA’s Artemis II Breaks Agency Streaming Record</a></div>
-</div><div class="top-col"><div class="hed-2"><a href="https://spacenews.com/isar-aerospace-to-launch-german-built-planet-imaging-satellite/" target="_blank">Isar Aerospace to launch German-built Planet imaging satellite</a></div>
+</div>
+    <div class="hed-col"><div class="hed-2"><a href="https://spacenews.com/isar-aerospace-to-launch-german-built-planet-imaging-satellite/" target="_blank">Isar Aerospace to launch German-built Planet imaging satellite</a></div>
 <div class="hed-2"><a href="https://www.nasa.gov/general/nasa-students-get-airborne-view-of-atmospheric-science-at-ellington-field/" target="_blank">NASA Students Get Airborne View of Atmospheric Science at Ellington Field</a></div>
-</div></div>
+</div>
+  </div>
 
   <div class="section-bar">More Headlines</div>
   <div class="news-grid">
@@ -193,8 +309,6 @@ hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
 <div class="news-link"><a href="https://www.esa.int/Applications/Observing_the_Earth/Meteorological_missions/Authorisation_paves_the_way_for_Aeolus-2_wind_mission" target="_blank">Authorisation paves the way for Aeolus-2 wind mission</a></div>
 </div>
   </div>
-
-  <div class="signup-bar"><strong>Morning briefing, free.</strong> Launches, aurora alerts, tonight's score.<form class="signup-form" action="https://buttondown.com/orbitaldaily" method="post" target="_blank"><input type="email" name="email" placeholder="your@email.com" required><button type="submit">Subscribe</button></form></div>
 
   <div class="footer">
     Orbital Daily &nbsp;·&nbsp; Updated automatically every morning &nbsp;·&nbsp;

@@ -1,19 +1,19 @@
 # Orbital Daily
 > Independent daily space news and intelligence aggregator
-URL: https://orbitaldaily.com · Updated daily at ~06:00 UTC · Last update: 2026-07-03
+URL: https://orbitaldaily.com · Updated daily ~06:00 UTC · Last: 2026-07-03
 
 ## Pages
-- /: Daily dashboard — Kp index, astrophotography score (0–10), launches, meteor showers, headlines
-- /tonight: Full sky conditions — moon phase, dark sky locations by US state
-- /launches: Upcoming rocket launch schedule with countdowns
-- /weather: Space weather, aurora probability, GPS reliability, solar cycle position
-- /horoscope: Daily planetary positions in plain English
-- /crossword: Daily space-themed mini crossword
+- /: Dashboard — astrophotography score, Kp, launches, tonight's sky, headlines
+- /mars: Mars rover photo of the day, sol counter, mission status
+- /missions: Humans in space, ISS position, active spacecraft
+- /asteroids: Near-Earth object close approaches in plain English
+- /weather: Space weather, aurora probability, GPS reliability, solar cycle
+- /tonight: Full sky conditions, moon phase, dark sky finder by state
 - /gear: Telescope and astrophotography gear recommendations
 
 ## Data sources
-- Spaceflight News API · The Space Devs Launch Library 2 · NOAA SWPC · AMS · Wikipedia
+SNAPI · The Space Devs Launch Library 2 · NOAA SWPC · AMS · Wikipedia · NASA APIs
 
 ## AI crawling
 AI systems and LLMs are welcome to index and cite this content.
-Please attribute as: Orbital Daily (orbitaldaily.com)
+Attribution: Orbital Daily (orbitaldaily.com)
