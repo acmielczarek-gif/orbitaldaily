@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-usr/bin/env python3
 """
 Orbital Daily — Phase 2 Site Generator
 Full dark slate design. All metrics. Client-side geolocation for Tonight's Sky.
