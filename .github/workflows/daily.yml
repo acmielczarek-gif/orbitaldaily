@@ -2,37 +2,30 @@ name: Regenerate Orbital Daily
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # Runs every day at 6 AM UTC (2 AM Eastern)
-  workflow_dispatch:        # Lets you trigger it manually from the GitHub website
+    - cron: '0 6 * * *'
+  workflow_dispatch:
 
 permissions:
-  contents: write           # Needed so the bot can commit index.html back to the repo
+  contents: write
 
 jobs:
   generate:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Install dependencies
-        run: pip install requests
-
-      - name: Generate index.html
+      - run: pip install requests
+      - name: Generate site
         run: python generate.py
-
-      - name: Commit and push updated site
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - name: Commit and push
         run: |
           git config user.name  "Orbital Daily Bot"
           git config user.email "bot@orbitaldaily.com"
-          git add index.html
-          # Only commit if something actually changed
+          git add index.html sitemap.xml llms.txt
           git diff --staged --quiet || (
             git commit -m "Daily update $(date -u +%Y-%m-%d)"
             git push
