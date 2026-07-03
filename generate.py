@@ -4,7 +4,7 @@ Orbital Daily — Phase 1b: Metrics-first layout
 Outputs: index.html, sitemap.xml, llms.txt
 
 Configure before deploying:
-  GA_MEASUREMENT_ID    — your Google Analytics G-XXXXXXXX ID
+  GA_MEASUREMENT_ID    — your Google Analytics G-WKN4NLN7XC ID
   BUTTONDOWN_USERNAME  — your Buttondown username
   ANTHROPIC_API_KEY    — set as a GitHub Actions secret (repo Settings → Secrets)
 """
