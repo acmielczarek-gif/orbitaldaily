@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Orbital Daily — Phase 1c
-Full metric modules, 2x2 grid, no horizontal scroll.
+Orbital Daily — Phase 1d
+Dark slate design. High contrast. Editorial between condition modules and launch/sky modules.
 Outputs: index.html, sitemap.xml, llms.txt
 """
 
@@ -14,6 +14,7 @@ BUTTONDOWN_USERNAME = "orbitaldaily"
 SITE_URL            = "https://orbitaldaily.com"
 UA = {"User-Agent": "OrbitalDaily/1.0 (orbitaldaily.com)"}
 
+
 # ── HTTP ───────────────────────────────────────────────────────────────────────
 
 def get(url):
@@ -25,21 +26,26 @@ def get(url):
         print(f"  ⚠  {url}: {e}", file=sys.stderr)
         return None
 
+
 # ── Moon ───────────────────────────────────────────────────────────────────────
 
 def moon_phase(date):
     known_new = datetime(2000, 1, 6, 18, 14, tzinfo=timezone.utc)
     pos   = ((date - known_new).total_seconds() / 86400 % 29.53058770576) / 29.53058770576
     illum = (1 - math.cos(2 * math.pi * pos)) / 2
-    names = ["New Moon","Waxing Crescent","First Quarter","Waxing Gibbous",
-             "Full Moon","Waning Gibbous","Last Quarter","Waning Crescent"]
-    thresholds = [0.0625, 0.1875, 0.3125, 0.4375, 0.5625, 0.6875, 0.8125, 0.9375]
+    thresholds = [0.0625,0.1875,0.3125,0.4375,0.5625,0.6875,0.8125,0.9375]
+    names      = ["New Moon","Waxing Crescent","First Quarter","Waxing Gibbous",
+                  "Full Moon","Waning Gibbous","Last Quarter","Waning Crescent"]
     name = names[0]
     for i, t in enumerate(thresholds):
         if pos < t:
             name = names[i]
             break
-    return pos, illum, name
+    emoji_map = {"New Moon":"🌑","Waxing Crescent":"🌒","First Quarter":"🌓",
+                 "Waxing Gibbous":"🌔","Full Moon":"🌕","Waning Gibbous":"🌖",
+                 "Last Quarter":"🌗","Waning Crescent":"🌘"}
+    return pos, illum, name, emoji_map.get(name, "🌙")
+
 
 # ── Astrophotography score ─────────────────────────────────────────────────────
 
@@ -47,21 +53,22 @@ def astro_score(kp, moon_illum, days_to_shower):
     moon_s   = 10.0 * (1.0 - moon_illum)
     kp_s     = max(0.0, 10.0 - (kp if kp else 2.0) * 1.4)
     d        = days_to_shower
-    shower_s = (10 if d is not None and d <= 1
-                else 10 - d if d and d <= 7
-                else max(0, 5 - (d - 7) * 0.5) if d and d <= 14
+    shower_s = (10 if d is not None and d<=1
+                else 10-d if d and d<=7
+                else max(0, 5-(d-7)*0.5) if d and d<=14
                 else 0)
-    return round(min(10.0, max(0.0, moon_s * .55 + kp_s * .25 + shower_s * .20)), 1)
+    return round(min(10.0, max(0.0, moon_s*.55 + kp_s*.25 + shower_s*.20)), 1)
 
 def score_label(s):
-    if s >= 8.5: return "Exceptional", "#1a6b3c"
-    if s >= 7.0: return "Excellent",   "#2a8a4c"
-    if s >= 5.5: return "Good",        "#4a9a3c"
-    if s >= 4.0: return "Fair",        "#c87800"
-    if s >= 2.5: return "Poor",        "#b84000"
-    return              "Unfavorable", "#941c00"
+    if s >= 8.5: return "Exceptional", "#4ade80"
+    if s >= 7.0: return "Excellent",   "#4ade80"
+    if s >= 5.5: return "Good",        "#86efac"
+    if s >= 4.0: return "Fair",        "#f59e0b"
+    if s >= 2.5: return "Poor",        "#f97316"
+    return              "Unfavorable", "#f87171"
 
-# ── Fetchers ───────────────────────────────────────────────────────────────────
+
+# ── Data fetchers ──────────────────────────────────────────────────────────────
 
 def fetch_kp():
     r = get("https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json")
@@ -74,12 +81,12 @@ def fetch_kp():
     return None
 
 def kp_label(kp):
-    if kp is None:  return "UNKNOWN",       "#999"
-    if kp >= 7:     return "EXTREME STORM", "#c0120c"
-    if kp >= 5:     return "GEOMAG STORM",  "#d44000"
-    if kp >= 4:     return "ACTIVE",        "#c87800"
-    if kp >= 2:     return "UNSETTLED",     "#6a8a30"
-    return                  "QUIET",        "#1a6b3c"
+    if kp is None:  return "UNKNOWN",       "#64748b"
+    if kp >= 7:     return "EXTREME STORM", "#f87171"
+    if kp >= 5:     return "GEOMAG STORM",  "#f97316"
+    if kp >= 4:     return "ACTIVE",        "#f59e0b"
+    if kp >= 2:     return "UNSETTLED",     "#86efac"
+    return                  "QUIET",        "#4ade80"
 
 def fetch_news():
     r = get("https://api.spaceflightnewsapi.net/v4/articles/?limit=18&ordering=-published_at")
@@ -126,8 +133,9 @@ def launch_timing(net):
         if d < 0:  return "LAUNCHED"
         if d == 0: return f"T−{diff.seconds//3600}H"
         if d == 1: return "TOMORROW"
-        return f"{dt.strftime('%b')} {dt.day}"
+        return f"{dt.strftime('%b').upper()} {dt.day}"
     except: return "TBD"
+
 
 # ── Claude editorial note ──────────────────────────────────────────────────────
 
@@ -144,12 +152,14 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history):
     try:
         r = requests.post(
             "https://api.anthropic.com/v1/messages",
-            headers={"x-api-key": api_key, "anthropic-version": "2023-06-01", "content-type": "application/json"},
+            headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
+                     "content-type": "application/json"},
             json={"model":"claude-haiku-4-5-20251001","max_tokens":120,
                   "messages":[{"role":"user","content":
                     f"Today's space data:\n{chr(10).join(ctx)}\n\n"
-                    "Write exactly 2 sentences about what makes today notable from a space perspective. "
-                    "Specific and factual. No 'Today is a great day' openings. Informed reader voice."}]},
+                    "Write exactly 2 sentences about what makes today notable from a space "
+                    "perspective. Specific and factual. No 'Today is a great day' openings. "
+                    "Informed reader voice."}]},
             timeout=15
         )
         if r.status_code == 200:
@@ -159,152 +169,131 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history):
         print(f"  Editorial: {e}", file=sys.stderr)
     return None
 
+
 # ── HTML ───────────────────────────────────────────────────────────────────────
 
 def esc(s): return escape(str(s))
 
 CSS = """
 :root {
-  --bg:     #f5f4ef;
-  --bg2:    #edecea;
-  --bg3:    #e4e2dc;
-  --border: #ccc9c0;
-  --text:   #191817;
-  --dim:    #6e6a62;
-  --red:    #bf3a1c;
-  --orange: #c85800;
-  --navy:   #1c3461;
-  --green:  #1a6b3c;
-  --mono:   'Courier New', Courier, monospace;
-  --serif:  Georgia, 'Times New Roman', serif;
-  --sans:   system-ui, -apple-system, sans-serif;
+  --bg:      #111827;
+  --bg-dark: #0f172a;
+  --border:  #1e293b;
+  --text:    #f1f5f9;
+  --mid:     #cbd5e1;
+  --sub:     #94a3b8;
+  --dim:     #64748b;
+  --amber:   #f59e0b;
+  --blue:    #93c5fd;
+  --blue-accent: #60a5fa;
+  --mono:    'Courier New', Courier, monospace;
+  --serif:   Georgia, 'Times New Roman', serif;
+  --sans:    system-ui, -apple-system, sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
-a { color: var(--navy); text-decoration: none; }
-a:hover { text-decoration: underline; }
-hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 15px; line-height: 1.6; }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; color: #bfdbfe; }
+hr.slim { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 .wrapper { max-width: 1000px; margin: 0 auto; padding: 0 14px; }
 
 /* Masthead */
-.masthead { text-align: center; padding: 22px 16px 14px; border-bottom: 2px solid var(--text); }
-.masthead h1 { font-family: var(--serif); font-size: clamp(2rem,6vw,3.6rem); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-.masthead-rule { width: 60px; border-top: 1px solid var(--dim); margin: 8px auto; }
-.tagline { font-family: var(--mono); font-size: .68rem; color: var(--dim); letter-spacing: .2em; text-transform: uppercase; }
-.dateline { font-family: var(--mono); font-size: .66rem; color: var(--dim); margin-top: 5px; }
+.masthead { text-align: center; padding: 20px 16px 14px; border-bottom: 2px solid var(--text); }
+.masthead h1 { font-family: var(--serif); font-size: clamp(2rem,6vw,3.6rem); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #ffffff; }
+.masthead-rule { width: 50px; border-top: 1px solid var(--dim); margin: 8px auto; }
+.tagline { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--sub); margin-top: 4px; }
+.dateline { font-size: .72rem; color: var(--dim); margin-top: 5px; }
 
 /* Alert */
-.alert-banner { background: #fff0ed; border-top: 3px solid var(--red); border-bottom: 1px solid #e8b8ae; padding: 10px 20px; text-align: center; }
-.alert-title { color: var(--red); font-family: var(--mono); font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-.alert-sub { color: #7a3020; font-size: .8rem; }
-.alert-sub a { color: var(--red); }
+.alert-banner { background: #2d0f0f; border-top: 3px solid #f87171; border-bottom: 1px solid #5a1a1a; padding: 10px 20px; text-align: center; }
+.alert-title { color: #f87171; font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.alert-sub { color: #fca5a5; font-size: .82rem; }
+.alert-sub a { color: #f87171; }
 
 /* History bar */
-.history-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 8px 16px; font-size: .8rem; color: var(--dim); text-align: center; }
+.history-bar { background: var(--bg-dark); border-bottom: 1px solid var(--border); padding: 8px 16px; font-size: .84rem; color: var(--mid); text-align: center; }
 .history-bar strong { color: var(--text); }
+.history-bar a { color: var(--blue); }
 
-/* ── METRIC MODULES — 2×2 grid ── */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border-bottom: 1px solid var(--border);
-}
-@media(max-width: 600px) { .metrics-grid { grid-template-columns: 1fr; } }
+/* Module grid */
+.mod-grid { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border); }
+@media(max-width:600px) { .mod-grid { grid-template-columns: 1fr; } }
 
-.module {
-  padding: 22px 20px;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.module:nth-child(2n) { border-right: none; }
-.module:nth-last-child(-n+2) { border-bottom: none; }
-@media(max-width:600px) {
-  .module { border-right: none !important; border-bottom: 1px solid var(--border) !important; }
-  .module:last-child { border-bottom: none !important; }
-}
+.module { padding: 20px 18px; border-right: 1px solid var(--border); }
+.module:last-child { border-right: none; }
+@media(max-width:600px) { .module { border-right: none; border-bottom: 1px solid var(--border); } }
 
-.module-label {
-  font-family: var(--mono); font-size: .6rem; letter-spacing: .22em;
-  text-transform: uppercase; color: var(--dim);
-  margin-bottom: 12px; display: block;
-}
+.mod-label { font-size: .67rem; letter-spacing: .18em; text-transform: uppercase; color: var(--sub); margin-bottom: 12px; display: block; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
 
-/* Astrophotography module */
-.score-display { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
-.score-big { font-family: var(--serif); font-size: 4rem; font-weight: 700; line-height: 1; }
-.score-denom { font-size: 1.1rem; color: var(--dim); }
-.score-status { font-family: var(--mono); font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 8px; }
-.score-breakdown { font-size: .78rem; color: var(--dim); }
-.score-breakdown span { display: inline-block; margin-right: 12px; }
+/* Condition modules */
+.big-num { font-family: var(--serif); font-size: 3.6rem; font-weight: 700; line-height: 1; }
+.big-denom { font-size: 1rem; color: var(--dim); margin-top: 2px; }
+.big-status { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; margin-top: 4px; margin-bottom: 10px; font-weight: 700; }
+.mod-sub { font-size: .82rem; color: var(--sub); line-height: 1.6; }
+.mod-sub-mid { font-size: .82rem; color: var(--mid); line-height: 1.6; }
+.mod-sub-bright { font-size: .82rem; color: var(--text); line-height: 1.6; }
+.mod-section-label { font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; color: var(--sub); margin-bottom: 5px; margin-top: 2px; }
 
-/* Space weather module */
-.kp-display { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
-.kp-big { font-family: var(--serif); font-size: 4rem; font-weight: 700; line-height: 1; }
-.kp-status { font-family: var(--mono); font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 8px; }
-.kp-sub { font-size: .78rem; color: var(--dim); margin-bottom: 6px; }
+/* Editorial strip */
+.editorial-strip { padding: 14px 18px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 3px 1fr; gap: 16px; align-items: start; background: var(--bg-dark); }
+.editorial-accent { background: var(--blue-accent); border-radius: 2px; }
+.editorial-text { font-family: var(--serif); font-style: italic; font-size: .94rem; color: var(--mid); line-height: 1.7; }
+.editorial-placeholder { font-size: .78rem; color: var(--dim); font-style: normal; }
 
-/* Launches module */
-.launch-list { display: grid; gap: 10px; }
-.launch-row { display: grid; grid-template-columns: 80px 1fr; gap: 6px; align-items: start; }
-.launch-timing { font-family: var(--mono); font-size: .62rem; color: var(--orange); text-transform: uppercase; letter-spacing: .08em; padding-top: 2px; }
-.launch-name { font-size: .88rem; font-weight: 600; line-height: 1.3; }
+/* Launch module */
+.launch-row { display: grid; grid-template-columns: 85px 1fr; gap: 8px; margin-bottom: 10px; align-items: start; }
+.launch-timing { font-size: .67rem; color: var(--amber); letter-spacing: .08em; text-transform: uppercase; padding-top: 2px; font-weight: 700; }
+.launch-name { font-size: .88rem; color: var(--text); font-weight: 600; line-height: 1.3; }
 .launch-name a { color: var(--text); }
-.launch-name a:hover { color: var(--navy); }
+.launch-name a:hover { color: var(--blue); }
 
-/* Sky conditions module */
-.sky-items { display: grid; gap: 10px; }
-.sky-row { display: grid; grid-template-columns: 110px 1fr; gap: 6px; align-items: start; padding: 8px 0; border-bottom: 1px solid var(--border); }
-.sky-row:last-child { border-bottom: none; padding-bottom: 0; }
-.sky-key { font-family: var(--mono); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); padding-top: 2px; }
-.sky-val { font-size: .88rem; font-weight: 600; }
-.sky-sub { font-size: .75rem; color: var(--dim); }
+/* Sky module */
+.sky-row { display: grid; grid-template-columns: 106px 1fr; gap: 6px; padding: 9px 0; border-bottom: 1px solid var(--border); align-items: start; }
+.sky-row:last-child { border-bottom: none; }
+.sky-key { font-size: .67rem; letter-spacing: .1em; text-transform: uppercase; color: var(--sub); padding-top: 2px; }
+.sky-val { font-size: .9rem; font-weight: 600; color: var(--text); }
+.sky-val a { color: var(--text); }
+.sky-val a:hover { color: var(--blue); }
+.sky-sub { font-size: .76rem; color: var(--dim); margin-top: 2px; }
 
-/* Editorial */
-.editorial-bar {
-  padding: 16px 20px; border-bottom: 1px solid var(--border);
-  display: grid; grid-template-columns: 3px 1fr; gap: 16px; align-items: start;
-}
-.editorial-accent { background: var(--red); border-radius: 2px; }
-.editorial-text { font-family: var(--serif); font-style: italic; font-size: .92rem; color: #3a3630; line-height: 1.6; }
-.editorial-placeholder { font-family: var(--mono); font-size: .72rem; color: var(--dim); }
-
-/* Contextual subscribe CTA */
-.cta-bar {
-  background: var(--navy); color: #c8d4ea;
-  padding: 14px 20px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-}
-.cta-text { flex: 1; min-width: 200px; font-size: .88rem; }
-.cta-text strong { color: #fff; }
+/* Contextual CTA */
+.cta-bar { background: var(--bg-dark); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.cta-text { font-size: .88rem; color: var(--mid); flex: 1; min-width: 200px; }
+.cta-text strong { color: var(--text); }
 .cta-form { display: flex; gap: 6px; flex-shrink: 0; }
-.cta-form input[type=email] { padding: 7px 12px; border: none; border-radius: 2px; font-size: .82rem; width: 200px; }
-.cta-form button { padding: 7px 16px; background: var(--orange); color: #fff; border: none; border-radius: 2px; font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
+.cta-form input[type=email] { padding: 7px 12px; background: #1e293b; border: 1px solid #475569; color: var(--text); font-size: .84rem; border-radius: 2px; width: 190px; font-family: var(--mono); }
+.cta-form input[type=email]::placeholder { color: var(--dim); }
+.cta-form button { padding: 7px 16px; background: #d97706; color: #fff; border: none; font-family: var(--mono); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; white-space: nowrap; font-weight: 700; }
 
 /* Headlines */
-.section-bar { font-family: var(--mono); font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); background: var(--bg2); padding: 6px 14px; border-bottom: 1px solid var(--border); }
+.section-bar { font-size: .67rem; letter-spacing: .18em; text-transform: uppercase; color: var(--sub); background: var(--bg-dark); padding: 7px 16px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 .headlines-grid { display: grid; grid-template-columns: 1fr 1fr; }
 @media(max-width:580px) { .headlines-grid { grid-template-columns: 1fr; } }
 .hed-col { padding: 12px 14px; border-right: 1px solid var(--border); }
 .hed-col:last-child { border-right: none; }
-.hed-1 { font-family: var(--serif); font-size: 1rem; font-weight: 700; line-height: 1.25; margin-bottom: 10px; }
+.hed-1 { font-family: var(--serif); font-size: 1rem; font-weight: 700; line-height: 1.3; margin-bottom: 10px; }
 .hed-1 a { color: var(--text); }
-.hed-1 a:hover { color: var(--red); text-decoration: none; }
-.hed-2 { font-family: var(--serif); font-size: .86rem; line-height: 1.3; margin-bottom: 8px; }
-.hed-2 a { color: #4a4640; }
+.hed-1 a:hover { color: var(--blue); text-decoration: none; }
+.hed-2 { font-family: var(--serif); font-size: .86rem; line-height: 1.35; margin-bottom: 9px; }
+.hed-2 a { color: var(--mid); }
+.hed-2 a:hover { color: var(--text); }
 .news-grid { display: grid; grid-template-columns: repeat(3,1fr); }
 @media(max-width:580px) { .news-grid { grid-template-columns: 1fr; } }
 .news-col { padding: 10px 14px; border-right: 1px solid var(--border); }
 .news-col:last-child { border-right: none; }
-.news-link { margin-bottom: 8px; font-size: .8rem; line-height: 1.3; }
-.news-link a { color: var(--navy); }
+.news-link { margin-bottom: 9px; font-size: .81rem; line-height: 1.35; font-family: var(--serif); }
+.news-link a { color: var(--blue); }
 
 /* Footer */
-.footer { text-align: center; padding: 14px; font-family: var(--mono); font-size: .62rem; color: var(--dim); border-top: 1px solid var(--border); }
+.footer { text-align: center; padding: 14px; font-size: .7rem; color: var(--dim); border-top: 1px solid var(--border); }
 .footer a { color: var(--dim); }
+.footer a:hover { color: var(--sub); }
 """
 
-def render_html(kp, news, launches, showers, score, moon_illum, moon_name,
+
+def render_html(kp, news, launches, showers, score, moon_illum, moon_name, moon_emoji,
                 history, editorial, now):
+
     kp_text, kp_color  = kp_label(kp)
     kp_display         = f"{kp:.1f}" if kp is not None else "N/A"
     score_text, sc_col = score_label(score)
@@ -321,124 +310,121 @@ def render_html(kp, news, launches, showers, score, moon_illum, moon_name,
               f'"url":"{SITE_URL}","description":"Independent daily space news and intelligence.",'
               f'"publisher":{{"@type":"Organization","name":"Orbital Daily"}}}}')
 
-    # Alert banner
+    # Alert
     alert = ""
     if kp and kp >= 5:
         msg = "EXTREME GEOMAGNETIC STORM" if kp >= 7 else "GEOMAGNETIC STORM ACTIVE"
-        alert = (f'<div class="alert-banner"><div class="alert-title">⚡ {esc(msg)}</div>'
+        alert = (f'<div class="alert-banner">'
+                 f'<div class="alert-title">⚡ {esc(msg)}</div>'
                  f'<div class="alert-sub">Kp {kp_display} — Aurora possible tonight · '
-                 f'<a href="https://spaceweather.gov" target="_blank">spaceweather.gov</a></div></div>')
+                 f'<a href="https://spaceweather.gov" target="_blank">spaceweather.gov</a></div>'
+                 f'</div>')
 
     # History bar
     hist_bar = ""
     if history:
         href = f' <a href="{esc(history["url"])}" target="_blank">→</a>' if history.get("url") else ""
-        hist_bar = (f'<div class="history-bar"><strong>This day in space history '
-                    f'({esc(str(history["year"]))}):</strong> {esc(history["text"])}{href}</div>')
+        hist_bar = (f'<div class="history-bar">'
+                    f'<strong>This day in space history ({esc(str(history["year"]))}):</strong> '
+                    f'{esc(history["text"])}{href}</div>')
 
-    # ── MODULE 1: Astrophotography Score ──
-    moon_score  = round(10 * (1 - moon_illum), 1)
-    kp_val      = kp if kp is not None else 2.0
-    kp_s        = round(max(0, 10 - kp_val * 1.4), 1)
-    d           = showers[0][0] if showers else None
-    shower_s    = round(10 if d is not None and d<=1 else 10-d if d and d<=7
-                        else max(0,5-(d-7)*0.5) if d and d<=14 else 0, 1)
+    # Score breakdown
+    moon_s   = round(10 * (1 - moon_illum), 1)
+    kp_val   = kp if kp is not None else 2.0
+    kp_s     = round(max(0, 10 - kp_val * 1.4), 1)
+    d        = showers[0][0] if showers else None
+    shower_s = round(10 if d is not None and d<=1 else 10-d if d and d<=7
+                     else max(0,5-(d-7)*0.5) if d and d<=14 else 0, 1)
 
-    mod_astro = f"""
-<div class="module">
-  <span class="module-label">Astrophotography Score</span>
-  <div class="score-display">
-    <div class="score-big" style="color:{esc(sc_col)}">{esc(str(score))}</div>
-    <div class="score-denom">/ 10</div>
-  </div>
-  <div class="score-status" style="color:{esc(sc_col)}">{esc(score_text)} tonight</div>
-  <div class="score-breakdown">
-    <span>🌙 Moon darkness {esc(str(moon_score))}/10</span>
-    <span>⚡ Kp quiet {esc(str(kp_s))}/10</span>
-    <span>☄ Showers {esc(str(shower_s))}/10</span>
+    # Module 1: Astrophotography score
+    mod_astro = f"""<div class="module">
+  <span class="mod-label">Astrophotography Score</span>
+  <div class="big-num" style="color:{esc(sc_col)}">{esc(str(score))}</div>
+  <div class="big-denom">/ 10</div>
+  <div class="big-status" style="color:{esc(sc_col)}">{esc(score_text)} tonight</div>
+  <div class="mod-sub">
+    🌙 Moon darkness &nbsp;{esc(str(moon_s))} / 10<br>
+    ⚡ Kp quiet &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{esc(str(kp_s))} / 10<br>
+    ☄&nbsp; Showers &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{esc(str(shower_s))} / 10
   </div>
 </div>"""
 
-    # ── MODULE 2: Space Weather ──
-    mod_weather = f"""
-<div class="module">
-  <span class="module-label">Space Weather</span>
-  <div class="kp-display">
-    <div class="kp-big" style="color:{esc(kp_color)}">{esc(kp_display)}</div>
-  </div>
-  <div class="kp-status" style="color:{esc(kp_color)}">{esc(kp_text)}</div>
-  <div class="kp-sub">Planetary Kp Index · <a href="https://spaceweather.gov" target="_blank">NOAA SWPC</a></div>
-  <div class="kp-sub">GPS reliability: {"⚠ Degraded — expect drift" if kp and kp >= 4 else "✓ Normal"}</div>
-  <hr style="margin:12px 0">
-  <div class="kp-sub" style="font-family:var(--mono);font-size:.62rem;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Solar Cycle 25</div>
-  <div class="kp-sub">Near solar maximum · elevated aurora frequency expected through 2025–26</div>
+    # Module 2: Space weather
+    gps_status = ("⚠ Degraded — expect drift" if kp and kp >= 4
+                  else "✓ Normal precision")
+    gps_color  = "#f59e0b" if kp and kp >= 4 else "#4ade80"
+
+    mod_weather = f"""<div class="module">
+  <span class="mod-label">Space Weather</span>
+  <div class="big-num" style="color:{esc(kp_color)}">{esc(kp_display)}</div>
+  <div class="big-denom">Kp index</div>
+  <div class="big-status" style="color:{esc(kp_color)}">{esc(kp_text)}</div>
+  <div class="mod-sub-mid">Planetary Kp Index · <a href="https://spaceweather.gov" target="_blank">NOAA SWPC</a></div>
+  <div class="mod-sub-bright" style="margin-top:6px;color:{esc(gps_color)}">GPS: {esc(gps_status)}</div>
+  <hr class="slim">
+  <div class="mod-section-label">Solar Cycle 25</div>
+  <div class="mod-sub">Near solar maximum · elevated aurora frequency expected through 2026</div>
 </div>"""
 
-    # ── MODULE 3: Launches ──
+    # Editorial strip
+    if editorial:
+        ed_inner = f'<div class="editorial-text">{esc(editorial)}</div>'
+    else:
+        ed_inner = ('<div class="editorial-placeholder">'
+                    'Add ANTHROPIC_API_KEY as a GitHub secret to enable the daily editorial note.'
+                    '</div>')
+
+    editorial_strip = f"""<div class="editorial-strip">
+  <div class="editorial-accent"></div>
+  {ed_inner}
+</div>"""
+
+    # Module 3: Launches
     launch_rows = ""
     for lnch in launches[:5]:
         t    = launch_timing(lnch.get("net",""))
         name = lnch.get("name","Unknown")
         slug = lnch.get("slug","")
         url  = f"https://www.rocketlaunch.live/launch/{slug}" if slug else "https://www.rocketlaunch.live"
-        launch_rows += f"""<div class="launch-row">
-  <div class="launch-timing">{esc(t)}</div>
-  <div class="launch-name"><a href="{esc(url)}" target="_blank">{esc(name)}</a></div>
-</div>\n"""
+        launch_rows += (f'<div class="launch-row">'
+                        f'<div class="launch-timing">{esc(t)}</div>'
+                        f'<div class="launch-name"><a href="{esc(url)}" target="_blank">{esc(name)}</a></div>'
+                        f'</div>\n')
     if not launch_rows:
-        launch_rows = '<div class="kp-sub">No launches currently scheduled.</div>'
+        launch_rows = '<div class="mod-sub">No launches currently scheduled.</div>'
 
-    mod_launches = f"""
-<div class="module">
-  <span class="module-label">Upcoming Launches</span>
-  <div class="launch-list">
-    {launch_rows}
-  </div>
-  <hr style="margin:12px 0">
-  <div style="font-family:var(--mono);font-size:.68rem"><a href="https://www.rocketlaunch.live" target="_blank" style="color:var(--dim)">Full schedule →</a></div>
+    mod_launches = f"""<div class="module">
+  <span class="mod-label">Upcoming Launches</span>
+  {launch_rows}
+  <hr class="slim">
+  <div style="font-size:.74rem;color:var(--sub)"><a href="https://www.rocketlaunch.live" target="_blank" style="color:var(--sub)">Full schedule →</a></div>
 </div>"""
 
-    # ── MODULE 4: Tonight's Sky ──
-    moon_emoji = {"New Moon":"🌑","Waxing Crescent":"🌒","First Quarter":"🌓","Waxing Gibbous":"🌔",
-                  "Full Moon":"🌕","Waning Gibbous":"🌖","Last Quarter":"🌗","Waning Crescent":"🌘"}.get(moon_name,"🌙")
-
-    shower_rows = ""
+    # Module 4: Tonight's sky
+    sky_rows = f"""<div class="sky-row">
+  <div class="sky-key">Moon</div>
+  <div><div class="sky-val">{moon_emoji} {esc(moon_name)}</div><div class="sky-sub">{esc(str(moon_pct))}% illuminated</div></div>
+</div>"""
     for days, name, peak_str, zhr in showers:
         when = "Tonight" if days<=0 else "Tomorrow" if days==1 else f"In {days} days · {peak_str}"
-        shower_rows += f"""<div class="sky-row">
-  <div class="sky-key">{esc(when)}</div>
-  <div><div class="sky-val"><a href="https://www.amsmeteors.org/meteor-showers/meteor-shower-calendar/" target="_blank">{esc(name)}</a></div>
-  <div class="sky-sub">Peak {zhr}/hr</div></div>
-</div>\n"""
-
-    mod_sky = f"""
-<div class="module">
-  <span class="module-label">Tonight's Sky</span>
-  <div class="sky-items">
-    <div class="sky-row">
-      <div class="sky-key">Moon</div>
-      <div><div class="sky-val">{moon_emoji} {esc(moon_name)}</div>
-      <div class="sky-sub">{esc(str(moon_pct))}% illuminated</div></div>
-    </div>
-    {shower_rows}
-    <div class="sky-row">
-      <div class="sky-key">ISS Passes</div>
-      <div><div class="sky-val"><a href="https://spotthestation.nasa.gov" target="_blank">Spot the Station</a></div>
-      <div class="sky-sub">NASA sighting times by location</div></div>
-    </div>
-    <div class="sky-row">
-      <div class="sky-key">Dark Skies</div>
-      <div><div class="sky-val"><a href="https://www.darksky.org/dark-sky-places-program/" target="_blank">Find a dark sky →</a></div>
-      <div class="sky-sub">IDA certified locations</div></div>
-    </div>
-  </div>
+        sky_rows += (f'<div class="sky-row">'
+                     f'<div class="sky-key">{esc(when)}</div>'
+                     f'<div><div class="sky-val"><a href="https://www.amsmeteors.org/meteor-showers/meteor-shower-calendar/" target="_blank">{esc(name)}</a></div>'
+                     f'<div class="sky-sub">Peak {zhr}/hr</div></div>'
+                     f'</div>\n')
+    sky_rows += """<div class="sky-row">
+  <div class="sky-key">ISS Passes</div>
+  <div><div class="sky-val"><a href="https://spotthestation.nasa.gov" target="_blank">Spot the Station</a></div><div class="sky-sub">NASA sighting times by location</div></div>
+</div>
+<div class="sky-row">
+  <div class="sky-key">Dark Skies</div>
+  <div><div class="sky-val"><a href="https://www.darksky.org/dark-sky-places-program/" target="_blank">IDA Finder →</a></div><div class="sky-sub">Certified dark sky locations</div></div>
 </div>"""
 
-    # Editorial
-    if editorial:
-        ed_block = f'<div class="editorial-text">{esc(editorial)}</div>'
-    else:
-        ed_block = '<div class="editorial-placeholder">Add ANTHROPIC_API_KEY as a GitHub secret to enable the daily editorial note.</div>'
+    mod_sky = f"""<div class="module">
+  <span class="mod-label">Tonight's Sky</span>
+  {sky_rows}
+</div>"""
 
     # Contextual CTA
     if kp and kp >= 5:
@@ -448,24 +434,27 @@ def render_html(kp, news, launches, showers, score, moon_illum, moon_name,
     else:
         cta_msg = "☄ <strong>Morning briefing, free.</strong> Launches, aurora alerts, and tonight's conditions."
 
-    cta_block = f"""<div class="cta-bar">
+    cta = f"""<div class="cta-bar">
   <div class="cta-text">{cta_msg}</div>
   <form class="cta-form" action="https://buttondown.com/{BUTTONDOWN_USERNAME}" method="post" target="_blank">
     <input type="email" name="email" placeholder="your@email.com" required>
-    <button type="submit">Subscribe Free</button>
+    <button type="submit">Subscribe free</button>
   </form>
 </div>"""
 
     # Headlines
-    top_cols = ["",""]
+    top_cols = ["", ""]
     for i, a in enumerate(news[:4]):
         cls = "hed-1" if i in (0,2) else "hed-2"
-        top_cols[i%2] += f'<div class="{cls}"><a href="{esc(a["url"])}" target="_blank">{esc(a["title"])}</a></div>\n'
+        top_cols[i%2] += (f'<div class="{cls}">'
+                          f'<a href="{esc(a["url"])}" target="_blank">{esc(a["title"])}</a>'
+                          f'</div>\n')
 
-    rest = news[4:]
     more = ["","",""]
-    for i, a in enumerate(rest):
-        more[i%3] += f'<div class="news-link"><a href="{esc(a["url"])}" target="_blank">{esc(a["title"])}</a></div>\n'
+    for i, a in enumerate(news[4:]):
+        more[i%3] += (f'<div class="news-link">'
+                      f'<a href="{esc(a["url"])}" target="_blank">{esc(a["title"])}</a>'
+                      f'</div>\n')
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -475,7 +464,7 @@ def render_html(kp, news, launches, showers, score, moon_illum, moon_name,
   <title>Orbital Daily — Independent Space News</title>
   <meta name="description" content="Daily space intelligence: rocket launches, aurora alerts, astrophotography conditions, meteor showers, and space news.">
   <meta name="author" content="Orbital Daily">
-  <meta property="og:title" content="Orbital Daily">
+  <meta property="og:title" content="Orbital Daily — Independent Space News">
   <meta property="og:description" content="Daily space intelligence: launches, aurora, astrophotography score.">
   <meta property="og:url" content="{SITE_URL}">
   <meta property="og:type" content="website">
@@ -497,24 +486,23 @@ def render_html(kp, news, launches, showers, score, moon_illum, moon_name,
   {alert}
   {hist_bar}
 
-  <!-- ── FOUR METRIC MODULES ── -->
-  <div class="metrics-grid">
+  <!-- Top: conditions -->
+  <div class="mod-grid">
     {mod_astro}
     {mod_weather}
+  </div>
+
+  <!-- Editorial: connects conditions to narrative -->
+  {editorial_strip}
+
+  <!-- Bottom: schedule + sky -->
+  <div class="mod-grid">
     {mod_launches}
     {mod_sky}
   </div>
 
-  <!-- Editorial note -->
-  <div class="editorial-bar">
-    <div class="editorial-accent"></div>
-    {ed_block}
-  </div>
+  {cta}
 
-  <!-- Contextual subscribe CTA -->
-  {cta_block}
-
-  <!-- Headlines -->
   <div class="section-bar">Headlines</div>
   <div class="headlines-grid">
     <div class="hed-col">{top_cols[0]}</div>
@@ -541,6 +529,7 @@ def render_html(kp, news, launches, showers, score, moon_illum, moon_name,
 </body>
 </html>"""
 
+
 # ── Sitemap + llms.txt ─────────────────────────────────────────────────────────
 
 def write_sitemap(now):
@@ -550,7 +539,8 @@ def write_sitemap(now):
         for p in ["","tonight","launches","weather","asteroids","mars","missions","gear"]
     )
     with open("sitemap.xml","w") as f:
-        f.write(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}\n</urlset>')
+        f.write(f'<?xml version="1.0" encoding="UTF-8"?>\n'
+                f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}\n</urlset>')
     print("✓  sitemap.xml")
 
 def write_llms(now):
@@ -577,24 +567,25 @@ Attribution: Orbital Daily (orbitaldaily.com)
 """)
     print("✓  llms.txt")
 
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     print("Orbital Daily — generating...")
     now      = datetime.now(timezone.utc)
-    kp       = fetch_kp();         print(f"  Kp: {kp}")
-    news     = fetch_news();       print(f"  News: {len(news)}")
-    launches = fetch_launches();   print(f"  Launches: {len(launches)}")
-    showers  = upcoming_showers(); print(f"  Showers: {[s[1] for s in showers]}")
+    kp       = fetch_kp();          print(f"  Kp: {kp}")
+    news     = fetch_news();        print(f"  News: {len(news)}")
+    launches = fetch_launches();    print(f"  Launches: {len(launches)}")
+    showers  = upcoming_showers();  print(f"  Showers: {[s[1] for s in showers]}")
     history  = fetch_space_history(now)
-    _, moon_illum, moon_name = moon_phase(now)
+    _, moon_illum, moon_name, moon_emoji = moon_phase(now)
     score    = astro_score(kp, moon_illum, showers[0][0] if showers else None)
     editorial = fetch_editorial(kp, score, launches, showers, moon_name, history)
     print(f"  Score: {score}/10  Moon: {moon_name} ({int(moon_illum*100)}%)")
     print(f"  Editorial: {'✓' if editorial else '— no API key'}")
 
     html = render_html(kp, news, launches, showers, score, moon_illum,
-                       moon_name, history, editorial, now)
+                       moon_name, moon_emoji, history, editorial, now)
     with open("index.html","w",encoding="utf-8") as f: f.write(html)
     print("✓  index.html")
     write_sitemap(now)
