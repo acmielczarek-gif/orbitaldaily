@@ -365,7 +365,7 @@ CSS = """
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#111827; --surface:#0f172a; --deep:#0a1020;
-  --border:#2d3f55;
+  --border:#1e2d3d;
   --text:#ffffff;
   --hi:#f1f5f9;
   --mid:#e2e8f0;
@@ -442,6 +442,7 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
 .neo-row{display:flex;gap:10px;margin-bottom:7px;font-size:.82rem;align-items:start;}
 .neo-k{font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);min-width:66px;padding-top:2px;}
 .neo-v{color:var(--mid);}
+.plain-english{font-size:.82rem;color:var(--mid);line-height:1.5;background:#0d1825;border:1px solid var(--border);border-radius:3px;padding:8px 12px;margin:8px 0 12px;}
 
 /* Tonight's sky — horizontal */
 .tonight{background:#0d1825;border-bottom:1px solid var(--border);}
@@ -685,13 +686,42 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
     gps_status = "⚠ Degraded · expect drift" if kp and kp >= 4 else "✓ Normal precision"
     gps_color  = "var(--amber)" if kp and kp >= 4 else "var(--green)"
 
+    # Plain English cards for each module
+    if score >= 7.5:
+        astro_plain = "Great night to go outside and look up. Dark skies, calm conditions — ideal for stargazing or photography."
+    elif score >= 5.5:
+        astro_plain = "Decent night for stargazing. Some interference from moonlight or space weather."
+    elif score >= 4.0:
+        astro_plain = "Marginal conditions tonight. Bright moon or active space weather limiting visibility."
+    else:
+        astro_plain = "Poor conditions tonight. Bright moon or disturbed skies — better nights ahead this week."
+
+    if kp is None or kp < 2:
+        kp_plain = "The sun is calm. GPS works normally. Aurora unlikely tonight at most latitudes."
+    elif kp < 4:
+        kp_plain = "Mildly active space weather. No major impact expected. Aurora possible at high latitudes."
+    elif kp < 5:
+        kp_plain = "Elevated space weather. Minor GPS disruption possible. Aurora visible at higher latitudes."
+    else:
+        kp_plain = "Geomagnetic storm active. GPS may drift. Aurora possible across a wide area tonight."
+
+    if neos:
+        ld = neos[0]["ld"]
+        if ld < 1:
+            neo_plain = "An asteroid is passing very close to Earth today. No impact risk — but unusually close."
+        elif ld < 5:
+            neo_plain = f"A small asteroid passes safely by Earth this week — about {round(ld)}x the Moon's distance. No risk."
+        else:
+            neo_plain = f"Nearest asteroid this week passes at {round(ld)}x the Moon's distance. Routine and safe."
+    else:
+        neo_plain = "No asteroids making notable close approaches this week. Clear skies above."
+
     # Solar context for space weather module
     if flares:
         f0   = flares[0]
         cls  = f0.get("classType","")
         when = f0.get("beginTime","")[:10]
         solar_detail = f'<div class="msub" style="color:var(--amber)">{esc(cls)} flare · {esc(when)}</div>'
-        # CME check
         cme = f0.get("linkedEvents",[])
         if cme:
             solar_detail += '<div class="msub-d">CME associated · monitor spaceweather.gov</div>'
@@ -701,10 +731,11 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
     # NEO module
     if neos:
         n0   = neos[0]
-        nc   = score_color(10 - min(10, n0["ld"]/2))  # greener = farther
+        nc   = score_color(10 - min(10, n0["ld"]/2))
         neo_html = (f'<div class="neo-big" style="color:{esc(nc)}">{n0["ld"]:.1f}</div>'
                     f'<div class="neo-unit">lunar distances · closest this week</div>'
                     f'<div class="neo-id">{esc(n0["name"])} · est. ⌀{n0["diam"]}m</div>'
+                    f'<div class="plain-english">{esc(neo_plain)}</div>'
                     f'<hr>'
                     f'<div class="neo-row"><span class="neo-k">Approach</span><span class="neo-v">{esc(n0["approach_str"][:16] if n0["approach_str"] else n0["date"])}</span></div>'
                     f'<div class="neo-row"><span class="neo-k">Velocity</span><span class="neo-v">{n0["vel"]} km/s</span></div>'
@@ -712,15 +743,22 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
                     f'{"⚠ Potentially hazardous" if n0["hazardous"] else "None · safe passage"}</span></div>'
                     f'<div class="neo-row"><span class="neo-k">This week</span><span class="neo-v">{len(neos)} close approaches</span></div>')
     else:
-        neo_html = ('<div class="neo-big" style="color:var(--faint)">—</div>'
+        neo_html = ('<div class="neo-big" style="color:var(--dim)">—</div>'
                     '<div class="neo-unit">no close approaches this week</div>'
-                    '<div style="margin-top:16px;font-size:.82rem;color:var(--dim)">All clear · no objects within 20 lunar distances</div>'
+                    f'<div class="plain-english">{esc(neo_plain)}</div>'
                     '<div style="margin-top:12px"><a href="https://cneos.jpl.nasa.gov/ca/" target="_blank" style="font-size:.78rem">NASA close approach data →</a></div>')
 
     # Tonight's Sky cells — server defaults, overridden client-side
     kp_val_for_js = f"{kp:.1f}" if kp is not None else "2.0"
-    aurora_init   = "3% chance" if not kp or kp < 2 else "12% chance"
-    aurora_color  = "var(--sub)" if not kp or kp < 4 else "var(--amber)"
+    if not kp or kp < 2:
+        aurora_init  = "Low tonight"
+        aurora_color = "var(--sub)"
+    elif kp < 4:
+        aurora_init  = "Possible at high latitudes"
+        aurora_color = "var(--sub)"
+    else:
+        aurora_init  = "Watch tonight"
+        aurora_color = "var(--amber)"
 
     tonight_html = f"""<div class="tonight">
   <div class="tonight-hdr">
@@ -729,29 +767,29 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
   </div>
   <div class="tcells">
     <div class="tc">
-      <div class="tc-lbl">ISS Pass</div>
+      <div class="tc-lbl">Space Station</div>
       <div class="tc-val" style="color:var(--blue)"><a href="https://spotthestation.nasa.gov" target="_blank" style="color:var(--blue)">Check tonight's pass →</a></div>
-      <div class="tc-sub">NASA sighting times by location</div>
+      <div class="tc-sub">Visible to naked eye · NASA sighting times</div>
     </div>
     <div class="tc">
-      <div class="tc-lbl">Visible Planets</div>
+      <div class="tc-lbl">Planets Up Tonight</div>
       <div><a href="https://stellarium-web.org" target="_blank" class="ptag">Open sky map →</a></div>
-      <div class="tc-sub">Interactive tonight's sky · Stellarium</div>
+      <div class="tc-sub">Interactive · no equipment needed</div>
     </div>
     <div class="tc">
       <div class="tc-lbl">Moon</div>
       <div class="tc-val">{esc(moon_emoji)} {esc(moon_name)}</div>
-      <div class="tc-sub">{esc(str(moon_pct))}% illuminated</div>
+      <div class="tc-sub">{esc(str(moon_pct))}% illuminated{"  · good for stargazing after moonset" if moon_pct < 40 else ""}</div>
     </div>
     <div class="tc">
-      <div class="tc-lbl">Aurora</div>
+      <div class="tc-lbl">Aurora Chance</div>
       <div class="tc-val" id="aurora-val" style="color:{aurora_color}">{aurora_init}</div>
-      <div class="tc-sub" id="aurora-sub">{"Kp elevated · watch tonight" if kp and kp >= 4 else "Based on your latitude · Kp " + kp_display}</div>
+      <div class="tc-sub" id="aurora-sub">{"Kp elevated · watch the northern horizon" if kp and kp >= 4 else "Updates based on your location"}</div>
     </div>
     <div class="tc">
-      <div class="tc-lbl">Nearest Dark Sky</div>
+      <div class="tc-lbl">Best Stargazing Nearby</div>
       <div class="tc-val" style="font-size:.82rem" id="dark-sky-name">Locating…</div>
-      <div class="tc-sub" id="dark-sky-sub">IDA certified · detecting location</div>
+      <div class="tc-sub" id="dark-sky-sub">Very dark skies · IDA certified</div>
     </div>
   </div>
 </div>
@@ -885,6 +923,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
     <div class="big" style="color:{esc(sc_color)}">{esc(str(score))}</div>
     <div class="big-den">/ 10</div>
     <div class="big-st" style="color:{esc(sc_color)}">{esc(sc_label)} tonight</div>
+    <div class="plain-english">{esc(astro_plain)}</div>
     <div class="msub">🌙 Moon darkness &nbsp;&nbsp; {esc(str(moon_s))} / 10<br>⚡ Kp quiet &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {esc(str(kp_s))} / 10<br>☄&nbsp; Showers &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {esc(str(shower_s))} / 10</div>
   </div>
   <div class="mod">
@@ -892,6 +931,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
     <div class="big" style="color:{esc(kp_color)}">{esc(kp_display)}</div>
     <div class="big-den">Kp index</div>
     <div class="big-st" style="color:{esc(kp_color)}">{esc(kp_text)}</div>
+    <div class="plain-english">{esc(kp_plain)}</div>
     <div class="msub">Planetary Kp Index · <a href="https://spaceweather.gov" target="_blank">NOAA SWPC</a></div>
     <div style="font-size:.82rem;color:{esc(gps_color)};margin-top:7px">GPS: {esc(gps_status)}</div>
     <hr>
@@ -1065,7 +1105,7 @@ def send_daily_email(kp, score, sai_status, launches, news, neos, flares,
     gps_status = "Degraded — expect drift" if kp and kp >= 4 else "Normal"
     divider = '─' * 48
     editorial_text = editorial if editorial else "Visit orbitaldaily.com for today's full briefing."
-    body = f"""Orbital Daily tracks space conditions daily: astrophotography scores, rocket launches, aurora alerts, and near-Earth objects, computed fresh every morning.
+    body = f"""Orbital Daily tracks space conditions daily — astrophotography scores, rocket launches, aurora alerts, and near-Earth objects, computed fresh every morning.
 
 {divider}
 
