@@ -1,6 +1,6 @@
 # Orbital Daily
 > Independent daily space news and intelligence aggregator
-URL: https://orbitaldaily.com · Updated daily ~06:00 UTC · Last: 2026-07-03
+URL: https://orbitaldaily.com · Updated daily ~06:00 UTC · Last: 2026-07-04
 
 ## Derived metrics (proprietary)
 - Astrophotography Score (0–10): moon darkness + Kp + meteor shower proximity
