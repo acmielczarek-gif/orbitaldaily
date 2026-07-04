@@ -365,7 +365,7 @@ CSS = """
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#111827; --surface:#0f172a; --deep:#0a1020;
-  --border:#1e2d3d;
+  --border:#162030;
   --text:#ffffff;
   --hi:#f1f5f9;
   --mid:#e2e8f0;
