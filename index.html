@@ -18,12 +18,8 @@
 :root{
   --bg:#111827; --surface:#0f172a; --deep:#0a1020;
   --border:#162030;
-  --text:#ffffff;
-  --hi:#f1f5f9;
-  --mid:#e2e8f0;
-  --body:#cbd5e1;
-  --sub:#94a3b8;
-  --dim:#64748b;
+  --text:#ffffff; --hi:#f1f5f9; --mid:#e2e8f0; --body:#cbd5e1;
+  --sub:#94a3b8; --dim:#64748b;
   --green:#4ade80; --green-mid:#86efac;
   --amber:#fbbf24; --orange:#f97316; --red:#f87171;
   --blue:#93c5fd; --blue-acc:#60a5fa;
@@ -37,100 +33,123 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
 .w{max-width:1060px;margin:0 auto;}
 
 /* Masthead */
-.masthead{text-align:center;padding:22px 16px 16px;border-bottom:2px solid var(--text);}
-.masthead h1{font-family:var(--serif);font-size:2.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;}
+.masthead{text-align:center;padding:18px 14px 14px;border-bottom:2px solid var(--text);}
+.masthead h1{font-family:var(--serif);font-size:clamp(1.8rem,6vw,2.6rem);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;}
 .mast-rule{width:52px;border-top:1px solid var(--sub);margin:8px auto;}
 .mast-tag{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);margin-top:4px;}
 .mast-date{font-size:.72rem;color:var(--dim);margin-top:5px;}
 
 /* Alert */
-.alert{background:#2d0808;border-top:3px solid var(--red);border-bottom:1px solid #5a1010;padding:10px 20px;text-align:center;}
+.alert{background:#2d0808;border-top:3px solid var(--red);border-bottom:1px solid #5a1010;padding:10px 16px;text-align:center;}
 .alert-title{color:var(--red);font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
 .alert-sub{color:#fca5a5;font-size:.82rem;}
-.alert-sub a{color:var(--red);}
 
 /* History */
-.hist{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 20px;font-size:.86rem;color:var(--mid);text-align:center;}
+.hist{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 16px;font-size:.84rem;color:var(--mid);text-align:center;}
 .hist strong{color:var(--text);}
 
 /* SAI */
 .sai-wrap{background:var(--surface);}
 .sai-inner{display:grid;grid-template-columns:5fr 2fr;}
-.sai-left{padding:16px 22px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;gap:10px;}
+.sai-left{padding:14px 18px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;gap:10px;}
 .sai-top{display:flex;align-items:baseline;gap:14px;}
-.sai-eye{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--sub);}
+.sai-eye{font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;color:var(--sub);}
 .sai-status{font-family:var(--serif);font-size:1.8rem;font-weight:700;}
-.sai-num{font-size:.74rem;color:var(--dim);margin-left:auto;}
+.sai-num{font-size:.72rem;color:var(--dim);margin-left:auto;}
 .sai-track{height:6px;background:#1e3a52;border-radius:3px;overflow:hidden;}
 .sai-fill{height:100%;border-radius:3px;}
-.sai-ticks{display:flex;justify-content:space-between;font-size:.6rem;color:var(--sub);letter-spacing:.08em;text-transform:uppercase;}
-.sai-right{padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;}
+.sai-ticks{display:flex;justify-content:space-between;font-size:.58rem;color:var(--sub);letter-spacing:.08em;text-transform:uppercase;}
+.sai-right{padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;}
 .sai-comp{font-size:.82rem;line-height:1.3;white-space:nowrap;}
 .sai-comp strong{color:var(--hi);}
 .sai-comp span{color:var(--body);}
 
+/* Mobile: SAI stacks, right panel hidden */
+@media(max-width:600px){
+  .sai-inner{grid-template-columns:1fr;}
+  .sai-right{display:none;}
+  .sai-left{border-right:none;padding:14px 16px;}
+}
+
 /* Humans strip */
-.humans{background:var(--deep);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:7px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
-.h-lbl{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--sub);}
+.humans{background:var(--deep);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:6px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.h-lbl{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--sub);}
 .h-count{font-size:.8rem;color:var(--body);}
 .h-count strong{color:var(--hi);}
-.h-names{font-size:.76rem;color:var(--body);flex:1;}
+.h-names{font-size:.74rem;color:var(--body);flex:1;}
+
+/* Mobile: humans shows count only, names hidden */
+@media(max-width:600px){
+  .h-names{display:none;}
+}
 
 /* Top 3 modules */
 .top3{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
-@media(max-width:680px){.top3{grid-template-columns:1fr;}}
-.mod{padding:20px 20px;border-right:1px solid var(--border);}
+@media(max-width:700px){.top3{grid-template-columns:1fr;}}
+.mod{padding:18px 18px;border-right:1px solid var(--border);}
 .mod:last-child{border-right:none;}
-.mod-lbl{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);display:block;border-bottom:1px solid var(--border);padding-bottom:7px;margin-bottom:14px;}
-.big{font-family:var(--serif);font-size:3.6rem;font-weight:700;line-height:1;}
+@media(max-width:700px){
+  .mod{border-right:none;border-bottom:1px solid var(--border);}
+  .mod:last-child{border-bottom:none;}
+}
+.mod-lbl{font-size:.63rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);display:block;border-bottom:1px solid var(--border);padding-bottom:7px;margin-bottom:14px;}
+.big{font-family:var(--serif);font-size:3.4rem;font-weight:700;line-height:1;}
 .big-den{font-size:.9rem;color:var(--sub);margin-top:3px;}
-.big-st{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:5px;margin-bottom:12px;}
+.big-st{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:5px;margin-bottom:8px;}
+.plain-english{font-size:.82rem;color:var(--mid);line-height:1.5;background:#0d1825;border:1px solid var(--border);border-radius:3px;padding:8px 12px;margin:8px 0 12px;}
 .msub{font-size:.84rem;color:var(--mid);line-height:1.75;}
 .msub-d{font-size:.82rem;color:var(--body);line-height:1.6;}
 .sec-lbl{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);margin-bottom:5px;margin-top:2px;}
 .neo-big{font-family:var(--serif);font-size:3.2rem;font-weight:700;line-height:1;}
 .neo-unit{font-size:.84rem;color:var(--body);margin-top:3px;}
-.neo-id{font-size:.8rem;color:var(--sub);margin-top:4px;margin-bottom:12px;}
+.neo-id{font-size:.8rem;color:var(--sub);margin-top:4px;margin-bottom:8px;}
 .neo-row{display:flex;gap:10px;margin-bottom:7px;font-size:.82rem;align-items:start;}
-.neo-k{font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);min-width:66px;padding-top:2px;}
+.neo-k{font-size:.63rem;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);min-width:64px;padding-top:2px;}
 .neo-v{color:var(--mid);}
-.plain-english{font-size:.82rem;color:var(--mid);line-height:1.5;background:#0d1825;border:1px solid var(--border);border-radius:3px;padding:8px 12px;margin:8px 0 12px;}
 
-/* Tonight's sky — horizontal */
+/* Tonight's Sky */
 .tonight{background:#0d1825;border-bottom:1px solid var(--border);}
-.tonight-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 22px 0;}
-.t-lbl{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);}
-.t-loc{font-size:.65rem;color:var(--sub);display:flex;align-items:center;gap:5px;}
+.tonight-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 18px 0;}
+.t-lbl{font-size:.63rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);}
+.t-loc{font-size:.63rem;color:var(--sub);display:flex;align-items:center;gap:5px;}
 .t-dot{width:5px;height:5px;border-radius:50%;background:var(--blue-acc);display:inline-block;}
 .tcells{display:grid;grid-template-columns:repeat(5,1fr);}
-@media(max-width:600px){.tcells{grid-template-columns:1fr 1fr;}}
-.tc{padding:10px 18px 14px;border-right:1px solid var(--border);}
+@media(max-width:700px){.tcells{grid-template-columns:1fr 1fr;}}
+@media(max-width:400px){.tcells{grid-template-columns:1fr;}}
+.tc{padding:10px 16px 14px;border-right:1px solid var(--border);}
 .tc:last-child{border-right:none;}
+@media(max-width:700px){
+  .tc{border-right:none;border-bottom:1px solid var(--border);}
+  .tc:nth-child(odd){border-right:1px solid var(--border);}
+  .tc:last-child{border-bottom:none;}
+}
 .tc-lbl{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--sub);margin-bottom:6px;}
-.tc-val{font-size:.92rem;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1.2;}
+.tc-val{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1.2;}
 .tc-sub{font-size:.74rem;color:var(--body);line-height:1.3;}
 .ptag{display:inline-block;font-size:.7rem;background:#141e30;border:1px solid var(--border);border-radius:2px;padding:2px 7px;margin-right:4px;margin-bottom:3px;color:var(--blue);}
 
 /* Editorial + briefing */
 .ed-row{display:grid;grid-template-columns:2fr 1fr;border-bottom:1px solid var(--border);background:var(--surface);}
 @media(max-width:600px){.ed-row{grid-template-columns:1fr;}}
-.ed-col{padding:16px 22px;border-right:1px solid var(--border);display:grid;grid-template-columns:3px 1fr;gap:16px;align-items:center;}
+.ed-col{padding:14px 18px;border-right:1px solid var(--border);display:grid;grid-template-columns:3px 1fr;gap:14px;align-items:center;}
+@media(max-width:600px){.ed-col{border-right:none;}}
 .ed-acc{background:var(--blue-acc);border-radius:2px;align-self:stretch;}
-.ed-text{font-family:var(--serif);font-style:italic;font-size:.96rem;color:var(--mid);line-height:1.7;}
-.brief{padding:16px 20px;display:flex;flex-direction:column;justify-content:center;gap:10px;}
+.ed-text{font-family:var(--serif);font-style:italic;font-size:.94rem;color:var(--mid);line-height:1.7;}
+.brief{padding:14px 18px;display:flex;flex-direction:column;justify-content:center;gap:10px;}
 .brief-eye{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--blue-acc);}
-.brief-hed{font-family:var(--serif);font-size:1rem;font-weight:700;color:var(--text);line-height:1.3;}
+.brief-hed{font-family:var(--serif);font-size:.96rem;font-weight:700;color:var(--text);line-height:1.3;}
 .brief-inp{padding:8px 12px;background:#1e293b;border:1px solid var(--border);color:var(--text);font-size:.84rem;border-radius:2px;font-family:var(--mono);width:100%;}
 .brief-inp::placeholder{color:var(--dim);}
-.brief-btn{padding:9px 16px;background:#d97706;color:#fff;border:none;font-family:var(--mono);font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;font-weight:700;text-align:center;}
+.brief-btn{padding:9px 16px;background:#d97706;color:#fff;border:none;font-family:var(--mono);font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;font-weight:700;text-align:center;width:100%;margin-top:4px;}
 
 /* 7-day forecast */
 .forecast{border-bottom:1px solid var(--border);background:#0b1420;}
-.fc-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 22px 0;flex-wrap:wrap;gap:8px;}
-.fc-lbl{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);}
-.fc-leg{display:flex;gap:14px;font-size:.62rem;color:var(--body);align-items:center;flex-wrap:wrap;}
+.fc-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 18px 0;flex-wrap:wrap;gap:8px;}
+.fc-lbl{font-size:.63rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);}
+.fc-leg{display:flex;gap:12px;font-size:.6rem;color:var(--body);align-items:center;flex-wrap:wrap;}
 .ldot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px;}
-.days{display:grid;grid-template-columns:repeat(7,1fr);}
+.days-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.days{display:grid;grid-template-columns:repeat(7,minmax(90px,1fr));min-width:560px;}
 .day{padding:10px 8px 14px;border-right:1px solid var(--border);text-align:center;}
 .day:last-child{border-right:none;}
 .day.now{background:#101e30;}
@@ -149,31 +168,35 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
 .d-est{font-size:.54rem;color:var(--dim);margin-top:5px;text-transform:uppercase;letter-spacing:.06em;}
 
 /* Section bar */
-.sec-bar{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);background:var(--surface);padding:7px 22px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);}
+.sec-bar{font-size:.63rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);background:var(--surface);padding:7px 18px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);}
 
 /* Launches */
-.launches{padding:18px 22px;border-bottom:1px solid var(--border);}
-.lg{display:grid;grid-template-columns:repeat(4,1fr);margin-top:14px;}
-@media(max-width:680px){.lg{grid-template-columns:1fr 1fr;gap:12px;}}
-.li{padding-right:18px;margin-right:18px;border-right:1px solid var(--border);}
+.launches{padding:16px 18px;border-bottom:1px solid var(--border);}
+.lg{display:grid;grid-template-columns:repeat(4,1fr);margin-top:14px;gap:0;}
+@media(max-width:700px){.lg{grid-template-columns:1fr 1fr;gap:14px;}}
+@media(max-width:400px){.lg{grid-template-columns:1fr;}}
+.li{padding-right:16px;margin-right:16px;border-right:1px solid var(--border);}
 .li:last-child{border-right:none;padding-right:0;margin-right:0;}
+@media(max-width:700px){.li{border-right:none;padding-right:0;margin-right:0;}}
 .l-time{font-size:.68rem;color:var(--amber);letter-spacing:.08em;text-transform:uppercase;font-weight:700;display:block;margin-bottom:5px;}
-.l-name{font-size:.9rem;color:var(--hi);font-weight:600;line-height:1.3;}
+.l-name{font-size:.88rem;color:var(--hi);font-weight:600;line-height:1.3;}
 
 /* Headlines */
 .hed-grid{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);}
-@media(max-width:580px){.hed-grid{grid-template-columns:1fr;}}
+@media(max-width:560px){.hed-grid{grid-template-columns:1fr;}}
 .hc{padding:12px 14px;border-right:1px solid var(--border);}
 .hc:last-child{border-right:none;}
-.h1{font-family:var(--serif);font-size:1.02rem;font-weight:700;line-height:1.3;margin-bottom:10px;}
+@media(max-width:560px){.hc{border-right:none;border-bottom:1px solid var(--border);}.hc:last-child{border-bottom:none;}}
+.h1{font-family:var(--serif);font-size:1rem;font-weight:700;line-height:1.3;margin-bottom:10px;}
 .h1 a{color:var(--text);}
 .h1 a:hover{color:var(--red);text-decoration:none;}
 .h2{font-family:var(--serif);font-size:.88rem;line-height:1.35;margin-bottom:9px;}
 .h2 a{color:var(--mid);}
 .more-grid{display:grid;grid-template-columns:repeat(3,1fr);}
-@media(max-width:580px){.more-grid{grid-template-columns:1fr;}}
+@media(max-width:560px){.more-grid{grid-template-columns:1fr;}}
 .mc{padding:10px 14px;border-right:1px solid var(--border);}
 .mc:last-child{border-right:none;}
+@media(max-width:560px){.mc{border-right:none;border-bottom:1px solid var(--border);}.mc:last-child{border-bottom:none;}}
 .nl{font-family:var(--serif);font-size:.82rem;line-height:1.35;margin-bottom:9px;}
 .nl a{color:var(--blue);}
 
@@ -189,10 +212,10 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
   <h1>Orbital Daily</h1>
   <div class="mast-rule"></div>
   <div class="mast-tag">Independent Space News &amp; Intelligence</div>
-  <div class="mast-date">Updated Saturday, July 4, 2026  ·  02:58 UTC</div>
+  <div class="mast-date">Updated Saturday, July 4, 2026  ·  03:23 UTC</div>
 </div>
 
-
+<div class="alert"><div class="alert-title">⚡ GEOMAGNETIC STORM ACTIVE</div><div class="alert-sub">Kp 6.0 — Aurora possible tonight · <a href="https://spaceweather.gov" target="_blank">spaceweather.gov</a></div></div>
 <div class="hist"><strong>This day in space history (2006):</strong> Space Shuttle program: Discovery launches STS-121 to the International Space Station. The event gained wide media attention as it was the only shuttle launch in the program&#x27;s history to occur on the United States&#x27; Independence Day. <a href="https://en.wikipedia.org/wiki/Space_Shuttle_program" target="_blank">→</a></div>
 
 <div class="sai-wrap">
@@ -200,15 +223,15 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
     <div class="sai-left">
       <div class="sai-top">
         <span class="sai-eye">Space Activity Index</span>
-        <span class="sai-status" style="color:#fbbf24">HIGH</span>
-        <span class="sai-num">56 / 100</span>
+        <span class="sai-status" style="color:#f87171">EXTREME</span>
+        <span class="sai-num">80 / 100</span>
       </div>
-      <div class="sai-track"><div class="sai-fill" style="width:56%;background:#fbbf24"></div></div>
+      <div class="sai-track"><div class="sai-fill" style="width:80%;background:#f87171"></div></div>
       <div class="sai-ticks"><span>Low</span><span>Moderate</span><span>High</span><span>Extreme</span></div>
     </div>
     <div class="sai-right"><div class="sai-comp"><strong>8</strong> <span>launches this week</span></div>
-<div class="sai-comp"><strong>Kp 3.7</strong> <span>unsettled</span></div>
-<div class="sai-comp"><strong>No solar flares</strong> <span>past 4 days</span></div>
+<div class="sai-comp"><strong>Kp 6.0</strong> <span>geomag storm</span></div>
+<div class="sai-comp"><strong style="color:var(--amber)">M1.2 flare</strong> <span style="color:var(--orange)">recent · monitor for Kp rise</span></div>
 <div class="sai-comp"><strong>9.0 LD</strong> <span>closest NEO this week</span></div>
 <div class="sai-comp" style="opacity:.35"><strong>12</strong> <span>humans in orbit</span></div>
 </div>
@@ -220,27 +243,27 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
 <div class="top3">
   <div class="mod">
     <span class="mod-lbl">Astrophotography Score</span>
-    <div class="big" style="color:#f87171">2.2</div>
+    <div class="big" style="color:#f87171">1.4</div>
     <div class="big-den">/ 10</div>
     <div class="big-st" style="color:#f87171">Unfavorable tonight</div>
-    <div class="plain-english">Poor conditions tonight. Bright moon or disturbed skies — better nights ahead this week.</div>
-    <div class="msub">🌙 Moon darkness &nbsp;&nbsp; 1.8 / 10<br>⚡ Kp quiet &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.9 / 10<br>☄&nbsp; Showers &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 / 10</div>
+    <div class="plain-english">Poor conditions tonight. Better nights ahead this week.</div>
+    <div class="msub">🌙 Moon darkness &nbsp;&nbsp; 1.8 / 10<br>⚡ Kp quiet &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.6 / 10<br>☄&nbsp; Showers &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 / 10</div>
   </div>
   <div class="mod">
     <span class="mod-lbl">Space Weather</span>
-    <div class="big" style="color:#86efac">3.7</div>
+    <div class="big" style="color:#f97316">6.0</div>
     <div class="big-den">Kp index</div>
-    <div class="big-st" style="color:#86efac">UNSETTLED</div>
-    <div class="plain-english">Mildly active space weather. No major impact expected. Aurora possible at high latitudes.</div>
+    <div class="big-st" style="color:#f97316">GEOMAG STORM</div>
+    <div class="plain-english">Geomagnetic storm active. GPS may drift. Aurora possible across a wide area tonight.</div>
     <div class="msub">Planetary Kp Index · <a href="https://spaceweather.gov" target="_blank">NOAA SWPC</a></div>
-    <div style="font-size:.82rem;color:var(--green);margin-top:7px">GPS: ✓ Normal precision</div>
+    <div style="font-size:.82rem;color:var(--amber);margin-top:7px">GPS: Degraded · expect drift</div>
     <hr>
     <div class="sec-lbl">Solar Events · DONKI</div>
-    <div class="msub-d">No active solar events past 4 days</div>
+    <div class="msub" style="color:var(--amber)">M1.2 flare · 2026-07-04</div>
   </div>
   <div class="mod">
     <span class="mod-lbl">Near-Earth Objects</span>
-    <div class="neo-big" style="color:#fbbf24">9.0</div><div class="neo-unit">lunar distances · closest this week</div><div class="neo-id">523808 (2007 ML24 · est. ⌀580m</div><div class="plain-english">Nearest asteroid this week passes at 9x the Moon&#x27;s distance. Routine and safe.</div><hr><div class="neo-row"><span class="neo-k">Approach</span><span class="neo-v">2026-Jul-04 19:5</span></div><div class="neo-row"><span class="neo-k">Velocity</span><span class="neo-v">16.8 km/s</span></div><div class="neo-row"><span class="neo-k">Threat</span><span style="color:var(--red)">⚠ Potentially hazardous</span></div><div class="neo-row"><span class="neo-k">This week</span><span class="neo-v">39 close approaches</span></div>
+    <div class="neo-big" style="color:#fbbf24">9.0</div><div class="neo-unit">lunar distances · closest this week</div><div class="neo-id">523808 (2007 ML24 · est. diameter 580m</div><div class="plain-english">Nearest asteroid this week passes at 9x the Moon&#x27;s distance. Routine and safe.</div><hr><div class="neo-row"><span class="neo-k">Approach</span><span class="neo-v">2026-Jul-04 19:5</span></div><div class="neo-row"><span class="neo-k">Velocity</span><span class="neo-v">16.8 km/s</span></div><div class="neo-row"><span class="neo-k">Threat</span><span style="color:var(--red)">Potentially hazardous</span></div><div class="neo-row"><span class="neo-k">This week</span><span class="neo-v">39 close approaches</span></div>
   </div>
 </div>
 
@@ -253,7 +276,7 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
     <div class="tc">
       <div class="tc-lbl">Space Station</div>
       <div class="tc-val" style="color:var(--blue)"><a href="https://spotthestation.nasa.gov" target="_blank" style="color:var(--blue)">Check tonight's pass →</a></div>
-      <div class="tc-sub">Visible to naked eye · NASA sighting times</div>
+      <div class="tc-sub">Visible to the naked eye · NASA sighting times</div>
     </div>
     <div class="tc">
       <div class="tc-lbl">Planets Up Tonight</div>
@@ -267,8 +290,8 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
     </div>
     <div class="tc">
       <div class="tc-lbl">Aurora Chance</div>
-      <div class="tc-val" id="aurora-val" style="color:var(--sub)">Possible at high latitudes</div>
-      <div class="tc-sub" id="aurora-sub">Updates based on your location</div>
+      <div class="tc-val" id="aurora-val" style="color:var(--amber)">Watch tonight</div>
+      <div class="tc-sub" id="aurora-sub">Kp elevated · watch the northern horizon</div>
     </div>
     <div class="tc">
       <div class="tc-lbl">Best Stargazing Nearby</div>
@@ -277,20 +300,19 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
     </div>
   </div>
 </div>
-<span id="server-kp" style="display:none">3.7</span>
+<span id="server-kp" style="display:none">6.0</span>
 
 <div class="ed-row">
   <div class="ed-col">
     <div class="ed-acc"></div>
-    <div class="ed-text">The Pegasus XL Swift Boost Mission launched today, advancing space observatories while an active geomagnetic storm (Kp 3.7) rendered viewing conditions unfavorable for astrophotography across much of the globe. Meanwhile, asteroid 523808 (2007 ML24) passes at 9 lunar distances—a safe but trackable near-Earth object—exactly 18 years after Discovery&#x27;s STS-121 mission renewed construction efforts at the International Space Station.</div>
+    <div class="ed-text">The Pegasus XL Swift Boost Mission launched successfully amid stormy geomagnetic conditions (Kp 6.0), while an M1.2 solar flare underscores the active solar environment that drives such disturbances. Eighteen years after Discovery&#x27;s STS-121 mission to the ISS, today marks another milestone in human spaceflight history as commercial launch capabilities continue their expansion.</div>
   </div>
   <div class="brief">
   <div class="brief-eye">Free daily email</div>
-  <div class="brief-hed">The morning briefing for space — launches, aurora alerts, tonight&#x27;s score.</div>
-  <input type="email" class="brief-inp" placeholder="your@email.com">
-  <form action="https://buttondown.com/orbitaldaily" method="post" target="_blank" style="display:contents">
-    <input type="email" name="email" class="brief-inp" placeholder="your@email.com" required style="display:none">
-    <button type="submit" class="brief-btn" onclick="this.closest('div').querySelector('input[name=email]').value=this.closest('.brief').querySelector('.brief-inp').value">Subscribe free →</button>
+  <div class="brief-hed">⚡ Aurora alert active — get notified automatically when conditions peak.</div>
+  <form action="https://buttondown.com/orbitaldaily" method="post" target="_blank">
+    <input type="email" name="email" class="brief-inp" placeholder="your@email.com" required>
+    <button type="submit" class="brief-btn" style="margin-top:7px;width:100%">Subscribe free →</button>
   </form>
 </div>
 </div>
@@ -302,16 +324,16 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
       <span><span class="ldot" style="background:var(--green)"></span>Excellent</span>
       <span><span class="ldot" style="background:var(--amber)"></span>Good</span>
       <span><span class="ldot" style="background:var(--orange)"></span>Fair</span>
-      <span><span class="ldot" style="background:var(--faint)"></span>Poor</span>
-      <span style="color:var(--faint)">· Days 4–7 moon-based only</span>
+      <span><span class="ldot" style="background:var(--dim)"></span>Poor</span>
+      <span style="color:var(--dim)">· Days 4–7 moon-based only</span>
     </div>
   </div>
-  <div class="days"><div class="day now"><div class="d-name">SAT</div><div class="d-date">Jul 4</div><div class="d-moon">🌖</div><div class="d-score" style="color:#f87171">2.2</div><div class="d-lbl" style="color:#f87171">Unfa</div><div class="d-bar" style="background:#f87171"></div><div class="d-tags"><span class="dtag tl">🚀</span></div></div><div class="day est"><div class="d-name">SUN</div><div class="d-date">Jul 5</div><div class="d-moon">🌖</div><div class="d-score" style="color:#f97316">3.3</div><div class="d-lbl" style="color:#f97316">Poor</div><div class="d-bar" style="background:#f97316"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">MON</div><div class="d-date">Jul 6</div><div class="d-moon">🌗</div><div class="d-score" style="color:#f97316">3.8</div><div class="d-lbl" style="color:#f97316">Poor</div><div class="d-bar" style="background:#f97316"></div><div class="d-tags"></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">TUE</div><div class="d-date">Jul 7</div><div class="d-moon">🌗</div><div class="d-score" style="color:#fbbf24">4.4</div><div class="d-lbl" style="color:#fbbf24">Fair</div><div class="d-bar" style="background:#fbbf24"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">WED</div><div class="d-date">Jul 8</div><div class="d-moon">🌗</div><div class="d-score" style="color:#fbbf24">5.0</div><div class="d-lbl" style="color:#fbbf24">Fair</div><div class="d-bar" style="background:#fbbf24"></div><div class="d-tags"></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">THU</div><div class="d-date">Jul 9</div><div class="d-moon">🌗</div><div class="d-score" style="color:#86efac">5.5</div><div class="d-lbl" style="color:#86efac">Good</div><div class="d-bar" style="background:#86efac"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">FRI</div><div class="d-date">Jul 10</div><div class="d-moon">🌘</div><div class="d-score" style="color:#86efac">6.1</div><div class="d-lbl" style="color:#86efac">Good</div><div class="d-bar" style="background:#86efac"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div></div>
+  <div class="days-scroll"><div class="days"><div class="day now"><div class="d-name">SAT</div><div class="d-date">Jul 4</div><div class="d-moon">🌖</div><div class="d-score" style="color:#f87171">1.4</div><div class="d-lbl" style="color:#f87171">Unfa</div><div class="d-bar" style="background:#f87171"></div><div class="d-tags"><span class="dtag tl">🚀</span><span class="dtag tk">⚡</span></div></div><div class="day est"><div class="d-name">SUN</div><div class="d-date">Jul 5</div><div class="d-moon">🌖</div><div class="d-score" style="color:#f97316">3.3</div><div class="d-lbl" style="color:#f97316">Poor</div><div class="d-bar" style="background:#f97316"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">MON</div><div class="d-date">Jul 6</div><div class="d-moon">🌗</div><div class="d-score" style="color:#f97316">3.8</div><div class="d-lbl" style="color:#f97316">Poor</div><div class="d-bar" style="background:#f97316"></div><div class="d-tags"></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">TUE</div><div class="d-date">Jul 7</div><div class="d-moon">🌗</div><div class="d-score" style="color:#fbbf24">4.4</div><div class="d-lbl" style="color:#fbbf24">Fair</div><div class="d-bar" style="background:#fbbf24"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">WED</div><div class="d-date">Jul 8</div><div class="d-moon">🌗</div><div class="d-score" style="color:#fbbf24">5.0</div><div class="d-lbl" style="color:#fbbf24">Fair</div><div class="d-bar" style="background:#fbbf24"></div><div class="d-tags"></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">THU</div><div class="d-date">Jul 9</div><div class="d-moon">🌗</div><div class="d-score" style="color:#86efac">5.5</div><div class="d-lbl" style="color:#86efac">Good</div><div class="d-bar" style="background:#86efac"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">FRI</div><div class="d-date">Jul 10</div><div class="d-moon">🌘</div><div class="d-score" style="color:#86efac">6.1</div><div class="d-lbl" style="color:#86efac">Good</div><div class="d-bar" style="background:#86efac"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div></div></div>
 </div>
 
 <div class="launches">
-  <span class="mod-lbl">Upcoming Launches</span>
-  <div class="lg"><div class="li"><span class="l-time">LAUNCHED</span><div class="l-name"><a href="https://www.rocketlaunch.live/launch/pegasus-xl-swift-boost-mission" target="_blank" style="color:var(--text)">Pegasus XL | Swift Boost Mission</a></div></div><div class="li"><span class="l-time">T−6H</span><div class="l-name"><a href="https://www.rocketlaunch.live/launch/long-march-6a-unknown-payload" target="_blank" style="color:var(--text)">Long March 6A | Unknown Payload</a></div></div><div class="li"><span class="l-time">TOMORROW</span><div class="l-name"><a href="https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-10-50" target="_blank" style="color:var(--text)">Falcon 9 Block 5 | Starlink Group 10-50</a></div></div><div class="li"><span class="l-time">TOMORROW</span><div class="l-name"><a href="https://www.rocketlaunch.live/launch/long-march-8a-spacesail-polar-group-tbd" target="_blank" style="color:var(--text)">Long March 8A | SpaceSail Polar Group TBD</a></div></div></div>
+  <span class="sec-bar" style="display:block;margin:0 -22px 14px;padding:7px 22px">Upcoming Launches</span>
+  <div class="lg"><div class="li"><span class="l-time">LAUNCHED</span><div class="l-name"><a href="https://www.rocketlaunch.live/launch/pegasus-xl-swift-boost-mission" target="_blank" style="color:var(--hi)">Pegasus XL | Swift Boost Mission</a></div></div><div class="li"><span class="l-time">T-6H</span><div class="l-name"><a href="https://www.rocketlaunch.live/launch/long-march-6a-unknown-payload" target="_blank" style="color:var(--hi)">Long March 6A | Unknown Payload</a></div></div><div class="li"><span class="l-time">TOMORROW</span><div class="l-name"><a href="https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-10-50" target="_blank" style="color:var(--hi)">Falcon 9 Block 5 | Starlink Group 10-50</a></div></div><div class="li"><span class="l-time">TOMORROW</span><div class="l-name"><a href="https://www.rocketlaunch.live/launch/long-march-8a-spacesail-polar-group-tbd" target="_blank" style="color:var(--hi)">Long March 8A | SpaceSail Polar Group TBD</a></div></div></div>
 </div>
 
 <div class="sec-bar">Headlines</div>
@@ -350,87 +372,62 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
   <a href="https://spaceflightnewsapi.net" target="_blank">SNAPI</a> ·
   <a href="https://thespacedevs.com" target="_blank">The Space Devs</a> ·
   <a href="https://spaceweather.gov" target="_blank">NOAA</a> ·
-  <a href="https://api.nasa.gov" target="_blank">NASA APIs</a> ·
+  <a href="https://api.nasa.gov" target="_blank">NASA</a> ·
   <a href="https://www.amsmeteors.org" target="_blank">AMS</a> ·
   <a href="https://en.wikipedia.org" target="_blank">Wikipedia</a>
 </div>
 
 </div>
 <script>
-(function() {
-  const DARK_PARKS = [{"name": "Cherry Springs State Park", "lat": 41.66, "lon": -77.82, "bortle": 2, "state": "PA"}, {"name": "Headlands Dark Sky Park", "lat": 45.75, "lon": -84.63, "bortle": 3, "state": "MI"}, {"name": "Big Bend National Park", "lat": 29.25, "lon": -103.25, "bortle": 2, "state": "TX"}, {"name": "Death Valley National Park", "lat": 36.46, "lon": -117.02, "bortle": 2, "state": "CA"}, {"name": "Natural Bridges National Monument", "lat": 37.6, "lon": -109.99, "bortle": 2, "state": "UT"}, {"name": "Chaco Culture NHP", "lat": 36.06, "lon": -107.96, "bortle": 2, "state": "NM"}, {"name": "Harmony Borrego Springs", "lat": 33.26, "lon": -116.38, "bortle": 3, "state": "CA"}, {"name": "Harriman State Park", "lat": 41.26, "lon": -74.14, "bortle": 4, "state": "NY"}, {"name": "Assateague Island", "lat": 38.05, "lon": -75.2, "bortle": 4, "state": "MD"}, {"name": "Anza-Borrego Desert", "lat": 33.22, "lon": -116.41, "bortle": 2, "state": "CA"}, {"name": "Canyonlands National Park", "lat": 38.2, "lon": -109.93, "bortle": 2, "state": "UT"}, {"name": "Glacier National Park", "lat": 48.5, "lon": -113.8, "bortle": 2, "state": "MT"}, {"name": "Great Basin National Park", "lat": 38.98, "lon": -114.26, "bortle": 2, "state": "NV"}, {"name": "Acadia National Park", "lat": 44.35, "lon": -68.21, "bortle": 4, "state": "ME"}, {"name": "Shenandoah National Park", "lat": 38.53, "lon": -78.35, "bortle": 4, "state": "VA"}, {"name": "Grand Canyon National Park", "lat": 36.1, "lon": -112.11, "bortle": 2, "state": "AZ"}, {"name": "Dry Tortugas National Park", "lat": 24.63, "lon": -82.87, "bortle": 3, "state": "FL"}, {"name": "Craters of the Moon NM", "lat": 43.42, "lon": -113.52, "bortle": 2, "state": "ID"}, {"name": "Black Canyon of the Gunnison", "lat": 38.57, "lon": -107.72, "bortle": 2, "state": "CO"}, {"name": "Joshua Tree National Park", "lat": 33.88, "lon": -115.9, "bortle": 3, "state": "CA"}];  // injected by server
-
-  function dist(lat1,lon1,lat2,lon2) {
-    const R=3958.8, p=Math.PI/180;
-    const a = Math.sin((lat2-lat1)*p/2)**2 + Math.cos(lat1*p)*Math.cos(lat2*p)*Math.sin((lon2-lon1)*p/2)**2;
-    return 2*R*Math.asin(Math.sqrt(a));
+(function(){
+  const PARKS = [{"name": "Cherry Springs State Park", "lat": 41.66, "lon": -77.82, "bortle": 2}, {"name": "Headlands Dark Sky Park", "lat": 45.75, "lon": -84.63, "bortle": 3}, {"name": "Big Bend National Park", "lat": 29.25, "lon": -103.25, "bortle": 2}, {"name": "Death Valley National Park", "lat": 36.46, "lon": -117.02, "bortle": 2}, {"name": "Natural Bridges NM", "lat": 37.6, "lon": -109.99, "bortle": 2}, {"name": "Chaco Culture NHP", "lat": 36.06, "lon": -107.96, "bortle": 2}, {"name": "Harriman State Park", "lat": 41.26, "lon": -74.14, "bortle": 4}, {"name": "Assateague Island", "lat": 38.05, "lon": -75.2, "bortle": 4}, {"name": "Anza-Borrego Desert", "lat": 33.22, "lon": -116.41, "bortle": 2}, {"name": "Canyonlands National Park", "lat": 38.2, "lon": -109.93, "bortle": 2}, {"name": "Glacier National Park", "lat": 48.5, "lon": -113.8, "bortle": 2}, {"name": "Great Basin National Park", "lat": 38.98, "lon": -114.26, "bortle": 2}, {"name": "Acadia National Park", "lat": 44.35, "lon": -68.21, "bortle": 4}, {"name": "Shenandoah National Park", "lat": 38.53, "lon": -78.35, "bortle": 4}, {"name": "Grand Canyon National Park", "lat": 36.1, "lon": -112.11, "bortle": 2}, {"name": "Dry Tortugas National Park", "lat": 24.63, "lon": -82.87, "bortle": 3}, {"name": "Craters of the Moon NM", "lat": 43.42, "lon": -113.52, "bortle": 2}, {"name": "Black Canyon of the Gunnison", "lat": 38.57, "lon": -107.72, "bortle": 2}, {"name": "Joshua Tree National Park", "lat": 33.88, "lon": -115.9, "bortle": 3}, {"name": "Harmony Borrego Springs", "lat": 33.26, "lon": -116.38, "bortle": 3}];
+  function dist(a,b,c,d){
+    const R=3958.8,p=Math.PI/180;
+    return 2*R*Math.asin(Math.sqrt(Math.sin((c-a)*p/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin((d-b)*p/2)**2));
   }
-
-  function nearestDarkSky(lat,lon) {
-    let best=null, bestD=Infinity;
-    for (const p of DARK_PARKS) {
-      const d = dist(lat,lon,p.lat,p.lon);
-      if (d < bestD) { bestD=d; best=p; }
-    }
-    return best ? {park:best, miles:Math.round(bestD)} : null;
+  function nearest(lat,lon){
+    let best=null,bd=Infinity;
+    for(const p of PARKS){const d=dist(lat,lon,p.lat,p.lon);if(d<bd){bd=d;best=p;}}
+    return best?{park:best,miles:Math.round(bd)}:null;
   }
-
-  function auroraProb(lat, kp) {
-    const oval = 67 - (kp * 2.5);
-    const gap  = lat - oval;
-    if (gap <= 0)  return 95;
-    if (gap <= 3)  return 75;
-    if (gap <= 7)  return 45;
-    if (gap <= 12) return 22;
-    if (gap <= 18) return 10;
-    return 3;
+  function auroraLevel(lat,kp){
+    const oval=67-(kp*2.5),gap=lat-oval;
+    if(gap<=0)return"High — watch tonight";
+    if(gap<=5)return"Moderate — possible tonight";
+    if(gap<=12)return"Low — unlikely tonight";
+    return"Low tonight";
   }
-
-  async function init() {
-    try {
-      const res = await fetch('https://ipapi.co/json/', {timeout:5000});
-      const loc = await res.json();
-      const city = loc.city || 'your location';
-      const region = loc.region_code || '';
-      const lat  = parseFloat(loc.latitude)  || 40;
-      const lon  = parseFloat(loc.longitude) || -74;
-      const kp   = parseFloat(document.getElementById('server-kp').textContent) || 2;
-
-      // Location label
-      const locEl = document.getElementById('tonight-loc-name');
-      if (locEl) locEl.textContent = city + (region ? ', '+region : '');
-
-      // Aurora
-      const prob = auroraProb(lat, kp);
-      const aEl  = document.getElementById('aurora-val');
-      const aSubEl = document.getElementById('aurora-sub');
-      if (aEl) {
-        aEl.textContent = prob + '% chance';
-        if (prob >= 60)      { aEl.style.color = '#f87171'; }
-        else if (prob >= 25) { aEl.style.color = '#fbbf24'; }
-        else                 { aEl.style.color = '#94a3b8'; }
+  function auroraColor(lat,kp){
+    const oval=67-(kp*2.5),gap=lat-oval;
+    if(gap<=0)return"#f87171";
+    if(gap<=5)return"#fbbf24";
+    return"#94a3b8";
+  }
+  async function init(){
+    try{
+      const res=await fetch("https://ipapi.co/json/");
+      const loc=await res.json();
+      const city=loc.city||"your location";
+      const rc=loc.region_code||"";
+      const lat=parseFloat(loc.latitude)||40;
+      const lon=parseFloat(loc.longitude)||-74;
+      const kp=parseFloat(document.getElementById("server-kp").textContent)||2;
+      const locEl=document.getElementById("tonight-loc-name");
+      if(locEl)locEl.textContent=city+(rc?", "+rc:"");
+      const aEl=document.getElementById("aurora-val");
+      const aSubEl=document.getElementById("aurora-sub");
+      if(aEl){aEl.textContent=auroraLevel(lat,kp);aEl.style.color=auroraColor(lat,kp);}
+      if(aSubEl&&kp>=4)aSubEl.textContent="Watch the northern horizon after dark";
+      const ds=nearest(lat,lon);
+      if(ds){
+        const n=document.getElementById("dark-sky-name");
+        const s=document.getElementById("dark-sky-sub");
+        if(n)n.textContent=ds.park.name;
+        if(s)s.textContent=ds.miles+" mi away · very dark skies";
       }
-      if (aSubEl && prob < 5) aSubEl.textContent = 'Geomagnetic conditions quiet';
-      if (aSubEl && prob >= 25) aSubEl.textContent = 'Watch northern horizon after midnight';
-
-      // Dark sky
-      const ds = nearestDarkSky(lat, lon);
-      if (ds) {
-        const dsEl  = document.getElementById('dark-sky-name');
-        const dsSub = document.getElementById('dark-sky-sub');
-        if (dsEl)  dsEl.textContent  = ds.park.name;
-        if (dsSub) dsSub.textContent = ds.miles + ' mi · Bortle ' + ds.park.bortle + ' · IDA certified';
-      }
-    } catch(e) {
-      // Fail silently — defaults remain
-    }
+    }catch(e){}
   }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  document.readyState==="loading"?document.addEventListener("DOMContentLoaded",init):init();
 })();
 </script>
 </body>

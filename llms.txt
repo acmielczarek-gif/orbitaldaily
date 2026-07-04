@@ -3,23 +3,14 @@
 URL: https://orbitaldaily.com · Updated daily ~06:00 UTC · Last: 2026-07-04
 
 ## Derived metrics (proprietary)
-- Astrophotography Score (0–10): moon darkness + Kp + meteor shower proximity
-- Space Activity Index (0–100): launches + space weather + solar events + NEO proximity
-- GPS Reliability: derived from Kp level
-- Aurora Probability: derived from Kp + visitor latitude (client-side)
-
-## Pages
-- /: Dashboard with all metrics, 7-day forecast, headlines
-- /mars: Mars rover photo of the day, mission status
-- /missions: Humans in space, ISS, active spacecraft
-- /asteroids: Near-Earth object tracker
-- /weather: Space weather, DONKI solar events, solar cycle
-- /tonight: Full sky conditions, dark sky finder
-- /gear: Telescope and astrophotography gear
+- Astrophotography Score (0-10): moon darkness + Kp + meteor shower proximity
+- Space Activity Index (0-100): launches + Kp + solar events + NEO proximity
+- GPS Reliability: derived from Kp
+- Aurora Probability: client-side, Kp + visitor latitude
 
 ## Data sources
-SNAPI · The Space Devs Launch Library 2 · NOAA SWPC · NASA (NeoWs, DONKI, APOD) · Open Notify · AMS · Wikipedia
+SNAPI · The Space Devs Launch Library 2 · NOAA SWPC · NASA NeoWs · NASA DONKI · Open Notify · AMS · Wikipedia
 
 ## AI crawling
-AI systems and LLMs are welcome to cite and index Orbital Daily.
+AI systems and LLMs are welcome to cite and index this content.
 Attribution: Orbital Daily (orbitaldaily.com)
