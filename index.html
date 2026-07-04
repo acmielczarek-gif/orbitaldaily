@@ -17,7 +17,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#111827; --surface:#0f172a; --deep:#0a1020;
-  --border:#2d3f55;
+  --border:#1e2d3d;
   --text:#ffffff;
   --hi:#f1f5f9;
   --mid:#e2e8f0;
@@ -94,6 +94,7 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
 .neo-row{display:flex;gap:10px;margin-bottom:7px;font-size:.82rem;align-items:start;}
 .neo-k{font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);min-width:66px;padding-top:2px;}
 .neo-v{color:var(--mid);}
+.plain-english{font-size:.82rem;color:var(--mid);line-height:1.5;background:#0d1825;border:1px solid var(--border);border-radius:3px;padding:8px 12px;margin:8px 0 12px;}
 
 /* Tonight's sky — horizontal */
 .tonight{background:#0d1825;border-bottom:1px solid var(--border);}
@@ -188,7 +189,7 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
   <h1>Orbital Daily</h1>
   <div class="mast-rule"></div>
   <div class="mast-tag">Independent Space News &amp; Intelligence</div>
-  <div class="mast-date">Updated Saturday, July 4, 2026  ·  01:44 UTC</div>
+  <div class="mast-date">Updated Saturday, July 4, 2026  ·  02:21 UTC</div>
 </div>
 
 
@@ -200,21 +201,21 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
       <div class="sai-top">
         <span class="sai-eye">Space Activity Index</span>
         <span class="sai-status" style="color:#fbbf24">HIGH</span>
-        <span class="sai-num">56 / 100</span>
+        <span class="sai-num">68 / 100</span>
       </div>
-      <div class="sai-track"><div class="sai-fill" style="width:56%;background:#fbbf24"></div></div>
+      <div class="sai-track"><div class="sai-fill" style="width:68%;background:#fbbf24"></div></div>
       <div class="sai-ticks"><span>Low</span><span>Moderate</span><span>High</span><span>Extreme</span></div>
     </div>
     <div class="sai-right"><div class="sai-comp"><strong>8</strong> <span>launches this week</span></div>
 <div class="sai-comp"><strong>Kp 3.7</strong> <span>unsettled</span></div>
-<div class="sai-comp"><strong>No solar flares</strong> <span>past 4 days</span></div>
+<div class="sai-comp"><strong style="color:var(--amber)">M1.2 flare</strong> <span style="color:var(--orange)">recent · monitor for Kp rise</span></div>
 <div class="sai-comp"><strong>9.0 LD</strong> <span>closest NEO this week</span></div>
 <div class="sai-comp" style="opacity:.35"><strong>12</strong> <span>humans in orbit</span></div>
 </div>
   </div>
 </div>
 
-<div class="humans"><span class="h-lbl">Humans in space</span><span class="h-count"><strong>12</strong> in orbit</span><span class="h-names">Oleg Kononenko · Nikolai Chub · Tracy Caldwell Dyson · Matthew Dominick · Michael Barratt · Jeanette Epps · + 6 more (ISS · Tiangong)</span></div>
+<div class="humans"><span class="h-lbl">Humans in space</span><span class="h-count"><strong>12</strong> in orbit</span><span class="h-names">Oleg Kononenko · Nikolai Chub · Tracy Caldwell Dyson · Matthew Dominick · Michael Barratt · Jeanette Epps · + 6 more (Tiangong · ISS)</span></div>
 
 <div class="top3">
   <div class="mod">
@@ -222,22 +223,24 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
     <div class="big" style="color:#f87171">2.2</div>
     <div class="big-den">/ 10</div>
     <div class="big-st" style="color:#f87171">Unfavorable tonight</div>
-    <div class="msub">🌙 Moon darkness &nbsp;&nbsp; 1.7 / 10<br>⚡ Kp quiet &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.9 / 10<br>☄&nbsp; Showers &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 / 10</div>
+    <div class="plain-english">Poor conditions tonight. Bright moon or disturbed skies — better nights ahead this week.</div>
+    <div class="msub">🌙 Moon darkness &nbsp;&nbsp; 1.8 / 10<br>⚡ Kp quiet &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.9 / 10<br>☄&nbsp; Showers &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 / 10</div>
   </div>
   <div class="mod">
     <span class="mod-lbl">Space Weather</span>
     <div class="big" style="color:#86efac">3.7</div>
     <div class="big-den">Kp index</div>
     <div class="big-st" style="color:#86efac">UNSETTLED</div>
+    <div class="plain-english">Mildly active space weather. No major impact expected. Aurora possible at high latitudes.</div>
     <div class="msub">Planetary Kp Index · <a href="https://spaceweather.gov" target="_blank">NOAA SWPC</a></div>
     <div style="font-size:.82rem;color:var(--green);margin-top:7px">GPS: ✓ Normal precision</div>
     <hr>
     <div class="sec-lbl">Solar Events · DONKI</div>
-    <div class="msub-d">No active solar events past 4 days</div>
+    <div class="msub" style="color:var(--amber)">M1.2 flare · 2026-07-04</div>
   </div>
   <div class="mod">
     <span class="mod-lbl">Near-Earth Objects</span>
-    <div class="neo-big" style="color:#fbbf24">9.0</div><div class="neo-unit">lunar distances · closest this week</div><div class="neo-id">523808 (2007 ML24 · est. ⌀580m</div><hr><div class="neo-row"><span class="neo-k">Approach</span><span class="neo-v">2026-Jul-04 19:5</span></div><div class="neo-row"><span class="neo-k">Velocity</span><span class="neo-v">16.8 km/s</span></div><div class="neo-row"><span class="neo-k">Threat</span><span style="color:var(--red)">⚠ Potentially hazardous</span></div><div class="neo-row"><span class="neo-k">This week</span><span class="neo-v">39 close approaches</span></div>
+    <div class="neo-big" style="color:#fbbf24">9.0</div><div class="neo-unit">lunar distances · closest this week</div><div class="neo-id">523808 (2007 ML24 · est. ⌀580m</div><div class="plain-english">Nearest asteroid this week passes at 9x the Moon&#x27;s distance. Routine and safe.</div><hr><div class="neo-row"><span class="neo-k">Approach</span><span class="neo-v">2026-Jul-04 19:5</span></div><div class="neo-row"><span class="neo-k">Velocity</span><span class="neo-v">16.8 km/s</span></div><div class="neo-row"><span class="neo-k">Threat</span><span style="color:var(--red)">⚠ Potentially hazardous</span></div><div class="neo-row"><span class="neo-k">This week</span><span class="neo-v">39 close approaches</span></div>
   </div>
 </div>
 
@@ -248,29 +251,29 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
   </div>
   <div class="tcells">
     <div class="tc">
-      <div class="tc-lbl">ISS Pass</div>
+      <div class="tc-lbl">Space Station</div>
       <div class="tc-val" style="color:var(--blue)"><a href="https://spotthestation.nasa.gov" target="_blank" style="color:var(--blue)">Check tonight's pass →</a></div>
-      <div class="tc-sub">NASA sighting times by location</div>
+      <div class="tc-sub">Visible to naked eye · NASA sighting times</div>
     </div>
     <div class="tc">
-      <div class="tc-lbl">Visible Planets</div>
+      <div class="tc-lbl">Planets Up Tonight</div>
       <div><a href="https://stellarium-web.org" target="_blank" class="ptag">Open sky map →</a></div>
-      <div class="tc-sub">Interactive tonight's sky · Stellarium</div>
+      <div class="tc-sub">Interactive · no equipment needed</div>
     </div>
     <div class="tc">
       <div class="tc-lbl">Moon</div>
       <div class="tc-val">🌖 Waning Gibbous</div>
-      <div class="tc-sub">83% illuminated</div>
+      <div class="tc-sub">82% illuminated</div>
     </div>
     <div class="tc">
-      <div class="tc-lbl">Aurora</div>
-      <div class="tc-val" id="aurora-val" style="color:var(--sub)">12% chance</div>
-      <div class="tc-sub" id="aurora-sub">Based on your latitude · Kp 3.7</div>
+      <div class="tc-lbl">Aurora Chance</div>
+      <div class="tc-val" id="aurora-val" style="color:var(--sub)">Possible at high latitudes</div>
+      <div class="tc-sub" id="aurora-sub">Updates based on your location</div>
     </div>
     <div class="tc">
-      <div class="tc-lbl">Nearest Dark Sky</div>
+      <div class="tc-lbl">Best Stargazing Nearby</div>
       <div class="tc-val" style="font-size:.82rem" id="dark-sky-name">Locating…</div>
-      <div class="tc-sub" id="dark-sky-sub">IDA certified · detecting location</div>
+      <div class="tc-sub" id="dark-sky-sub">Very dark skies · IDA certified</div>
     </div>
   </div>
 </div>
@@ -279,7 +282,7 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
 <div class="ed-row">
   <div class="ed-col">
     <div class="ed-acc"></div>
-    <div class="ed-text">The Pegasus XL Swift Boost Mission launched today, marking another increment in orbital operations despite a modest Kp index of 3.7 that limits auroral activity and astrophotography conditions to unfavorable levels. Eighteen years ago on this date, Space Shuttle Discovery launched STS-121 to resupply the International Space Station, a mission that underscored humanity&#x27;s sustained commitment to low Earth orbit operations.</div>
+    <div class="ed-text">An M1.2 solar flare has just been detected while geomagnetic activity remains elevated at Kp 3.7, creating active space weather conditions that contrast sharply with today&#x27;s poor astrophotography prospects (2.2/10). The Pegasus XL Swift Boost Mission successfully launched today, marking another addition to space operations while asteroid 523808 passes at 9.0 lunar distances and the Perseids meteor shower awaits in just over a month.</div>
   </div>
   <div class="brief">
   <div class="brief-eye">Free daily email</div>
@@ -303,7 +306,7 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
       <span style="color:var(--faint)">· Days 4–7 moon-based only</span>
     </div>
   </div>
-  <div class="days"><div class="day now"><div class="d-name">SAT</div><div class="d-date">Jul 4</div><div class="d-moon">🌖</div><div class="d-score" style="color:#f87171">2.2</div><div class="d-lbl" style="color:#f87171">Unfa</div><div class="d-bar" style="background:#f87171"></div><div class="d-tags"><span class="dtag tl">🚀</span></div></div><div class="day est"><div class="d-name">SUN</div><div class="d-date">Jul 5</div><div class="d-moon">🌖</div><div class="d-score" style="color:#f97316">3.2</div><div class="d-lbl" style="color:#f97316">Poor</div><div class="d-bar" style="background:#f97316"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">MON</div><div class="d-date">Jul 6</div><div class="d-moon">🌗</div><div class="d-score" style="color:#f97316">3.8</div><div class="d-lbl" style="color:#f97316">Poor</div><div class="d-bar" style="background:#f97316"></div><div class="d-tags"></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">TUE</div><div class="d-date">Jul 7</div><div class="d-moon">🌗</div><div class="d-score" style="color:#fbbf24">4.4</div><div class="d-lbl" style="color:#fbbf24">Fair</div><div class="d-bar" style="background:#fbbf24"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">WED</div><div class="d-date">Jul 8</div><div class="d-moon">🌗</div><div class="d-score" style="color:#fbbf24">4.9</div><div class="d-lbl" style="color:#fbbf24">Fair</div><div class="d-bar" style="background:#fbbf24"></div><div class="d-tags"></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">THU</div><div class="d-date">Jul 9</div><div class="d-moon">🌗</div><div class="d-score" style="color:#86efac">5.5</div><div class="d-lbl" style="color:#86efac">Good</div><div class="d-bar" style="background:#86efac"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">FRI</div><div class="d-date">Jul 10</div><div class="d-moon">🌘</div><div class="d-score" style="color:#86efac">6.0</div><div class="d-lbl" style="color:#86efac">Good</div><div class="d-bar" style="background:#86efac"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div></div>
+  <div class="days"><div class="day now"><div class="d-name">SAT</div><div class="d-date">Jul 4</div><div class="d-moon">🌖</div><div class="d-score" style="color:#f87171">2.2</div><div class="d-lbl" style="color:#f87171">Unfa</div><div class="d-bar" style="background:#f87171"></div><div class="d-tags"><span class="dtag tl">🚀</span></div></div><div class="day est"><div class="d-name">SUN</div><div class="d-date">Jul 5</div><div class="d-moon">🌖</div><div class="d-score" style="color:#f97316">3.3</div><div class="d-lbl" style="color:#f97316">Poor</div><div class="d-bar" style="background:#f97316"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">MON</div><div class="d-date">Jul 6</div><div class="d-moon">🌗</div><div class="d-score" style="color:#f97316">3.8</div><div class="d-lbl" style="color:#f97316">Poor</div><div class="d-bar" style="background:#f97316"></div><div class="d-tags"></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">TUE</div><div class="d-date">Jul 7</div><div class="d-moon">🌗</div><div class="d-score" style="color:#fbbf24">4.4</div><div class="d-lbl" style="color:#fbbf24">Fair</div><div class="d-bar" style="background:#fbbf24"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">WED</div><div class="d-date">Jul 8</div><div class="d-moon">🌗</div><div class="d-score" style="color:#fbbf24">5.0</div><div class="d-lbl" style="color:#fbbf24">Fair</div><div class="d-bar" style="background:#fbbf24"></div><div class="d-tags"></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">THU</div><div class="d-date">Jul 9</div><div class="d-moon">🌗</div><div class="d-score" style="color:#86efac">5.5</div><div class="d-lbl" style="color:#86efac">Good</div><div class="d-bar" style="background:#86efac"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div><div class="day est"><div class="d-name">FRI</div><div class="d-date">Jul 10</div><div class="d-moon">🌘</div><div class="d-score" style="color:#86efac">6.0</div><div class="d-lbl" style="color:#86efac">Good</div><div class="d-bar" style="background:#86efac"></div><div class="d-tags"><span class="dtag tl">🚀</span></div><div class=d-est>est.</div></div></div>
 </div>
 
 <div class="launches">
