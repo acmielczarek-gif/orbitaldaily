@@ -335,15 +335,15 @@ def send_daily_email(kp, score, sai_status, launches, news, neos, flares,
     gps_status  = "Degraded" if kp and kp >= 4 else "Normal"
 
     if kp and kp >= 5:
-        subject = f"Orbital Daily · {now.strftime('%b')} {day} — Aurora alert active, Kp {kp_display}"
+        subject = f"Orbital Daily · {now.strftime('%b')} {day}: Aurora alert active, Kp {kp_display}"
     elif score >= 7.5:
-        subject = f"Orbital Daily · {now.strftime('%b')} {day} — {score}/10 tonight, great conditions"
+        subject = f"Orbital Daily · {now.strftime('%b')} {day}: {score}/10 tonight, great conditions"
     elif neos and neos[0]["ld"] < 5:
-        subject = f"Orbital Daily · {now.strftime('%b')} {day} — Asteroid {neos[0]['name']} passing Earth"
+        subject = f"Orbital Daily · {now.strftime('%b')} {day}: Asteroid {neos[0]['name']} passing Earth"
     elif launches:
-        subject = f"Orbital Daily · {now.strftime('%b')} {day} — {launches[0].get('name','')} {launch_timing(launches[0].get('net',''))}"
+        subject = f"Orbital Daily · {now.strftime('%b')} {day}: {launches[0].get('name','')} {launch_timing(launches[0].get('net',''))}"
     else:
-        subject = f"Orbital Daily · {now.strftime('%b')} {day} — Space Activity {sai_status.title()}"
+        subject = f"Orbital Daily · {now.strftime('%b')} {day}: Space Activity {sai_status.title()}"
 
     if launches:
         launch_block = f"{launches[0].get('name','Unknown')} · {launch_timing(launches[0].get('net',''))}"
@@ -357,7 +357,7 @@ def send_daily_email(kp, score, sai_status, launches, news, neos, flares,
     headlines   = "\n".join(f"* {a['title']}" for a in news[:5]) if news else "* No headlines available"
     editorial_text = editorial if editorial else "Visit orbitaldaily.com for today's full briefing."
 
-    body = f"""Orbital Daily tracks space conditions daily — astrophotography scores, rocket launches, aurora alerts, and near-Earth objects, computed fresh every morning.
+    body = f"""Orbital Daily tracks space conditions daily: astrophotography scores, rocket launches, aurora alerts, and near-Earth objects, computed fresh every morning.
 
 {divider}
 
@@ -366,11 +366,11 @@ def send_daily_email(kp, score, sai_status, launches, news, neos, flares,
 {divider}
 
 TONIGHT · {date_str}
-Astrophotography Score: {score}/10 — {score_label(score)}
+Astrophotography Score: {score}/10 - {score_label(score)}
 Moon: {moon_name} · {moon_pct}% illuminated
 
 SPACE WEATHER
-Kp Index: {kp_display} — {kp_text}
+Kp Index: {kp_display} - {kp_text}
 GPS Reliability: {gps_status}
 Solar: {solar_block}
 
@@ -576,6 +576,38 @@ a:hover { text-decoration: underline; }
 
 /* Colophon */
 .colophon { text-align: center; padding-top: 26px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #a8a294; line-height: 1.9; }
+.colophon a { color: #6b6a62; border-bottom: 1px solid #d8d4c8; }
+.colophon a:hover { color: #14181d; text-decoration: none; }
+
+/* Location override */
+.loc-bar { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #a8a294; text-align: center; padding: 6px 0 0; }
+.loc-bar a { color: #8a8578; border-bottom: 1px dotted #c8c4b8; cursor: pointer; }
+.loc-override { display: none; margin-top: 6px; }
+.loc-override.open { display: flex; justify-content: center; gap: 6px; align-items: center; }
+.loc-inp { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 4px 8px; border: 1px solid #d8d4c8; background: #faf9f5; color: #14181d; border-radius: 3px; width: 180px; }
+.loc-inp::placeholder { color: #a8a294; }
+.loc-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; padding: 4px 10px; background: #1b3a6b; color: #faf9f5; border: none; border-radius: 3px; cursor: pointer; letter-spacing: 0.06em; }
+
+/* Contact modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(20,24,29,0.6); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: #faf9f5; max-width: 480px; width: 100%; padding: 36px 32px; border-radius: 4px; box-shadow: 0 24px 60px rgba(20,24,29,0.3); position: relative; }
+.modal-close { position: absolute; top: 14px; right: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #a8a294; cursor: pointer; background: none; border: none; letter-spacing: 0.1em; }
+.modal-close:hover { color: #14181d; }
+.modal-kicker { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #8a8578; margin-bottom: 10px; }
+.modal-heading { font-family: 'Newsreader', serif; font-weight: 600; font-size: 28px; letter-spacing: -0.02em; color: #14181d; margin-bottom: 6px; }
+.modal-sub { font-family: 'Newsreader', serif; font-style: italic; font-size: 15px; color: #6b6a62; margin-bottom: 22px; }
+.modal-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.modal-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8578; }
+.modal-input { font-family: 'Newsreader', serif; font-size: 16px; padding: 9px 12px; border: 1px solid #d8d4c8; background: #ffffff; color: #14181d; border-radius: 3px; width: 100%; }
+.modal-input::placeholder { color: #a8a294; }
+.modal-textarea { font-family: 'Newsreader', serif; font-size: 16px; padding: 9px 12px; border: 1px solid #d8d4c8; background: #ffffff; color: #14181d; border-radius: 3px; width: 100%; min-height: 110px; resize: vertical; }
+.modal-textarea::placeholder { color: #a8a294; }
+.modal-submit { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #faf9f5; background: #1b3a6b; padding: 12px 24px; border-radius: 4px; border: none; cursor: pointer; margin-top: 6px; }
+.modal-submit:hover { background: #14181d; }
+.modal-sent { display: none; text-align: center; padding: 20px 0; }
+.modal-sent-head { font-family: 'Newsreader', serif; font-weight: 600; font-size: 22px; color: #14181d; margin-bottom: 6px; }
+.modal-sent-body { font-family: 'Newsreader', serif; font-style: italic; font-size: 16px; color: #6b6a62; }
 """
 
 JS = """
@@ -593,11 +625,80 @@ JS = """
     document.querySelectorAll('.tip-anchor.tip-open').forEach(function(o){ o.classList.remove('tip-open'); });
   });
 
-  // Geolocation for aurora
+  // Contact modal
+  var overlay = document.getElementById('contact-overlay');
+  var form    = document.getElementById('contact-form');
+  var sent    = document.getElementById('contact-sent');
+  document.querySelectorAll('.open-contact').forEach(function(el){
+    el.addEventListener('click', function(e){ e.preventDefault(); overlay.classList.add('open'); });
+  });
+  document.getElementById('contact-close').addEventListener('click', function(){ overlay.classList.remove('open'); });
+  overlay.addEventListener('click', function(e){ if(e.target === overlay) overlay.classList.remove('open'); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') overlay.classList.remove('open'); });
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var name    = document.getElementById('c-name').value;
+    var email   = document.getElementById('c-email').value;
+    var message = document.getElementById('c-message').value;
+    var mailto  = 'mailto:hello@orbitaldaily.com'
+      + '?subject=' + encodeURIComponent('Message from ' + name)
+      + '&body='    + encodeURIComponent(message + '
+
+From: ' + name + ' <' + email + '>');
+    window.location.href = mailto;
+    form.style.display = 'none';
+    sent.style.display = 'block';
+    setTimeout(function(){ overlay.classList.remove('open'); form.style.display=''; sent.style.display='none'; form.reset(); }, 3000);
+  });
+
+  // Geolocation + location override
   const PARKS = DARK_SKY_DATA;
   function dist(a,b,c,d){ const R=3958.8,p=Math.PI/180; return 2*R*Math.asin(Math.sqrt(Math.sin((c-a)*p/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin((d-b)*p/2)**2)); }
   function nearest(lat,lon){ let best=null,bd=Infinity; for(const p of PARKS){const d=dist(lat,lon,p.lat,p.lon);if(d<bd){bd=d;best=p;}} return best?{park:best,miles:Math.round(bd)}:null; }
-  function auroraLevel(lat,kp){ const oval=67-(kp*2.5),gap=lat-oval; if(gap<=0)return"High — watch tonight"; if(gap<=5)return"Moderate — possible tonight"; return"Low tonight"; }
+  function auroraLevel(lat,kp){ const oval=67-(kp*2.5),gap=lat-oval; if(gap<=0)return"High tonight, watch the horizon"; if(gap<=5)return"Moderate, possible tonight"; return"Low tonight"; }
+
+  function applyLocation(lat, lon, label){
+    const kpEl = document.getElementById("server-kp");
+    const kp   = kpEl ? parseFloat(kpEl.textContent)||2 : 2;
+    const aEl  = document.getElementById("aurora-tip-text");
+    const dEl  = document.getElementById("darksky-tip-text");
+    const lEl  = document.getElementById("loc-label");
+    if(aEl) aEl.textContent = auroraLevel(lat, kp);
+    const ds = nearest(lat, lon);
+    if(dEl && ds) dEl.textContent = ds.park.name + " - " + ds.miles + " mi away";
+    if(lEl) lEl.textContent = label || "your location";
+  }
+
+  async function geocodeCity(city){
+    const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(city);
+    const res = await fetch(url, { headers: { "Accept-Language": "en" } });
+    const data = await res.json();
+    if(data && data[0]){ return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), label: data[0].display_name.split(",")[0] }; }
+    return null;
+  }
+
+  document.getElementById('loc-change').addEventListener('click', function(e){
+    e.preventDefault();
+    document.getElementById('loc-override').classList.toggle('open');
+    setTimeout(function(){ document.getElementById('loc-inp').focus(); }, 50);
+  });
+  document.getElementById('loc-go').addEventListener('click', async function(){
+    const city = document.getElementById('loc-inp').value.trim();
+    if(!city) return;
+    this.textContent = "...";
+    const result = await geocodeCity(city);
+    if(result){
+      applyLocation(result.lat, result.lon, result.label);
+      document.getElementById('loc-override').classList.remove('open');
+      document.getElementById('loc-inp').value = '';
+    } else {
+      document.getElementById('loc-inp').placeholder = "City not found";
+    }
+    this.textContent = "Go";
+  });
+  document.getElementById('loc-inp').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') document.getElementById('loc-go').click();
+  });
 
   async function init(){
     try{
@@ -605,15 +706,8 @@ JS = """
       const loc = await res.json();
       const lat = parseFloat(loc.latitude)||40;
       const lon = parseFloat(loc.longitude)||-74;
-      const kpEl = document.getElementById("server-kp");
-      const kp = kpEl ? parseFloat(kpEl.textContent)||2 : 2;
-      const aEl = document.getElementById("aurora-tip-text");
-      if(aEl) aEl.textContent = auroraLevel(lat,kp);
-      const ds = nearest(lat,lon);
-      if(ds){
-        const dEl = document.getElementById("darksky-tip-text");
-        if(dEl) dEl.textContent = ds.park.name + " · " + ds.miles + " mi away";
-      }
+      const city = (loc.city || "your location") + (loc.region_code ? ", " + loc.region_code : "");
+      applyLocation(lat, lon, city);
     }catch(e){}
   }
   document.readyState==="loading"?document.addEventListener("DOMContentLoaded",init):init();
@@ -655,7 +749,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         kp_msg = "EXTREME STORM" if kp >= 7 else "storm-class"
         bulletin_html = f"""<div class="bulletin">
   <span class="bulletin-label">&#9670; BULLETIN</span>
-  <span class="bulletin-text">Geomagnetic storm active &mdash; Kp <strong>{kp_display}</strong>. A faint aurora is possible on the northern horizon tonight; GPS may drift. <a href="https://spaceweather.gov" target="_blank">NOAA forecast</a></span>
+  <span class="bulletin-text">Geomagnetic storm active, Kp <strong>{kp_display}</strong>. A faint aurora is possible on the northern horizon tonight; GPS may drift. <a href="https://spaceweather.gov" target="_blank">NOAA forecast</a></span>
 </div>"""
 
     # Lede editorial copy
@@ -666,7 +760,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         p2_html = f'<p class="lede-p2">{esc(ed_p2)}</p>' if ed_p2 else ""
     else:
         if band == "poor":
-            default_p1 = f"The moon sits at {moon_pct}% and the Kp runs at {kp_display} — neither is doing photographers any favors tonight. Conditions point clearly toward the couch."
+            default_p1 = f"The moon sits at {moon_pct}% and the Kp runs at {kp_display} - neither is doing photographers any favors tonight. Conditions point clearly toward the couch."
             default_p2 = "Check the seven-night forecast below for your next opening. The moon thins steadily from here."
         elif band == "fair":
             default_p1 = f"A mixed picture tonight: Kp at {kp_display}, moon {moon_pct}% lit. Wide-field work is possible; faint deep-sky targets will struggle."
@@ -675,7 +769,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
             default_p1 = f"Conditions are solid tonight. Kp holds at {kp_display} and the moon clears the sky enough for patient work."
             default_p2 = "A worthwhile night for most targets. Set up before midnight."
         else:
-            default_p1 = f"A genuinely good window has opened. Kp at {kp_display}, moon only {moon_pct}% illuminated — the kind of night the forecast rarely hands you two of in a row."
+            default_p1 = f"A genuinely good window has opened. Kp at {kp_display}, moon only {moon_pct}% illuminated. The kind of night the forecast rarely hands you two of in a row."
             default_p2 = "Get outside. You can catch up on sleep tomorrow."
         first_letter = default_p1[0]
         rest_p1      = default_p1[1:]
@@ -694,12 +788,12 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
     neo_text     = f"a rock passing {round(neos[0]['ld'])} Moon-distances out" if neos else "no notable asteroids this week"
     neo_detail   = (f"{neos[0]['name']}, roughly {neos[0]['diam']}m across, at {neos[0]['ld']:.1f} lunar distances and {neos[0]['vel']} km/s. Routine and safe."
                     if neos else "Nothing notable this week.")
-    kp_detail    = (f"A geomagnetic storm — Kp {kp_display}. GPS may wander and a faint aurora is possible tonight."
+    kp_detail    = (f"A geomagnetic storm, Kp {kp_display}. GPS may wander and a faint aurora is possible tonight."
                     if kp and kp >= 5 else
-                    f"Kp sits at {kp_display} — {'quiet skies' if not kp or kp < 2 else 'mildly active'}. No major disruption expected.")
+                    f"Kp sits at {kp_display} (quiet skies if not kp or kp < 2 else 'mildly active'). No major disruption expected.")
     human_names  = ", ".join(p.get("name","") for p in humans_list[:4])
     if humans_n > 4: human_names += f" and {humans_n - 4} more"
-    human_detail = f"{human_names} — split between the ISS and Tiangong." if human_names else f"{humans_n} people currently in orbit."
+    human_detail = f"{human_names}, split between the ISS and Tiangong." if human_names else f"{humans_n} people currently in orbit."
 
     next_launches = [l for l in launches[:6]]
     flown_count   = sum(1 for l in next_launches if launch_timing(l.get("net","")) == "LAUNCHED")
@@ -725,7 +819,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         if lcount: flag = f"{lcount} LAUNCH{'ES' if lcount > 1 else ''}"
         if d["estimated"] and not flag: flag = "est."
         # note
-        if sc >= 7.0:   note = "Dark and quiet &mdash; go."
+        if sc >= 7.0:   note = "Dark and quiet. Go."
         elif sc >= 5.0: note = "Good window. Worth the drive."
         elif sc >= 3.0: note = "Fair. Wide-field only."
         else:           note = "Heavy moon or active sky. Skip it."
@@ -770,7 +864,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Orbital Daily &mdash; Independent Space Intelligence</title>
+  <title>Orbital Daily: Independent Space Intelligence</title>
   <meta name="description" content="Independent daily space intelligence: tonight's astrophotography verdict, aurora alerts, launch manifest, and space news.">
   <meta property="og:title" content="Orbital Daily">
   <meta property="og:description" content="Independent space intelligence, read over each morning before it goes out.">
@@ -813,7 +907,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         <h2 class="lede-headline">{esc(headline)}</h2>
         {p1_html}
         {p2_html}
-        <div class="lede-byline">&mdash; the Orbital Daily desk</div>
+        <div class="lede-byline">the Orbital Daily desk</div>
       </div>
       <aside class="lede-aside">
         <div>
@@ -838,7 +932,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
       <span class="tip-anchor"><strong>{kp_phrase}</strong><span class="tip-pop">{esc(kp_detail)}</span></span>,
       <span class="tip-anchor"><strong>{humans_n} humans aloft</strong><span class="tip-pop">{esc(human_detail)}</span></span>,
       and <span class="tip-anchor"><strong>{esc(neo_text)}</strong><span class="tip-pop">{esc(neo_detail)}</span></span>.
-      <span class="in-brief-hint">&mdash; hover any figure for the detail.</span>
+      <span class="in-brief-hint">(hover any figure for the detail)</span>
     </p>
   </section>
 
@@ -861,7 +955,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
 
   <section class="subscribe">
     <h3>The dispatch, in your inbox</h3>
-    <p>A short note each morning &mdash; and a nudge the moment the aurora odds turn in your favour.</p>
+    <p>A short note each morning, and a nudge the moment the aurora odds turn in your favour.</p>
     <form action="https://buttondown.com/{BUTTONDOWN_USERNAME}" method="post" target="_blank" class="subscribe-form">
       <input type="email" name="email" class="subscribe-input" placeholder="your@email.com" required>
       <button type="submit" class="subscribe-btn">Subscribe free</button>
@@ -869,10 +963,49 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
   </section>
 
   <footer class="colophon">
-    Set each morning by an automated desk, read over by a human eye before it goes out.<br>
-    Feeds &mdash; SNAPI &middot; The Space Devs &middot; NOAA SWPC &middot; NASA &middot; AMS &middot; Wikipedia
+    Set each morning by an automated desk.<br>
+    Feeds: SNAPI &middot; The Space Devs &middot; NOAA SWPC &middot; NASA &middot; AMS &middot; Wikipedia<br>
+    <a href="#" class="open-contact">Contact</a>
   </footer>
 
+  <div class="loc-bar">
+    Results based on <span id="loc-label">your location</span> &middot;
+    <a id="loc-change" href="#">Change location</a>
+    <div class="loc-override" id="loc-override">
+      <input type="text" class="loc-inp" id="loc-inp" placeholder="City or zip code">
+      <button class="loc-btn" id="loc-go">Go</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Contact modal -->
+<div class="modal-overlay" id="contact-overlay">
+  <div class="modal-box">
+    <button class="modal-close" id="contact-close">ESC to close</button>
+    <div class="modal-kicker">Get in touch</div>
+    <div class="modal-heading">Write to the desk</div>
+    <div class="modal-sub">Tips, corrections, telescope talk, anything.</div>
+    <form id="contact-form">
+      <div class="modal-field">
+        <label class="modal-label" for="c-name">Name</label>
+        <input type="text" class="modal-input" id="c-name" placeholder="Your name" required>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="c-email">Email</label>
+        <input type="email" class="modal-input" id="c-email" placeholder="your@email.com" required>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="c-message">Message</label>
+        <textarea class="modal-textarea" id="c-message" placeholder="What's on your mind?" required></textarea>
+      </div>
+      <button type="submit" class="modal-submit">Send message</button>
+    </form>
+    <div class="modal-sent" id="contact-sent">
+      <div class="modal-sent-head">Message sent.</div>
+      <div class="modal-sent-body">We will read it over with the morning dispatch.</div>
+    </div>
+  </div>
 </div>
 
 <span id="server-kp" style="display:none">{esc(kp_val_for_js)}</span>
