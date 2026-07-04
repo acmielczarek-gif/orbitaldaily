@@ -258,7 +258,7 @@ def compute_7day(now, kp, kp_forecast):
 
 def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos):
     api_key = os.environ.get("ANTHROPIC_API_KEY","")
-    if not api_key: return None
+    if not api_key: return None, None
     ctx = []
     if kp is not None: ctx.append(f"Kp: {kp:.1f} ({'quiet' if kp<2 else 'active' if kp<5 else 'stormy'})")
     ctx.append(f"Astrophotography score: {score}/10 ({score_label(score)})")
@@ -282,10 +282,14 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
         )
         if r.status_code == 200:
             for block in r.json().get("content",[]):
-                if block.get("type") == "text": return block["text"].strip()
+                if block.get("type") == "text":
+                    parts = [p.strip() for p in block["text"].strip().split("\n\n") if p.strip()]
+                    p1 = parts[0] if len(parts) > 0 else ""
+                    p2 = parts[1] if len(parts) > 1 else ""
+                    return p1, p2
     except Exception as e:
         print(f"  Editorial: {e}", file=sys.stderr)
-    return None
+    return None, None
 
 
 # ── Dark sky parks ─────────────────────────────────────────────────────────────
@@ -898,6 +902,15 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
   <div class="mast-double-rule"></div>
   <div class="mast-single-rule"></div>
 
+  <div class="loc-bar">
+    Results based on <span id="loc-label">your location</span> &middot;
+    <a id="loc-change" href="#">Change location</a>
+    <div class="loc-override" id="loc-override">
+      <input type="text" class="loc-inp" id="loc-inp" placeholder="City or zip code">
+      <button class="loc-btn" id="loc-go">Go</button>
+    </div>
+  </div>
+
   {bulletin_html}
 
   <section class="lede">
@@ -965,17 +978,10 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
   <footer class="colophon">
     Set each morning by an automated desk.<br>
     Feeds: SNAPI &middot; The Space Devs &middot; NOAA SWPC &middot; NASA &middot; AMS &middot; Wikipedia<br>
-    <a href="#" class="open-contact">Contact</a>
+    <a href="#" class="open-contact">Contact</a><br>
+    &copy; {now.year} Orbital Daily. All rights reserved.<br>
+    As an Amazon Associate, Orbital Daily earns from qualifying purchases.
   </footer>
-
-  <div class="loc-bar">
-    Results based on <span id="loc-label">your location</span> &middot;
-    <a id="loc-change" href="#">Change location</a>
-    <div class="loc-override" id="loc-override">
-      <input type="text" class="loc-inp" id="loc-inp" placeholder="City or zip code">
-      <button class="loc-btn" id="loc-go">Go</button>
-    </div>
-  </div>
 
 </div>
 
