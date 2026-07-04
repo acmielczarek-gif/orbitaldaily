@@ -25,7 +25,7 @@ from html import escape
 GA_MEASUREMENT_ID   = "G-WKN4NLN7XC"
 BUTTONDOWN_USERNAME = "orbitaldaily"
 SITE_URL            = "https://orbitaldaily.com"
-NASA_KEY            = "N6qdfqicCj0saaQ147TgYQHZTW5Odv4b3I9BDOVP"   # Free demo key, replace with your own from api.nasa.gov
+NASA_KEY            = "DEMO_KEY"   # Free demo key, replace with your own from api.nasa.gov
 UA = {"User-Agent": "OrbitalDaily/1.0 (orbitaldaily.com)"}
 
 
@@ -1006,6 +1006,119 @@ Attribution: Orbital Daily (orbitaldaily.com)
     print("✓  llms.txt")
 
 
+# ── Buttondown email digest ────────────────────────────────────────────────────
+
+def send_daily_email(kp, score, sai_status, launches, news, neos, flares,
+                     moon_name, moon_illum, editorial, now):
+    api_key = os.environ.get("BUTTONDOWN_API_KEY", "")
+    if not api_key:
+        print("  Email: no BUTTONDOWN_API_KEY — skipping")
+        return
+
+    kp_text, _   = kp_label(kp)
+    kp_display   = f"{kp:.1f}" if kp is not None else "N/A"
+    sc_lbl       = score_label(score)
+    moon_pct     = int(round(moon_illum * 100))
+    day          = now.day
+    date_str     = now.strftime(f"%B {day}, %Y")
+
+    # ── Subject line ──
+    if kp and kp >= 5:
+        subject = f"Orbital Daily · {now.strftime('%b')} {day} — Aurora alert active, Kp {kp_display}"
+    elif score >= 7.5:
+        subject = f"Orbital Daily · {now.strftime('%b')} {day} — {score}/10 tonight"
+    elif neos and neos[0]["ld"] < 5:
+        subject = f"Orbital Daily · {now.strftime('%b')} {day} — Asteroid {neos[0]['name']} passing Earth"
+    elif launches:
+        timing = launch_timing(launches[0].get("net", ""))
+        subject = f"Orbital Daily · {now.strftime('%b')} {day} — {launches[0].get('name','Launch')} {timing.lower()}"
+    else:
+        subject = f"Orbital Daily · {now.strftime('%b')} {day} — Space Activity {sai_status.title()}"
+
+    # ── Next launch block ──
+    if launches:
+        l0 = launches[0]
+        launch_block = f"{l0.get('name','Unknown')} · {launch_timing(l0.get('net',''))}"
+        if len(launches) > 1:
+            launch_block += f"\n{launches[1].get('name','')} · {launch_timing(launches[1].get('net',''))}"
+    else:
+        launch_block = "No launches currently scheduled"
+
+    # ── Solar block ──
+    if flares:
+        solar_block = f"{flares[0].get('classType','')} flare detected · monitor for Kp rise"
+    else:
+        solar_block = "No active solar events"
+
+    # ── NEO block ──
+    if neos and neos[0]["ld"] < 20:
+        neo_block = f"{neos[0]['name']} · {neos[0]['ld']:.1f} lunar distances · {neos[0].get('date','this week')}"
+    else:
+        neo_block = "No notable close approaches this week"
+
+    # ── Top headlines ──
+    headlines = "\n".join(
+        f"• {a['title']}" for a in news[:5]
+    ) if news else "• No headlines available"
+
+    # ── Email body ──
+    body = f"""Orbital Daily tracks space conditions daily — astrophotography scores, rocket launches, aurora alerts, and near-Earth objects, computed fresh every morning.
+
+{'─' * 48}
+
+{editorial if editorial else 'Visit orbitaldaily.com for today\'s full briefing.'}
+
+{'─' * 48}
+
+TONIGHT · {date_str}
+Astrophotography Score: {score}/10 — {sc_lbl}
+Moon: {moon_name} · {moon_pct}% illuminated
+
+SPACE WEATHER
+Kp Index: {kp_display} — {kp_text}
+GPS Reliability: {'⚠ Degraded' if kp and kp >= 4 else '✓ Normal'}
+Solar: {solar_block}
+
+UPCOMING LAUNCHES
+{launch_block}
+
+NEAR-EARTH OBJECTS
+{neo_block}
+
+{'─' * 48}
+
+TOP HEADLINES
+
+{headlines}
+
+{'─' * 48}
+
+Read the full dashboard at orbitaldaily.com
+Aurora alerts, 7-day sky forecast, and tonight's conditions updated every morning.
+"""
+
+    try:
+        r = requests.post(
+            "https://api.buttondown.com/v1/emails",
+            headers={
+                "Authorization": f"Token {api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "subject": subject,
+                "body": body,
+                "status": "about_to_send"
+            },
+            timeout=15
+        )
+        if r.status_code in (200, 201):
+            print(f"✓  Email sent: {subject}")
+        else:
+            print(f"  Email failed: {r.status_code} — {r.text[:200]}", file=sys.stderr)
+    except Exception as e:
+        print(f"  Email error: {e}", file=sys.stderr)
+
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -1041,6 +1154,13 @@ if __name__ == "__main__":
     print("✓  index.html")
     write_sitemap(now)
     write_llms(now)
+
+    print("  Sending email digest...")
+    send_daily_email(kp, score, sai_status, launches, news, neos, flares,
+                     moon_name, moon_illum, editorial, now)
+
     print("\nDone.")
     if not os.environ.get("ANTHROPIC_API_KEY"):
         print("  Tip: Add ANTHROPIC_API_KEY as a GitHub secret for the daily editorial note.")
+    if not os.environ.get("BUTTONDOWN_API_KEY"):
+        print("  Tip: Add BUTTONDOWN_API_KEY as a GitHub secret for the daily email digest.")
