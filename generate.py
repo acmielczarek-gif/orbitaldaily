@@ -1065,7 +1065,7 @@ def send_daily_email(kp, score, sai_status, launches, news, neos, flares,
     gps_status = "Degraded — expect drift" if kp and kp >= 4 else "Normal"
     divider = '─' * 48
     editorial_text = editorial if editorial else "Visit orbitaldaily.com for today's full briefing."
-    body = f"""Orbital Daily tracks space conditions daily — astrophotography scores, rocket launches, aurora alerts, and near-Earth objects, computed fresh every morning.
+    body = f"""Orbital Daily tracks space conditions daily: astrophotography scores, rocket launches, aurora alerts, and near-Earth objects, computed fresh every morning.
 
 {divider}
 
