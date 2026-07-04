@@ -1062,11 +1062,14 @@ def send_daily_email(kp, score, sai_status, launches, news, neos, flares,
     ) if news else "• No headlines available"
 
     # ── Email body ──
+    gps_status = "Degraded — expect drift" if kp and kp >= 4 else "Normal"
+    divider = '─' * 48
+    editorial_text = editorial if editorial else "Visit orbitaldaily.com for today's full briefing."
     body = f"""Orbital Daily tracks space conditions daily — astrophotography scores, rocket launches, aurora alerts, and near-Earth objects, computed fresh every morning.
 
-{'─' * 48}
+{divider}
 
-{editorial if editorial else 'Visit orbitaldaily.com for today\'s full briefing.'}
+{editorial_text}
 
 {'─' * 48}
 
@@ -1076,7 +1079,7 @@ Moon: {moon_name} · {moon_pct}% illuminated
 
 SPACE WEATHER
 Kp Index: {kp_display} — {kp_text}
-GPS Reliability: {'⚠ Degraded' if kp and kp >= 4 else '✓ Normal'}
+GPS Reliability: {gps_status}
 Solar: {solar_block}
 
 UPCOMING LAUNCHES
@@ -1085,13 +1088,13 @@ UPCOMING LAUNCHES
 NEAR-EARTH OBJECTS
 {neo_block}
 
-{'─' * 48}
+{divider}
 
 TOP HEADLINES
 
 {headlines}
 
-{'─' * 48}
+{divider}
 
 Read the full dashboard at orbitaldaily.com
 Aurora alerts, 7-day sky forecast, and tonight's conditions updated every morning.
