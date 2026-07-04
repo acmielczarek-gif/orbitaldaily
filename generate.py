@@ -25,7 +25,7 @@ from html import escape
 GA_MEASUREMENT_ID   = "G-WKN4NLN7XC"
 BUTTONDOWN_USERNAME = "orbitaldaily"
 SITE_URL            = "https://orbitaldaily.com"
-NASA_KEY            = "DEMO_KEY"   # Free demo key, replace with your own from api.nasa.gov
+NASA_KEY            = "N6qdfqicCj0saaQ147TgYQHZTW5Odv4b3I9BDOVP"   # Free demo key, replace with your own from api.nasa.gov
 UA = {"User-Agent": "OrbitalDaily/1.0 (orbitaldaily.com)"}
 
 
@@ -1105,7 +1105,8 @@ Aurora alerts, 7-day sky forecast, and tonight's conditions updated every mornin
             "https://api.buttondown.com/v1/emails",
             headers={
                 "Authorization": f"Token {api_key}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "X-Buttondown-Live-Dangerously": "true"
             },
             json={
                 "subject": subject,
