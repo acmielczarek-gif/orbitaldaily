@@ -515,19 +515,22 @@ hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
 .t-loc{font-size:.63rem;color:var(--sub);display:flex;align-items:center;gap:5px;}
 .t-dot{width:5px;height:5px;border-radius:50%;background:var(--blue-acc);display:inline-block;}
 .tcells{display:grid;grid-template-columns:repeat(5,1fr);}
-@media(max-width:700px){.tcells{grid-template-columns:1fr 1fr;}}
-@media(max-width:400px){.tcells{grid-template-columns:1fr;}}
 .tc{padding:10px 16px 14px;border-right:1px solid var(--border);}
 .tc:last-child{border-right:none;}
-@media(max-width:700px){
-  .tc{border-right:none;border-bottom:1px solid var(--border);}
-  .tc:nth-child(odd){border-right:1px solid var(--border);}
-  .tc:last-child{border-bottom:none;}
-}
 .tc-lbl{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--sub);margin-bottom:6px;}
 .tc-val{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1.2;}
 .tc-sub{font-size:.74rem;color:var(--body);line-height:1.3;}
 .ptag{display:inline-block;font-size:.7rem;background:#141e30;border:1px solid var(--border);border-radius:2px;padding:2px 7px;margin-right:4px;margin-bottom:3px;color:var(--blue);}
+
+/* Mobile: Tonight's Sky — Space Station + Moon only */
+@media(max-width:700px){
+  .tcells{grid-template-columns:1fr 1fr;}
+  .tc{border-right:none;border-bottom:1px solid var(--border);}
+  .tc:nth-child(odd){border-right:1px solid var(--border);}
+  .tc:last-child{border-bottom:none;}
+  .tc-hide-mobile{display:none;}
+  --border:#0f1827;
+}
 
 /* Editorial + briefing */
 .ed-row{display:grid;grid-template-columns:2fr 1fr;border-bottom:1px solid var(--border);background:var(--surface);}
@@ -816,7 +819,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
       <div class="tc-val" style="color:var(--blue)"><a href="https://spotthestation.nasa.gov" target="_blank" style="color:var(--blue)">Check tonight's pass →</a></div>
       <div class="tc-sub">Visible to the naked eye · NASA sighting times</div>
     </div>
-    <div class="tc">
+    <div class="tc tc-hide-mobile">
       <div class="tc-lbl">Planets Up Tonight</div>
       <div><a href="https://stellarium-web.org" target="_blank" class="ptag">Open sky map →</a></div>
       <div class="tc-sub">Interactive · no equipment needed</div>
@@ -826,12 +829,12 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
       <div class="tc-val">{esc(moon_emoji)} {esc(moon_name)}</div>
       <div class="tc-sub">{esc(str(moon_pct))}% illuminated{esc(moon_note)}</div>
     </div>
-    <div class="tc">
+    <div class="tc tc-hide-mobile">
       <div class="tc-lbl">Aurora Chance</div>
       <div class="tc-val" id="aurora-val" style="color:{aurora_color}">{aurora_init}</div>
       <div class="tc-sub" id="aurora-sub">{"Kp elevated · watch the northern horizon" if kp and kp >= 4 else "Updates based on your location"}</div>
     </div>
-    <div class="tc">
+    <div class="tc tc-hide-mobile">
       <div class="tc-lbl">Best Stargazing Nearby</div>
       <div class="tc-val" style="font-size:.82rem" id="dark-sky-name">Locating…</div>
       <div class="tc-sub" id="dark-sky-sub">Very dark skies · IDA certified</div>
