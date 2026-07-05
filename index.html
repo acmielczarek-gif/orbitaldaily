@@ -1,444 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Orbital Daily: Independent Space Intelligence</title>
-  <meta name="description" content="Independent daily space intelligence: tonight's astrophotography verdict, aurora alerts, launch manifest, and space news.">
-  <meta property="og:title" content="Orbital Daily">
-  <meta property="og:description" content="Independent space intelligence, read over each morning before it goes out.">
-  <meta property="og:url" content="https://orbitaldaily.com">
-  <link rel="canonical" href="https://orbitaldaily.com">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Orbital Daily","url":"https://orbitaldaily.com","description":"Independent daily space intelligence.","publisher":{"@type":"Organization","name":"Orbital Daily"}}</script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WKN4NLN7XC"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-WKN4NLN7XC");</script>
-  <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --od-paper:          #faf9f5;
-  --od-ink:            #14181d;
-  --od-ink-2:          #2a2f36;
-  --od-ink-3:          #4a4f57;
-  --od-muted:          #6b6a62;
-  --od-faint:          #8a8578;
-  --od-faint-2:        #a8a294;
-  --od-accent:         #1b3a6b;
-  --od-alert:          #b45309;
-  --od-rule:           #ddd8cc;
-  --od-rule-mast:      #d8d4c8;
-  --od-rule-row:       #e7e3d8;
-  --od-moon-shadow:    #c7cbd2;
-  --od-moon-lit:       #f3efe4;
-  --od-tooltip-bg:     #14181d;
-  --od-tooltip-text:   #c9cdd4;
-  --od-shadow-tooltip: 0 14px 34px rgba(20,24,29,.3);
-  --od-verdict-poor:   #b04a2f;
-  --od-verdict-fair:   #a07508;
-  --od-verdict-good:   #2f7d3e;
-  --od-field:          #ffffff;
-  --od-field-border:   #d8d4c8;
-  --od-font-serif:     'Newsreader', Georgia, serif;
-  --od-font-mono:      'IBM Plex Mono', 'Courier New', monospace;
-  --od-content-max:    940px;
-  --od-gutter:         26px;
-}
-
-html, body { background: var(--od-paper); color: var(--od-ink); }
-body { font-family: var(--od-font-serif); font-size: 18px; line-height: 1.6; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-a { color: inherit; text-decoration: none; }
-a:hover { text-decoration: underline; }
-::selection { background: #dfe6ee; }
-
-.page { max-width: var(--od-content-max); margin: 0 auto; padding: 0 var(--od-gutter) 90px; }
-.mono { font-family: var(--od-font-mono); }
-.eyebrow { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--od-faint); }
-.sec { padding: 34px 0 30px; border-bottom: 1px solid var(--od-rule); }
-h2 { font-family: var(--od-font-serif); font-weight: 600; font-size: 32px; letter-spacing: -.02em; margin: 0 0 4px; }
-.sub { font-style: italic; font-size: 16px; color: var(--od-muted); }
-
-/* Tooltip — CSS only */
-.term { position: relative; cursor: default; border-bottom: 1px dotted #9a9488; }
-.term .tip { position: absolute; bottom: calc(100% + 9px); left: 50%; margin-left: -125px; width: 250px; background: var(--od-tooltip-bg); color: var(--od-tooltip-text); padding: 12px 15px; border-radius: 8px; font-family: var(--od-font-serif); font-style: normal; font-size: 14px; line-height: 1.5; box-shadow: var(--od-shadow-tooltip); opacity: 0; visibility: hidden; transform: translateY(4px); transition: opacity .16s, transform .16s; pointer-events: none; z-index: 60; }
-.term:hover .tip, .term.tip-open .tip { opacity: 1; visibility: visible; transform: translateY(0); }
-
-/* Masthead */
-.masthead { text-align: center; padding: 40px 0 0; }
-.mast-title { font-weight: 600; font-size: clamp(42px,8vw,64px); line-height: 1; letter-spacing: -.02em; margin: 10px 0 8px; }
-.mast-dateline { display: flex; align-items: center; justify-content: center; gap: 14px; font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--od-muted); padding-top: 6px; }
-.mast-rule-line { flex: 1; height: 1px; background: var(--od-rule-mast); max-width: 120px; }
-.mast-tagline { font-style: italic; font-size: 15px; color: var(--od-muted); margin-top: 10px; padding-bottom: 22px; }
-.mast-double-rule { height: 2px; background: var(--od-ink); margin-top: 0; }
-.mast-single-rule { height: 1px; background: var(--od-ink); margin-top: 3px; }
-
-/* Bulletin */
-.bulletin { display: flex; align-items: baseline; gap: 14px; padding: 12px 2px; border-bottom: 1px solid var(--od-ink); }
-.bulletin-label { font-family: var(--od-font-mono); font-size: 11px; font-weight: 600; letter-spacing: .16em; color: var(--od-alert); white-space: nowrap; }
-.bulletin-text { font-size: 16px; color: var(--od-ink-2); line-height: 1.4; }
-.bulletin-text a { color: var(--od-accent); font-style: italic; border-bottom: 1px solid #b7c3d3; }
-
-/* Lede */
-.lede-section { padding: 40px 0 34px; border-bottom: 1px solid var(--od-rule); }
-.lede-grid { display: grid; grid-template-columns: 1fr auto; gap: 34px; align-items: start; }
-@media(max-width:600px){ .lede-grid { grid-template-columns: 1fr; } .lede-aside { display: none; } }
-.lede-headline { font-weight: 600; font-size: clamp(32px,6vw,52px); line-height: 1.02; letter-spacing: -.025em; margin: 0 0 18px; }
-.lede-body { font-size: 20px; line-height: 1.62; color: var(--od-ink-2); margin: 0 0 14px; max-width: 60ch; }
-.drop-cap { float: left; font-weight: 600; font-size: 70px; line-height: .72; padding: 8px 12px 0 0; color: var(--od-ink); }
-.lede-p2 { font-size: 20px; line-height: 1.62; color: var(--od-ink-2); margin: 0 0 16px; max-width: 60ch; }
-.lede-byline { font-style: italic; font-size: 16px; color: var(--od-muted); }
-.lede-aside { display: flex; flex-direction: column; align-items: center; gap: 22px; padding-top: 4px; }
-.moon-caption { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--od-faint); margin-top: 10px; text-align: center; }
-.moon-illum { font-size: 15px; color: var(--od-muted); font-style: italic; text-align: center; }
-.verdict-stamp { border: 1.5px solid; border-radius: 6px; padding: 12px 16px 10px; text-align: center; transform: rotate(-4deg); }
-.verdict-label { font-family: var(--od-font-mono); font-size: 11px; font-weight: 600; letter-spacing: .2em; }
-.verdict-score { font-weight: 700; font-size: 38px; line-height: 1; margin-top: 4px; }
-.verdict-sub { font-family: var(--od-font-mono); font-size: 10px; letter-spacing: .12em; margin-top: 2px; }
-
-/* In Brief */
-.in-brief-section { padding: 22px 0 26px; border-bottom: 1px solid var(--od-rule); }
-.in-brief-text { font-size: 21px; line-height: 1.7; color: var(--od-ink-2); margin: 0; max-width: 72ch; }
-.in-brief-hint { color: var(--od-faint); font-style: italic; font-size: 15px; }
-
-/* Week ahead */
-.week-section { padding: 34px 0 30px; border-bottom: 1px solid var(--od-rule); }
-.loc-line { font-family: var(--od-font-mono); font-size: 11px; color: var(--od-faint-2); display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
-.loc-pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--od-accent); display: inline-block; animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
-.loc-change { color: var(--od-accent); border-bottom: 1px dotted var(--od-accent); cursor: pointer; font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .08em; }
-.loc-override { display: none; align-items: center; gap: 6px; }
-.loc-override.open { display: flex; }
-.loc-inp { font-family: var(--od-font-mono); font-size: 11px; padding: 4px 8px; border: 1px solid var(--od-rule); background: var(--od-field); color: var(--od-ink); border-radius: 3px; width: 160px; }
-.loc-inp::placeholder { color: var(--od-faint-2); }
-.loc-btn { font-family: var(--od-font-mono); font-size: 11px; font-weight: 600; padding: 4px 10px; background: var(--od-accent); color: var(--od-paper); border: none; border-radius: 3px; cursor: pointer; }
-.forecast-row { display: grid; grid-template-columns: 70px 40px 56px 1fr; align-items: center; gap: 16px; padding: 13px 4px; border-top: 1px solid var(--od-rule-row); }
-@media(max-width:480px){ .forecast-row { grid-template-columns: 60px 30px 48px 1fr; gap: 10px; } }
-.fc-day-name { font-family: var(--od-font-mono); font-size: 12px; font-weight: 600; letter-spacing: .1em; }
-.fc-day-date { font-family: var(--od-font-mono); font-size: 11px; color: var(--od-faint); }
-.fc-score { font-weight: 700; font-size: 30px; line-height: 1; }
-.fc-note { font-size: 17px; color: var(--od-ink-2); line-height: 1.4; }
-.fc-flag { color: var(--od-faint-2); font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .08em; margin-left: 8px; }
-
-/* Desk's kit — affiliate gear */
-.gear-section { padding: 34px 0 30px; border-bottom: 1px solid var(--od-rule); }
-.gear-disclosure { font-family: var(--od-font-mono); font-style: normal; font-size: 11px; color: var(--od-faint-2); margin-left: 8px; }
-.gear-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap: 26px; margin-top: 20px; }
-.gear-card { display: block; text-decoration: none; color: inherit; }
-.gear-card:hover .gear-name { text-decoration: underline; }
-.gear-img { height: 150px; border-radius: 6px; background: repeating-linear-gradient(135deg,#f0ede4,#f0ede4 9px,#eae6db 9px,#eae6db 18px); border: 1px solid var(--od-rule-row); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
-.gear-img-label { font-family: var(--od-font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--od-faint-2); }
-.gear-category { font-family: var(--od-font-mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--od-faint); margin-bottom: 4px; }
-.gear-name { font-weight: 600; font-size: 20px; line-height: 1.2; letter-spacing: -.01em; }
-.gear-why { font-size: 15px; line-height: 1.45; color: var(--od-ink-3); margin: 7px 0 10px; }
-.gear-footer { display: flex; justify-content: space-between; border-top: 1px solid var(--od-rule-row); padding-top: 9px; }
-.gear-price { font-family: var(--od-font-mono); font-size: 12px; color: var(--od-muted); }
-.gear-cta { font-family: var(--od-font-mono); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--od-accent); }
-
-/* Subscribe */
-.subscribe-section { padding: 40px 0; border-bottom: 1px solid var(--od-rule); text-align: center; }
-.subscribe-alert { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--od-alert); margin-bottom: 12px; }
-.subscribe-heading { font-weight: 600; font-size: 30px; letter-spacing: -.02em; margin: 0 0 8px; }
-.subscribe-body { font-size: 17px; color: var(--od-ink-3); margin: 0 auto 6px; max-width: 52ch; line-height: 1.5; }
-.subscribe-form { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
-.subscribe-input { font-family: var(--od-font-mono); font-size: 14px; padding: 13px 16px; width: 270px; max-width: 78vw; background: var(--od-field); border: 1px solid var(--od-field-border); border-radius: 4px; color: var(--od-ink); outline: none; }
-.subscribe-input::placeholder { color: var(--od-faint-2); }
-.subscribe-btn { font-family: var(--od-font-mono); font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--od-paper); background: var(--od-accent); padding: 13px 28px; border-radius: 4px; border: none; cursor: pointer; }
-.subscribe-meta { font-family: var(--od-font-mono); font-size: 11px; color: var(--od-faint-2); margin-top: 12px; }
-.subscribe-thanks { display: none; font-style: italic; font-size: 19px; color: var(--od-verdict-good); margin-top: 20px; }
-
-/* Manifest + Wires */
-.manifest-wires { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 44px; padding: 34px 0 30px; border-bottom: 1px solid var(--od-rule); }
-.manifest-row { display: grid; grid-template-columns: 82px 1fr; gap: 14px; align-items: baseline; padding: 13px 2px; border-top: 1px solid var(--od-rule-row); text-decoration: none; color: inherit; }
-.manifest-row:hover .manifest-name { text-decoration: underline; }
-.manifest-when { font-family: var(--od-font-mono); font-size: 11px; font-weight: 600; letter-spacing: .08em; }
-.manifest-name { font-size: 18px; line-height: 1.35; }
-.lead-story { display: block; padding-bottom: 16px; margin-bottom: 4px; border-bottom: 1px solid var(--od-rule-row); }
-.lead-story:hover .lead-title { text-decoration: underline; }
-.lead-title { font-weight: 600; font-size: 23px; line-height: 1.24; letter-spacing: -.01em; }
-.wire-source { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .06em; color: var(--od-faint); margin-top: 6px; }
-.wire-item { display: block; padding: 12px 2px; border-top: 1px solid var(--od-rule-row); }
-.wire-item:hover .wire-title { text-decoration: underline; }
-.wire-title { font-size: 17px; font-weight: 500; line-height: 1.35; }
-.wire-source-sm { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .06em; color: var(--od-faint-2); margin-top: 3px; }
-
-/* Contact modal */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(20,24,29,.6); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
-.modal-overlay.open { display: flex; }
-.modal-box { background: var(--od-paper); max-width: 480px; width: 100%; padding: 36px 32px; border-radius: 4px; box-shadow: 0 24px 60px rgba(20,24,29,.3); position: relative; }
-.modal-close { position: absolute; top: 14px; right: 16px; font-family: var(--od-font-mono); font-size: 13px; color: var(--od-faint-2); cursor: pointer; background: none; border: none; letter-spacing: .1em; }
-.modal-close:hover { color: var(--od-ink); }
-.modal-kicker { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--od-faint); margin-bottom: 10px; }
-.modal-heading { font-weight: 600; font-size: 28px; letter-spacing: -.02em; color: var(--od-ink); margin-bottom: 6px; }
-.modal-sub { font-style: italic; font-size: 15px; color: var(--od-muted); margin-bottom: 22px; }
-.modal-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
-.modal-label { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--od-faint); }
-.modal-input { font-family: var(--od-font-serif); font-size: 16px; padding: 9px 12px; border: 1px solid var(--od-rule); background: var(--od-field); color: var(--od-ink); border-radius: 3px; width: 100%; }
-.modal-input::placeholder { color: var(--od-faint-2); }
-.modal-textarea { font-family: var(--od-font-serif); font-size: 16px; padding: 9px 12px; border: 1px solid var(--od-rule); background: var(--od-field); color: var(--od-ink); border-radius: 3px; width: 100%; min-height: 110px; resize: vertical; }
-.modal-textarea::placeholder { color: var(--od-faint-2); }
-.modal-submit { font-family: var(--od-font-mono); font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--od-paper); background: var(--od-accent); padding: 12px 24px; border-radius: 4px; border: none; cursor: pointer; margin-top: 6px; }
-.modal-submit:hover { background: var(--od-ink); }
-.modal-sent { display: none; text-align: center; padding: 20px 0; }
-.modal-sent-head { font-weight: 600; font-size: 22px; color: var(--od-ink); margin-bottom: 6px; }
-.modal-sent-body { font-style: italic; font-size: 16px; color: var(--od-muted); }
-
-/* Colophon */
-.colophon { text-align: center; padding-top: 26px; font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .06em; color: var(--od-faint-2); line-height: 1.9; }
-.colophon a { color: var(--od-muted); border-bottom: 1px solid var(--od-rule); }
-.colophon a:hover { color: var(--od-ink); text-decoration: none; }
-
-/* Loc bar */
-.loc-bar { font-family: var(--od-font-mono); font-size: 11px; color: var(--od-faint-2); text-align: center; padding: 8px 0 0; }
-.loc-bar a { color: var(--od-muted); border-bottom: 1px dotted var(--od-rule); cursor: pointer; }
-
-@media(max-width:600px){ .two { grid-template-columns: 1fr !important; } }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbital Daily -- Independent space intelligence</title>
+<meta name="description" content="Daily space intelligence: astrophotography score, aurora alerts, rocket launches, asteroid tracker, and space news.">
+<meta property="og:title" content="Orbital Daily">
+<meta property="og:description" content="Independent daily space intelligence -- tonight's verdict, what is flying overhead, and what to do about it.">
+<meta property="og:url" content="https://orbitaldaily.com">
+<link rel="canonical" href="https://orbitaldaily.com">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Orbital Daily","url":"https://orbitaldaily.com","description":"Independent daily space intelligence.","publisher":{"@type":"Organization","name":"Orbital Daily"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WKN4NLN7XC"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-WKN4NLN7XC");</script>
+<style>
+  :root {
+    --od-paper:#faf9f5; --od-field:#fffdf8;
+    --od-ink:#14181d; --od-ink-2:#2a2f36; --od-ink-3:#4a4f57;
+    --od-muted:#6b6a62; --od-faint:#8a8578; --od-faint-2:#a8a294;
+    --od-rule:#ddd8cc; --od-rule-row:#e7e3d8; --od-rule-mast:#d8d4c8; --od-field-border:#cfc9ba;
+    --od-accent:#1b3a6b; --od-alert:#b45309;
+    --od-verdict-poor:#b04a2f; --od-verdict-fair:#a07508; --od-verdict-good:#2f7d3e;
+    --od-moon-lit:#f3efe4; --od-moon-shadow:#c7cbd2;
+    --od-tooltip-bg:#14181d; --od-tooltip-text:#c9cdd4;
+    --od-serif:'Newsreader',Georgia,serif; --od-mono:'IBM Plex Mono',ui-monospace,monospace;
+    --od-max:940px;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ background:var(--od-paper); color:var(--od-ink); font-family:var(--od-serif); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  a{ color:inherit; text-decoration:none; }
+  ::selection{ background:#dfe6ee; }
+  .wrap{ max-width:var(--od-max); margin:0 auto; padding:0 26px 90px; }
+  .mono{ font-family:var(--od-mono); }
+  .eyebrow{ font-family:var(--od-mono); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--od-faint); }
+  h2,h3{ font-family:var(--od-serif); font-weight:600; letter-spacing:-.02em; color:var(--od-ink); margin:0; }
+  .term{ position:relative; cursor:default; }
+  .term .tip{
+    position:absolute; width:250px; max-width:76vw; background:var(--od-tooltip-bg); color:var(--od-tooltip-text);
+    padding:12px 15px; border-radius:8px; font-family:var(--od-serif); font-style:normal; font-weight:400;
+    font-size:14px; line-height:1.5; text-align:left; text-transform:none; letter-spacing:normal;
+    box-shadow:0 14px 34px rgba(20,24,29,.3); z-index:60;
+    opacity:0; visibility:hidden; transform:translateY(4px);
+    transition:opacity .16s ease, transform .16s ease; pointer-events:none;
+  }
+  .term .tip.below{ top:calc(100% + 9px); left:0; }
+  .term .tip.above{ bottom:calc(100% + 9px); left:50%; margin-left:-125px; }
+  .term:hover .tip, .term.open .tip{ opacity:1; visibility:visible; transform:translateY(0); pointer-events:auto; }
+  .idot{ display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; border-radius:50%; border:1px solid #cbc6b8; font-size:9px; color:var(--od-faint-2); }
+  @keyframes odpulse{ 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.3;transform:scale(.75);} }
+  .pulse{ width:8px; height:8px; border-radius:50%; background:var(--od-accent); animation:odpulse 1.6s ease-in-out infinite; display:inline-block; }
+  @media(max-width:640px){ .lede-grid,.activity-grid,.week-head{ grid-template-columns:1fr !important; } .tout{ width:100% !important; } }
 </style>
 </head>
 <body>
-
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs><clipPath id="moonclip"><circle cx="50" cy="50" r="48"/></clipPath></defs>
+  <defs><clipPath id="moonclip"><circle cx="50" cy="50" r="48"></circle></clipPath></defs>
 </svg>
 
-<div class="page">
+<div class="wrap">
 
-  <header class="masthead">
-    <h1 class="mast-title">Orbital Daily</h1>
-    <div class="mast-dateline">
-      <span class="mast-rule-line"></span>
-      <span>Sunday · July 5, 2026 · 11:21 UTC</span>
-      <span class="mast-rule-line"></span>
+  <header style="text-align:center;padding:40px 0 0;">
+    <h1 style="font-family:var(--od-serif);font-weight:600;font-size:64px;line-height:1;letter-spacing:-.02em;margin:0 0 8px;">Orbital Daily</h1>
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;font-family:var(--od-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-muted);padding-top:6px;">
+      <span style="flex:1;height:1px;background:var(--od-rule-mast);max-width:120px;"></span>
+      <span>Sunday · July 5, 2026 · 18:36 UTC</span>
+      <span style="flex:1;height:1px;background:var(--od-rule-mast);max-width:120px;"></span>
     </div>
-    <div class="mast-tagline">Independent space intelligence, read over each morning before it goes out.</div>
+    <div style="font-family:var(--od-serif);font-style:italic;font-size:15px;color:var(--od-muted);margin-top:10px;">Independent space intelligence, read over each morning before it goes out.</div>
   </header>
-  <div class="mast-double-rule"></div>
-  <div class="mast-single-rule"></div>
 
+  <div style="height:2px;background:var(--od-ink);margin:22px 0 0;"></div>
+  <div style="height:1px;background:var(--od-ink);margin:3px 0 0;"></div>
+
+  <div style="background:#f5f3ee;border-bottom:1px solid var(--od-rule);padding:8px 26px;font-family:var(--od-mono);font-size:11px;letter-spacing:.06em;color:var(--od-faint-2);text-align:center;"><strong style="color:var(--od-ink);">2023</strong> &mdash; The last Ariane 5 rocket is launched, carrying the Heinrich Hertz and Syracuse 4B satellites. <a href="https://en.wikipedia.org/wiki/Ariane_5" style="color:var(--od-accent);">Read more</a></div>
   
 
-  <section class="lede-section">
-    <div class="eyebrow" style="margin-bottom:14px">The desk&rsquo;s read for tonight</div>
-    <div class="lede-grid">
+  <section style="padding:40px 0 34px;border-bottom:1px solid var(--od-rule);">
+    <div class="eyebrow" style="margin-bottom:14px;">The desk&rsquo;s read for tonight</div>
+    <div class="lede-grid" style="display:grid;grid-template-columns:1fr auto;gap:34px;align-items:start;">
       <div>
-        <h2 class="lede-headline">Wait for a better window.</h2>
-        <p class="lede-body"><span class="drop-cap">T</span>he waning gibbous at 70 percent illumination will dominate the nocturnal landscape, washing fainter objects from view and constraining serious observational work to moonless intervals or the pre-dawn hours. A Kp index of 2.7 registers as unsettled rather than active, suggesting auroral activity remains possible at high latitudes but unlikely to intensify dramatically across mid-northern regions. The astrophotography score of 3.2 out of 10 reflects this combination of lunar interference and modest geomagnetic conditions, making tonight marginal for long-exposure work unless observers are willing to frame compositions around the moon itself or retreat to specialized filters and longer focal lengths.</p>
-        <p class="lede-p2">Stargazers might reasonably attempt wide-field observations of brighter deep-sky objects or naked-eye meteors if patience permits, though returns will be modest. The Perseid shower arrives in 37 days and remains the season&#x27;s most reliable event, making tonight useful primarily for calibration work, equipment testing, or reconnaissance of observing sites ahead of that window. Near-Earth object 2007 AA2, currently at 17.8 lunar distances, offers no particular viewing interest to amateur observers; meanwhile, the Falcon 9 launch window has closed with the Starlink deployment already complete. For serious astrophotography, waiting for darker skies and stronger geomagnetic conditions represents the</p>
-        <div class="lede-byline">the Orbital Daily desk</div>
+        <h2 style="font-size:52px;line-height:1.02;letter-spacing:-.025em;margin:0 0 18px;">Wait for a better window.</h2>
+        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 14px;max-width:60ch;"><span style="float:left;font-weight:600;font-size:70px;line-height:.72;padding:8px 12px 0 0;">T</span>he Last Quarter moon at 67 percent illumination will dominate the night sky with sufficient glare to substantially compromise deep-sky observation, though observers willing to work around the lunar interference may find conditions tolerable in the pre-dawn hours. The Kp index at 3.7 indicates unsettled geomagnetic conditions rather than a full substorm, meaning auroral displays remain possible at higher latitudes but will likely lack the intensity that drives photographer pilgrimages northward. Combined with an astrophotography score of 3.0 out of 10, conditions are decidedly poor for the ambitious, though not entirely prohibitive for those with modest expectations and flexible targets.</p>
+        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">Tonight&#x27;s practical strategy involves patience and specificity: avoid the lunar-facing sky and concentrate efforts on pre-dawn windows when the moon descends below the horizon, or consider abandoning imaging altogether in favor of visual observation of the NEO 2007 AA2, currently positioned at 17.8 lunar distances and representing a worthwhile naked-eye target for those with adequate optical aid. The broader calendar offers superior opportunities, with the Perseids beginning their buildup in 37 days and geomagnetic activity likely to peak again before summer&#x27;s end. For now, tonight is worth attempting only with lowered expectations and clear acknowledgment that future nights promise better returns on invested effort.</p>
+        <div style="font-style:italic;font-size:16px;color:var(--od-muted);">the Orbital Daily desk</div>
       </div>
-      <aside class="lede-aside">
-        <div>
-          <svg viewBox="0 0 100 100" width="104" height="104" style="display:block;" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="#c7cbd2"/><circle cx="35.6" cy="50" r="48" fill="#f3efe4" clip-path="url(#moonclip)"/><circle cx="50" cy="50" r="48" fill="none" stroke="#d8d4c8" stroke-width="1"/></svg>
-          <div class="moon-caption">WANING GIBBOUS</div>
-          <div class="moon-illum">70% lit</div>
+      <aside style="display:flex;flex-direction:column;align-items:center;gap:22px;padding-top:4px;">
+        <div style="text-align:center;">
+          <svg viewBox="0 0 100 100" width="104" height="104" style="display:block;">
+            <circle cx="50" cy="50" r="48" fill="var(--od-moon-shadow)"></circle>
+            <circle cx="34.2" cy="50" r="48" fill="var(--od-moon-lit)" clip-path="url(#moonclip)"></circle>
+            <circle cx="50" cy="50" r="48" fill="none" stroke="#d8d4c8" stroke-width="1"></circle>
+          </svg>
+          <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--od-faint);margin-top:10px;">Last Quarter</div>
+          <div style="font-size:15px;color:var(--od-muted);font-style:italic;">67% lit</div>
         </div>
-        <div class="verdict-stamp" style="border-color:#a07508;color:#a07508;background:rgba(160,117,8,0.03)">
-          <div class="verdict-label">FAIR</div>
-          <div class="verdict-score">3.2</div>
-          <div class="verdict-sub">SHOOT SCORE / 10</div>
+        <div class="term" data-tip tabindex="0" style="border:1.5px solid var(--od-verdict-fair);border-radius:6px;padding:12px 16px 10px;text-align:center;transform:rotate(-4deg);color:var(--od-verdict-fair);background:rgba(160,117,8,.03);">
+          <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.2em;">FAIR</div>
+          <div style="font-weight:700;font-size:38px;line-height:1;margin-top:4px;">3.0</div>
+          <div class="mono" style="font-size:10px;letter-spacing:.12em;margin-top:2px;">SHOOT SCORE / 10 &#9432;</div>
+          <span class="tip above">Half of it is moon darkness -- a dark, moonless sky beats everything, and nothing rescues a night when the moon is up. A quarter is how calm the magnetic field is; the rest is whether a meteor shower is near its peak.</span>
         </div>
       </aside>
     </div>
   </section>
 
-  <section class="in-brief-section">
-    <div class="eyebrow" style="margin-bottom:10px">In brief</div>
-    <p class="in-brief-text">
-      This week brings
-      <span class="term"><strong>8 launches</strong><span class="tip">1 already flown, 5 to go this week. Long March 8A | SpaceSail Polar Group TBD is next.</span></span>,
-      <span class="term"><strong>a Kp of 2.7</strong><span class="tip">Kp sits at 2.7 (quiet skies if not kp or kp &lt; 2 else &#x27;mildly active&#x27;). No major disruption expected.</span></span>,
-      <span class="term"><strong>12 humans aloft</strong><span class="tip">Oleg Kononenko, Nikolai Chub, Tracy Caldwell Dyson, Matthew Dominick and 8 more, split between the ISS and Tiangong.</span></span>,
-      and <span class="term"><strong>a rock passing 18 Moon-distances out</strong><span class="tip">2007 AA2, roughly 52m across, at 17.8 lunar distances and 7.2 km/s. Routine and safe.</span></span>.
-      <span class="in-brief-hint">(hover any figure for the detail)</span>
-    </p>
-  </section>
-
-  <section class="week-section">
-    <h2>The week ahead</h2>
-    <div class="sub" style="margin-bottom:14px">Seven nights, read by the desk. The score shifts as the moon thins and conditions settle.</div>
-    <div class="loc-line">
-      <span class="loc-pulse"></span>
-      <span id="loc-label">detecting location</span>
-      <span class="loc-change" id="loc-change">Change location</span>
-      <div class="loc-override" id="loc-override">
-        <input type="text" class="loc-inp" id="loc-inp" placeholder="City or zip">
-        <button class="loc-btn" id="loc-go">Go</button>
+  <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
+    <div class="activity-grid" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center;">
+      <div class="term" data-tip tabindex="0" style="text-align:center;padding-right:32px;border-right:1px solid var(--od-rule-row);">
+        <div class="mono" style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--od-faint);">Space Activity Index &#9432;</div>
+        <div style="display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-top:6px;">
+          <span style="font-weight:700;font-size:72px;line-height:.85;letter-spacing:-.03em;">54</span>
+          <span style="font-weight:600;font-size:22px;color:var(--od-faint-2);padding-bottom:10px;">/100</span>
+        </div>
+        <div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--od-accent);margin-top:4px;">High skies</div>
+        <span class="tip below" style="left:50%;margin-left:-125px;">How awake the space world is tonight -- mostly how busy the launch pads are, plus the Sun&rsquo;s mood, how charged the sky is, and whether any asteroid is swinging close.</span>
+      </div>
+      <div>
+        <p style="font-size:20px;line-height:1.5;color:var(--od-ink-2);margin:0 0 16px;max-width:54ch;">A busy week overhead. Several launches on the manifest, and the sun has been active.</p>
+        <div style="height:6px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;max-width:420px;">
+          <div style="width:54%;height:100%;background:var(--od-accent);"></div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--od-rule-row);flex-wrap:wrap;">
+          <span class="mono" style="font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);">Overhead tonight</span>
+          <span style="font-size:17px;" id="iss-pass">ISS passes <strong>03:49 AM UTC</strong> -- rises SW, peaks <strong>69&deg;</strong>, visible 645s.</span>
+        </div>
       </div>
     </div>
-    <div class="forecast-row" style="background:transparent"><div><div class="fc-day-name">SUN</div><div class="fc-day-date">Jul 5</div></div><svg viewBox="0 0 100 100" width="30" height="30" style="display:block;" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="#c7cbd2"/><circle cx="35.6" cy="50" r="48" fill="#f3efe4" clip-path="url(#moonclip)"/><circle cx="50" cy="50" r="48" fill="none" stroke="#d8d4c8" stroke-width="0"/></svg><div class="fc-score" style="color:#a07508">3.2</div><div class="fc-note">Fair. Wide-field only.<span class="fc-flag">2 LAUNCHES</span></div></div><div class="forecast-row" style="background:transparent"><div><div class="fc-day-name">MON</div><div class="fc-day-date">Jul 6</div></div><svg viewBox="0 0 100 100" width="30" height="30" style="display:block;" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="#c7cbd2"/><circle cx="30.8" cy="50" r="48" fill="#f3efe4" clip-path="url(#moonclip)"/><circle cx="50" cy="50" r="48" fill="none" stroke="#d8d4c8" stroke-width="0"/></svg><div class="fc-score" style="color:#a07508">4.0</div><div class="fc-note">Fair. Wide-field only.<span class="fc-flag">est.</span></div></div><div class="forecast-row" style="background:transparent"><div><div class="fc-day-name">TUE</div><div class="fc-day-date">Jul 7</div></div><svg viewBox="0 0 100 100" width="30" height="30" style="display:block;" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="#c7cbd2"/><circle cx="25.7" cy="50" r="48" fill="#f3efe4" clip-path="url(#moonclip)"/><circle cx="50" cy="50" r="48" fill="none" stroke="#d8d4c8" stroke-width="0"/></svg><div class="fc-score" style="color:#a07508">4.6</div><div class="fc-note">Fair. Wide-field only.<span class="fc-flag">1 LAUNCH</span></div></div><div class="forecast-row" style="background:rgba(47,125,62,0.05)"><div><div class="fc-day-name">WED</div><div class="fc-day-date">Jul 8</div></div><svg viewBox="0 0 100 100" width="30" height="30" style="display:block;" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="#c7cbd2"/><circle cx="20.6" cy="50" r="48" fill="#f3efe4" clip-path="url(#moonclip)"/><circle cx="50" cy="50" r="48" fill="none" stroke="#d8d4c8" stroke-width="0"/></svg><div class="fc-score" style="color:#2f7d3e">5.2</div><div class="fc-note">Good window. Worth the drive.<span class="fc-flag">est.</span></div></div><div class="forecast-row" style="background:rgba(47,125,62,0.05)"><div><div class="fc-day-name">THU</div><div class="fc-day-date">Jul 9</div></div><svg viewBox="0 0 100 100" width="30" height="30" style="display:block;" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="#c7cbd2"/><circle cx="15.8" cy="50" r="48" fill="#f3efe4" clip-path="url(#moonclip)"/><circle cx="50" cy="50" r="48" fill="none" stroke="#d8d4c8" stroke-width="0"/></svg><div class="fc-score" style="color:#2f7d3e">5.7</div><div class="fc-note">Good window. Worth the drive.<span class="fc-flag">1 LAUNCH</span></div></div><div class="forecast-row" style="background:rgba(47,125,62,0.05)"><div><div class="fc-day-name">FRI</div><div class="fc-day-date">Jul 10</div></div><svg viewBox="0 0 100 100" width="30" height="30" style="display:block;" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="#c7cbd2"/><circle cx="11.4" cy="50" r="48" fill="#f3efe4" clip-path="url(#moonclip)"/><circle cx="50" cy="50" r="48" fill="none" stroke="#d8d4c8" stroke-width="0"/></svg><div class="fc-score" style="color:#2f7d3e">6.2</div><div class="fc-note">Good window. Worth the drive.<span class="fc-flag">1 LAUNCH</span></div></div><div class="forecast-row" style="background:rgba(47,125,62,0.05)"><div><div class="fc-day-name">SAT</div><div class="fc-day-date">Jul 11</div></div><svg viewBox="0 0 100 100" width="30" height="30" style="display:block;" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="#c7cbd2"/><circle cx="7.7" cy="50" r="48" fill="#f3efe4" clip-path="url(#moonclip)"/><circle cx="50" cy="50" r="48" fill="none" stroke="#d8d4c8" stroke-width="0"/></svg><div class="fc-score" style="color:#2f7d3e">6.6</div><div class="fc-note">Good window. Worth the drive.<span class="fc-flag">1 LAUNCH</span></div></div>
   </section>
 
-  <section class="gear-section">
-    <h2>The desk&rsquo;s kit</h2>
-    <div class="sub" style="margin-bottom:4px">Conditions are quiet. A good time to pick up something for the next clear night. <span class="gear-disclosure">Affiliate links &mdash; a purchase may support the desk at no cost to you.</span></div>
-    <div class="gear-grid"><a href="https://www.amazon.com/s?k=celestron+nexstar+5se&amp;tag=orbitaldaily-20" rel="sponsored noopener" target="_blank" class="gear-card"><div class="gear-img"><span class="gear-img-label">product</span></div><div class="gear-category">For beginners</div><div class="gear-name">Celestron NexStar 5SE</div><div class="gear-why">A serious first telescope. Go-to mount, solid optics, and a community that will help you learn.</div><div class="gear-footer"><span class="gear-price">~$860</span><span class="gear-cta">View on Amazon</span></div></a><a href="https://www.amazon.com/s?k=sky-watcher+star+adventurer+GTi&amp;tag=orbitaldaily-20" rel="sponsored noopener" target="_blank" class="gear-card"><div class="gear-img"><span class="gear-img-label">product</span></div><div class="gear-category">For the camera</div><div class="gear-name">Sky-Watcher Star Adventurer GTi</div><div class="gear-why">A compact tracker so long exposures stay pin-sharp when the sky finally cooperates.</div><div class="gear-footer"><span class="gear-price">~$460</span><span class="gear-cta">View on Amazon</span></div></a><a href="https://www.amazon.com/s?k=red+flashlight+astronomy&amp;tag=orbitaldaily-20" rel="sponsored noopener" target="_blank" class="gear-card"><div class="gear-img"><span class="gear-img-label">product</span></div><div class="gear-category">Red flashlight</div><div class="gear-name">Energizer Night Vision</div><div class="gear-why">Preserves your night vision. Bring one every time.</div><div class="gear-footer"><span class="gear-price">~$20</span><span class="gear-cta">View on Amazon</span></div></a></div>
+  <section style="padding:26px 0 8px;border-bottom:1px solid var(--od-rule);">
+    <div class="eyebrow" style="margin-bottom:18px;">Tonight, at a glance</div>
+    <div id="tiles" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));row-gap:24px;margin-bottom:26px;"></div>
   </section>
 
-  <section class="subscribe-section">
+  <section style="padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
+    <div class="week-head" style="display:grid;grid-template-columns:1fr auto;gap:26px;align-items:start;margin-bottom:6px;">
+      <div>
+        <h3 style="font-size:32px;margin:0 0 10px;">The week ahead</h3>
+        <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;">
+          <span style="font-weight:600;font-size:22px;" id="loc-name">your location</span>
+          <span class="mono" style="font-size:12px;letter-spacing:.06em;color:var(--od-muted);" id="loc-bortle">detecting...</span>
+          <a href="#" id="change-loc" style="display:inline-flex;align-items:center;gap:7px;font-family:var(--od-mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);">
+            <span class="pulse"></span> Change location
+          </a>
+        </div>
+        <div style="font-style:italic;font-size:16px;color:var(--od-muted);margin-top:12px;max-width:52ch;">Seven nights, scored for your sky. The number climbs as the moon thins and conditions settle.</div>
+      </div>
+      <a class="tout" href="https://www.amazon.com/s?k=telescope+beginner&tag=orbitaldaily-20" target="_blank" rel="sponsored noopener" style="display:block;width:220px;border:1px solid #e2ddd0;border-radius:8px;padding:14px;background:#fdfcf8;">
+        <div class="mono" style="font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:10px;">Sponsored</div>
+        <div style="height:78px;border-radius:4px;background:repeating-linear-gradient(135deg,#f0ede4,#f0ede4 9px,#eae6db 9px,#eae6db 18px);display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+          <span class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-faint-2);">product slot</span>
+        </div>
+        <div style="font-weight:600;font-size:17px;line-height:1.2;">Celestron NexStar 5SE</div>
+        <div style="font-size:13px;color:var(--od-muted);line-height:1.4;margin:4px 0 8px;">Go-to mount, solid optics -- a serious first scope.</div>
+        <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);">View on Amazon</div>
+      </a>
+    </div>
+    <div id="forecast" style="margin-top:14px;"></div>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--od-rule-row);display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;">
+      <span class="mono" style="font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--od-faint);white-space:nowrap;padding-top:5px;">The week, in a sentence</span>
+      <div>
+        <p style="font-family:var(--od-serif);font-style:italic;font-size:19px;line-height:1.5;color:var(--od-ink-2);margin:0;max-width:64ch;">Tonight&#x27;s practical strategy involves patience and specificity: avoid the lunar-facing sky and concentrate efforts on pre-dawn windows when the moon descends below the horizon, or consider abandoning imaging altogether in favor of visual observation of the NEO 2007 AA2, currently positioned at 17.8 lunar distances and representing a worthwhile naked-eye target for those with adequate optical aid. The broader calendar offers superior opportunities, with the Perseids beginning their buildup in 37 days and geomagnetic activity likely to peak again before summer&#x27;s end. For now, tonight is worth attempting only with lowered expectations and clear acknowledgment that future nights promise better returns on invested effort.</p>
+        <div class="mono" style="font-size:10px;letter-spacing:.08em;color:var(--od-faint-2);margin-top:8px;">Generated by Claude &middot; Anthropic</div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
+    <h3 style="font-size:32px;margin:0 0 4px;">The desk&rsquo;s kit</h3>
+    <div style="font-style:italic;font-size:16px;color:var(--od-muted);margin-bottom:20px;max-width:66ch;">What we would actually point at the sky this week. <span class="mono" style="font-style:normal;font-size:11px;letter-spacing:.04em;color:var(--od-faint-2);">Affiliate links -- a purchase may support the desk at no cost to you.</span></div>
+    <div id="gear" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:26px;"></div>
+  </section>
+
+  <section style="padding:40px 0;border-bottom:1px solid var(--od-rule);text-align:center;">
     
-    <h2 class="subscribe-heading">The dispatch, in your inbox.</h2>
-    <p class="subscribe-body">A short note each morning -- the night&#x27;s verdict, what&#x27;s flying overhead, and a nudge when the sky opens up.</p>
-    <form action="https://buttondown.com/orbitaldaily" method="post" target="_blank" class="subscribe-form">
-      <input type="email" name="email" class="subscribe-input" placeholder="your@email.com" required>
-      <button type="submit" class="subscribe-btn">Subscribe free</button>
+    <h3 style="font-size:30px;margin:0 0 8px;">The dispatch, in your inbox.</h3>
+    <p style="font-size:17px;color:var(--od-ink-3);margin:0 auto 6px;max-width:52ch;line-height:1.5;">A short note each morning -- the night&#x27;s verdict, what is flying overhead, and a nudge when the sky opens up.</p>
+    <form id="subscribe" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
+      <input type="email" required placeholder="you@email.com" class="mono" style="font-size:14px;padding:13px 16px;width:270px;max-width:78vw;background:var(--od-field);border:1px solid var(--od-field-border);border-radius:4px;color:var(--od-ink);outline:none;">
+      <button type="submit" class="mono" style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--od-paper);background:var(--od-accent);padding:13px 28px;border-radius:4px;border:none;cursor:pointer;">Subscribe</button>
     </form>
-    <div class="subscribe-meta">Free &middot; one email a day &middot; unsubscribe anytime</div>
+    <div id="sub-done" style="display:none;font-style:italic;font-size:19px;color:var(--od-verdict-good);margin-top:20px;">You are on the list -- watch your inbox at dawn.</div>
+    <div class="mono" style="font-size:11px;letter-spacing:.04em;color:var(--od-faint-2);margin-top:12px;">Free &middot; one email a day &middot; unsubscribe anytime</div>
   </section>
 
-  <section class="manifest-wires">
+  <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:44px;padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
     <div>
-      <h2 style="margin-bottom:16px">Launch manifest</h2>
-      <a href="https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-10-50" target="_blank" class="manifest-row"><span class="manifest-when" style="color:#a8a294">LAUNCHED</span><span class="manifest-name">Falcon 9 Block 5 | Starlink Group 10-50</span></a><a href="https://www.rocketlaunch.live/launch/long-march-8a-spacesail-polar-group-tbd" target="_blank" class="manifest-row"><span class="manifest-when" style="color:#1b3a6b">T-2H</span><span class="manifest-name">Long March 8A | SpaceSail Polar Group TBD</span></a><a href="https://www.rocketlaunch.live/launch/falcon-9-block-5-transporter-17-dedicated-sso-ride" target="_blank" class="manifest-row"><span class="manifest-when" style="color:#2a2f36">TOMORROW</span><span class="manifest-name">Falcon 9 Block 5 | Transporter 17 (Dedicated SSO Rideshare)</span></a><a href="https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-10-42" target="_blank" class="manifest-row"><span class="manifest-when" style="color:#2a2f36">JUL 9</span><span class="manifest-name">Falcon 9 Block 5 | Starlink Group 10-42</span></a><a href="https://www.rocketlaunch.live/launch/long-march-10b-demo-flight" target="_blank" class="manifest-row"><span class="manifest-when" style="color:#2a2f36">JUL 10</span><span class="manifest-name">Long March 10B | Demo Flight</span></a><a href="https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-17-48" target="_blank" class="manifest-row"><span class="manifest-when" style="color:#2a2f36">JUL 11</span><span class="manifest-name">Falcon 9 Block 5 | Starlink Group 17-48</span></a>
+      <h3 style="font-size:32px;margin:0 0 16px;">Launch manifest</h3>
+      <div id="launches"></div>
     </div>
     <div>
-      <h2 style="margin-bottom:16px">From the wires</h2>
-      <a href="https://www.nasaspaceflight.com/2026/07/vast-update-070426/" target="_blank" class="lead-story"><div class="lead-title">Vast’s Haven-1 continues to advance through milestones ahead of planned 2027 launch</div><div class="wire-source">NASASpaceflight</div></a><a href="https://spaceflightnow.com/2026/07/04/live-coverage-semiconductor-manufacturing-test-bed-to-fly-alongside-starlink-satellites-on-falcon-9-launch/" target="_blank" class="wire-item"><div class="wire-title">Live coverage: Semiconductor manufacturing test bed to fly alongside Starlink satellites on Falcon 9 launch</div><div class="wire-source-sm">Spaceflight Now</div></a><a href="https://www.spacescout.info/2026/07/need-a-lift-nasa-launches-swift-rescue-mission/" target="_blank" class="wire-item"><div class="wire-title">Need a Lift? NASA Launches Swift Rescue Mission</div><div class="wire-source-sm">Space Scout</div></a><a href="https://science.nasa.gov/missions/hubble/nasas-hubble-spies-stellar-sparkler-for-july-4th/" target="_blank" class="wire-item"><div class="wire-title">NASA’s Hubble Spies Stellar Sparkler for July 4th</div><div class="wire-source-sm">NASA</div></a><a href="https://spacenews.com/gao-flags-satellite-costs-launch-risks-in-space-force-portfolio/" target="_blank" class="wire-item"><div class="wire-title">GAO flags satellite costs, launch risks in Space Force portfolio</div><div class="wire-source-sm">SpaceNews</div></a><a href="https://spacepolicyonline.com/news/katalysts-link-on-its-way-to-reboost-swift/" target="_blank" class="wire-item"><div class="wire-title">Katalyst’s LINK On Its Way to Reboost Swift</div><div class="wire-source-sm">SpacePolicyOnline.com</div></a><a href="https://www.nasaspaceflight.com/2026/07/starship-florida-pushing-launch/" target="_blank" class="wire-item"><div class="wire-title">Starship in Florida pushing for launch this year</div><div class="wire-source-sm">NASASpaceflight</div></a>
+      <h3 style="font-size:32px;margin:0 0 16px;">From the wires</h3>
+      <a href="https://spacenews.com/airbus-to-build-aeolus-2-wind-monitoring-satellite/" style="display:block;padding-bottom:16px;margin-bottom:4px;border-bottom:1px solid var(--od-rule-row);"><div style="font-weight:600;font-size:23px;line-height:1.24;letter-spacing:-.01em;">Airbus to build Aeolus-2 wind-monitoring satellite</div><div class="mono" style="font-size:11px;letter-spacing:.06em;color:var(--od-faint);margin-top:6px;">SpaceNews</div></a>
+      <div id="wires"></div>
     </div>
   </section>
 
-  <footer class="colophon">
+  <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+      <div>
+        <div class="mono" style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--od-faint-2);">Off the pad &middot; tangential</div>
+        <h3 style="font-size:28px;margin:2px 0 0;">The space economy</h3>
+      </div>
+      <span class="mono" style="font-size:11px;letter-spacing:.04em;color:var(--od-faint-2);max-width:34ch;text-align:right;">Not investment advice &middot; prices delayed</span>
+    </div>
+    <div id="stocks" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));"></div>
+  </section>
+
+  <footer style="text-align:center;padding-top:26px;font-family:var(--od-mono);font-size:11px;letter-spacing:.06em;color:var(--od-faint-2);line-height:1.9;">
     Set each morning by an automated desk.<br>
-    Some gear links are affiliate links &mdash; a purchase may earn the desk a commission at no extra cost to you.<br>
-    Feeds: SNAPI &middot; The Space Devs &middot; NOAA SWPC &middot; NASA &middot; AMS &middot; Wikipedia<br>
-    <a href="#" class="open-contact">Contact</a>
-    &middot; &copy; 2026 orbitaldaily.com, All rights reserved.
-    This site participates in the Amazon Services LLC Associates Program.
+    Some gear links are affiliate links -- a purchase may earn the desk a commission at no extra cost to you.<br>
+    &copy; 2026 orbitaldaily.com, All rights reserved.<br>
+    This site is a participant in the Amazon Services LLC Associates Program.<br>
+    Feeds: SNAPI &middot; The Space Devs &middot; NOAA SWPC &middot; NASA &middot; AMS &middot; Wikipedia
   </footer>
 
 </div>
 
-<!-- Contact modal -->
-<div class="modal-overlay" id="contact-overlay">
-  <div class="modal-box">
-    <button class="modal-close" id="contact-close">ESC to close</button>
-    <div class="modal-kicker">Get in touch</div>
-    <div class="modal-heading">Write to the desk</div>
-    <div class="modal-sub">Tips, corrections, telescope talk, anything.</div>
-    <form id="contact-form">
-      <div class="modal-field">
-        <label class="modal-label" for="c-name">Name</label>
-        <input type="text" class="modal-input" id="c-name" placeholder="Your name" required>
-      </div>
-      <div class="modal-field">
-        <label class="modal-label" for="c-email">Email</label>
-        <input type="email" class="modal-input" id="c-email" placeholder="your@email.com" required>
-      </div>
-      <div class="modal-field">
-        <label class="modal-label" for="c-message">Message</label>
-        <textarea class="modal-textarea" id="c-message" placeholder="What's on your mind?" required></textarea>
-      </div>
-      <button type="submit" class="modal-submit">Send message</button>
-    </form>
-    <div class="modal-sent" id="contact-sent">
-      <div class="modal-sent-head">Message sent.</div>
-      <div class="modal-sent-body">We will read it over with the morning dispatch.</div>
-    </div>
-  </div>
-</div>
-
-<span id="server-kp" style="display:none">2.7</span>
 <script>
-(function(){
-  // Tooltip touch support
-  document.querySelectorAll('.tip-anchor').forEach(function(el){
-    el.addEventListener('click', function(e){
-      e.stopPropagation();
-      var open = el.classList.contains('tip-open');
-      document.querySelectorAll('.tip-anchor.tip-open').forEach(function(o){ o.classList.remove('tip-open'); });
-      if(!open) el.classList.add('tip-open');
-    });
-  });
-  document.addEventListener('click', function(){
-    document.querySelectorAll('.tip-anchor.tip-open').forEach(function(o){ o.classList.remove('tip-open'); });
-  });
 
-  // Contact modal
-  var overlay = document.getElementById('contact-overlay');
-  var form    = document.getElementById('contact-form');
-  var sent    = document.getElementById('contact-sent');
-  document.querySelectorAll('.open-contact').forEach(function(el){
-    el.addEventListener('click', function(e){ e.preventDefault(); overlay.classList.add('open'); });
+var TILES_DATA    = [{"value": "33", "unit": "% dark", "label": "Moon darkness", "color": "var(--od-verdict-fair)", "href": "#moon", "detail": "Moon is 67% illuminated -- 67% of tonight is washed out. Moon darkness is the single biggest factor in the shoot score."}, {"value": "Possible", "unit": "", "label": "Aurora", "color": "var(--od-verdict-fair)", "href": "#aurora", "detail": "Kp at 3.7. Aurora possible at high latitudes only."}, {"value": "3.7", "unit": "Kp", "label": "Space weather", "color": "var(--od-ink)", "href": "#kp", "detail": "Planetary Kp index from NOAA SWPC. Values above 5 indicate a storm; GPS may drift and aurora becomes visible at lower latitudes."}, {"value": "17.8", "unit": "LD", "label": "Closest asteroid", "color": "var(--od-ink)", "href": "#neo", "detail": "2007 AA2, est. 52m across, at 17.8 lunar distances and 7.2 km/s. Routine and safe."}, {"value": "4.0", "unit": "hrs", "label": "True-dark window", "color": "var(--od-ink)", "href": "#dark", "detail": "Approximate hours of genuine astronomical dark tonight, accounting for moon phase. Best window is usually after midnight."}];
+var FORECAST_DATA = [{"day": "SUN", "date": "Jul 5", "illum": 0.67, "score": 3.0, "note": "Fair. Wide-field only.", "flag": "2 LAUNCHES"}, {"day": "MON", "date": "Jul 6", "illum": 0.57, "score": 4.2, "note": "Fair. Wide-field only.", "flag": "est."}, {"day": "TUE", "date": "Jul 7", "illum": 0.46, "score": 4.8, "note": "Fair. Wide-field only.", "flag": "1 LAUNCH"}, {"day": "WED", "date": "Jul 8", "illum": 0.36, "score": 5.3, "note": "Good window. Worth the drive.", "flag": "est."}, {"day": "THU", "date": "Jul 9", "illum": 0.26, "score": 5.9, "note": "Good window. Worth the drive.", "flag": "1 LAUNCH"}, {"day": "FRI", "date": "Jul 10", "illum": 0.17, "score": 6.4, "note": "Good window. Worth the drive.", "flag": "1 LAUNCH"}, {"day": "SAT", "date": "Jul 11", "illum": 0.1, "score": 6.8, "note": "Good window. Worth the drive.", "flag": "1 LAUNCH"}];
+var GEAR_DATA     = [{"cat": "Start here", "name": "Celestron StarSense Explorer LT 114AZ", "why": "The phone does the star-finding. A good scope to have ready when the sky opens up.", "price": "~$149", "url": "https://amzn.to/4gFMlML"}, {"cat": "Worth the upgrade", "name": "Celestron StarSense Explorer DX 130AZ", "why": "App-guided 130mm reflector. Better aperture, same simplicity. Buy it once.", "price": "~$249", "url": "https://amzn.to/4v9UNan"}, {"cat": "Track the sky", "name": "Tempest Weather Station", "why": "Know when the clouds will clear before you even look out the window.", "price": "~$329", "url": "https://amzn.to/4p4UFrb"}];
+var LAUNCHES_DATA = [{"when": "LAUNCHED", "color": "var(--od-faint-2)", "title": "Falcon 9 Block 5 | Starlink Group 10-50", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-10-50"}, {"when": "LAUNCHED", "color": "var(--od-faint-2)", "title": "Long March 8A | SpaceSail Polar Group #14", "url": "https://www.rocketlaunch.live/launch/long-march-8a-spacesail-polar-group-14"}, {"when": "TOMORROW", "color": "var(--od-ink-2)", "title": "Falcon 9 Block 5 | Transporter 17 (Dedicated SSO Rideshare)", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-transporter-17-dedicated-sso-ride"}, {"when": "JUL 9", "color": "var(--od-ink-2)", "title": "Falcon 9 Block 5 | Starlink Group 10-42", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-10-42"}, {"when": "JUL 10", "color": "var(--od-ink-2)", "title": "Long March 10B | Demo Flight", "url": "https://www.rocketlaunch.live/launch/long-march-10b-demo-flight"}, {"when": "JUL 11", "color": "var(--od-ink-2)", "title": "Falcon 9 Block 5 | Starlink Group 17-48", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-17-48"}];
+var WIRES_DATA    = [{"title": "Airbus to build Aeolus-2 wind-monitoring satellite", "source": "SpaceNews", "url": "https://spacenews.com/airbus-to-build-aeolus-2-wind-monitoring-satellite/"}, {"title": "Vast\u2019s Haven-1 continues to advance through milestones ahead of planned 2027 launch", "source": "NASASpaceflight", "url": "https://www.nasaspaceflight.com/2026/07/vast-update-070426/"}, {"title": "Live coverage: Semiconductor manufacturing test bed to fly alongside Starlink satellites on Falcon 9 launch", "source": "Spaceflight Now", "url": "https://spaceflightnow.com/2026/07/04/live-coverage-semiconductor-manufacturing-test-bed-to-fly-alongside-starlink-satellites-on-falcon-9-launch/"}, {"title": "Need a Lift? NASA Launches Swift Rescue Mission", "source": "Space Scout", "url": "https://www.spacescout.info/2026/07/need-a-lift-nasa-launches-swift-rescue-mission/"}, {"title": "NASA\u2019s Hubble Spies Stellar Sparkler for July 4th", "source": "NASA", "url": "https://science.nasa.gov/missions/hubble/nasas-hubble-spies-stellar-sparkler-for-july-4th/"}, {"title": "GAO flags satellite costs, launch risks in Space Force portfolio", "source": "SpaceNews", "url": "https://spacenews.com/gao-flags-satellite-costs-launch-risks-in-space-force-portfolio/"}];
+var STOCKS_DATA   = [{"sym": "RKLB", "price": "$100.46", "chg": "+0.4%", "color": "var(--od-verdict-good)"}, {"sym": "ASTS", "price": "$85.13", "chg": "-1.1%", "color": "var(--od-verdict-poor)"}, {"sym": "LUNR", "price": "$19.58", "chg": "-3.1%", "color": "var(--od-verdict-poor)"}, {"sym": "SPCE", "price": "$2.70", "chg": "-2.9%", "color": "var(--od-verdict-poor)"}, {"sym": "LMT", "price": "$545.91", "chg": "+4.6%", "color": "var(--od-verdict-good)"}, {"sym": "BA", "price": "$226.49", "chg": "+3.6%", "color": "var(--od-verdict-good)"}];
+var DARK_PARKS    = [{"name": "Cherry Springs State Park", "lat": 41.66, "lon": -77.82, "bortle": 2}, {"name": "Headlands Dark Sky Park", "lat": 45.75, "lon": -84.63, "bortle": 3}, {"name": "Big Bend National Park", "lat": 29.25, "lon": -103.25, "bortle": 2}, {"name": "Death Valley National Park", "lat": 36.46, "lon": -117.02, "bortle": 2}, {"name": "Natural Bridges NM", "lat": 37.6, "lon": -109.99, "bortle": 2}, {"name": "Harriman State Park", "lat": 41.26, "lon": -74.14, "bortle": 4}, {"name": "Assateague Island", "lat": 38.05, "lon": -75.2, "bortle": 4}, {"name": "Anza-Borrego Desert", "lat": 33.22, "lon": -116.41, "bortle": 2}, {"name": "Canyonlands National Park", "lat": 38.2, "lon": -109.93, "bortle": 2}, {"name": "Glacier National Park", "lat": 48.5, "lon": -113.8, "bortle": 2}, {"name": "Great Basin National Park", "lat": 38.98, "lon": -114.26, "bortle": 2}, {"name": "Acadia National Park", "lat": 44.35, "lon": -68.21, "bortle": 4}, {"name": "Shenandoah National Park", "lat": 38.53, "lon": -78.35, "bortle": 4}, {"name": "Grand Canyon National Park", "lat": 36.1, "lon": -112.11, "bortle": 2}, {"name": "Joshua Tree National Park", "lat": 33.88, "lon": -115.9, "bortle": 3}, {"name": "Craters of the Moon NM", "lat": 43.42, "lon": -113.52, "bortle": 2}, {"name": "Black Canyon of the Gunnison", "lat": 38.57, "lon": -107.72, "bortle": 2}, {"name": "Dry Tortugas National Park", "lat": 24.63, "lon": -82.87, "bortle": 3}];
+var SERVER_KP     = 3.7;
+
+// helpers (same as Claude Design)
+function moonCx(i){ return (50-(1-i)*48).toFixed(1); }
+function band(s){ return s<3?'var(--od-verdict-poor)':s<5?'var(--od-verdict-fair)':'var(--od-verdict-good)'; }
+function rowTint(s){ return s<3?'rgba(176,74,47,.04)':s>=5?'rgba(47,125,62,.05)':'transparent'; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// render tiles
+document.getElementById('tiles').innerHTML = TILES_DATA.map(function(t){
+  return '<a class="term" data-tip href="'+t.href+'" style="text-decoration:none;padding:2px 20px;border-left:1px solid var(--od-rule-row);display:block;">'
+    +'<div style="display:flex;align-items:baseline;gap:6px;">'
+    +'<span style="font-weight:700;font-size:40px;line-height:.95;letter-spacing:-.02em;color:'+t.color+';">'+esc(t.value)+'</span>'
+    +'<span class="mono" style="font-size:12px;color:var(--od-faint-2);">'+esc(t.unit)+'</span></div>'
+    +'<div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-family:var(--od-mono);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--od-muted);">'
+    +esc(t.label)+'<span class="idot">i</span></div>'
+    +'<span class="tip below">'+esc(t.detail)+'</span></a>';
+}).join('');
+
+// render forecast
+document.getElementById('forecast').innerHTML = FORECAST_DATA.map(function(d){
+  return '<div style="display:grid;grid-template-columns:70px 40px 56px 1fr;align-items:center;gap:16px;padding:13px 4px;border-top:1px solid var(--od-rule-row);background:'+rowTint(d.score)+';">'
+    +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
+    +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div></div>'
+    +'<svg viewBox="0 0 100 100" width="30" height="30" style="display:block;"><circle cx="50" cy="50" r="48" fill="var(--od-moon-shadow)"/>'
+    +'<circle cx="'+moonCx(d.illum)+'" cy="50" r="48" fill="var(--od-moon-lit)" clip-path="url(#moonclip)"/></svg>'
+    +'<div style="font-weight:700;font-size:30px;line-height:1;color:'+band(d.score)+';">'+d.score.toFixed(1)+'</div>'
+    +'<div style="font-size:17px;color:var(--od-ink-2);line-height:1.4;">'+esc(d.note)
+    +'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:8px;">'+esc(d.flag)+'</span></div></div>';
+}).join('');
+
+// render gear
+document.getElementById('gear').innerHTML = GEAR_DATA.map(function(g){
+  return '<a href="'+g.url+'" target="_blank" rel="sponsored noopener" style="display:block;">'
+    +'<div style="height:150px;border-radius:6px;background:repeating-linear-gradient(135deg,#f0ede4,#f0ede4 9px,#eae6db 9px,#eae6db 18px);border:1px solid var(--od-rule-row);display:flex;align-items:center;justify-content:center;">'
+    +'<span class="mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-faint-2);">product shot</span></div>'
+    +'<div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin:14px 0 4px;">'+esc(g.cat)+'</div>'
+    +'<div style="font-weight:600;font-size:20px;line-height:1.2;letter-spacing:-.01em;">'+esc(g.name)+'</div>'
+    +'<div style="font-size:15px;line-height:1.45;color:var(--od-ink-3);margin:7px 0 10px;">'+esc(g.why)+'</div>'
+    +'<div style="display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--od-rule-row);padding-top:9px;">'
+    +'<span class="mono" style="font-size:12px;color:var(--od-muted);">'+esc(g.price)+'</span>'
+    +'<span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);">View on Amazon</span></div></a>';
+}).join('');
+
+// render launches
+document.getElementById('launches').innerHTML = LAUNCHES_DATA.map(function(l){
+  return '<a href="'+l.url+'" style="display:grid;grid-template-columns:82px 1fr;gap:14px;align-items:baseline;padding:13px 2px;border-top:1px solid var(--od-rule-row);">'
+    +'<span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.08em;color:'+l.color+';">'+esc(l.when)+'</span>'
+    +'<span style="font-size:18px;line-height:1.35;">'+esc(l.title)+'</span></a>';
+}).join('');
+
+// render wires
+document.getElementById('wires').innerHTML = WIRES_DATA.map(function(h){
+  return '<a href="'+h.url+'" style="display:block;padding:12px 2px;border-top:1px solid var(--od-rule-row);">'
+    +'<div style="font-size:17px;font-weight:500;line-height:1.35;">'+esc(h.title)+'</div>'
+    +'<div class="mono" style="font-size:11px;letter-spacing:.06em;color:var(--od-faint-2);margin-top:3px;">'+esc(h.source)+'</div></a>';
+}).join('');
+
+// render stocks
+document.getElementById('stocks').innerHTML = STOCKS_DATA.map(function(s){
+  return '<div style="padding:12px 16px;border-left:1px solid var(--od-rule-row);">'
+    +'<div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.08em;">'+s.sym+'</div>'
+    +'<div style="font-weight:600;font-size:22px;margin-top:4px;">'+s.price+'</div>'
+    +'<div class="mono" style="font-size:12px;font-weight:600;color:'+s.color+';margin-top:2px;">'+s.chg+'</div></div>';
+}).join('');
+
+// tooltips
+document.querySelectorAll('.term[data-tip]').forEach(function(el){
+  el.addEventListener('click', function(e){
+    var isLink = el.tagName === 'A';
+    if (isLink && el.classList.contains('open')) return;
+    if (isLink) e.preventDefault();
+    var wasOpen = el.classList.contains('open');
+    document.querySelectorAll('.term.open').forEach(function(o){ o.classList.remove('open'); });
+    if (!wasOpen) el.classList.add('open');
+    e.stopPropagation();
   });
-  document.getElementById('contact-close').addEventListener('click', function(){ overlay.classList.remove('open'); });
-  overlay.addEventListener('click', function(e){ if(e.target === overlay) overlay.classList.remove('open'); });
-  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') overlay.classList.remove('open'); });
-  form.addEventListener('submit', function(e){
-    e.preventDefault();
-    var name    = document.getElementById('c-name').value;
-    var email   = document.getElementById('c-email').value;
-    var message = document.getElementById('c-message').value;
-    var mailto  = 'mailto:hello@orbitaldaily.com'
-      + '?subject=' + encodeURIComponent('Message from ' + name)
-      + '&body='    + encodeURIComponent(message + '
+});
+document.addEventListener('click', function(){
+  document.querySelectorAll('.term.open').forEach(function(o){ o.classList.remove('open'); });
+});
 
-From: ' + name + ' <' + email + '>');
-    window.location.href = mailto;
-    form.style.display = 'none';
-    sent.style.display = 'block';
-    setTimeout(function(){ overlay.classList.remove('open'); form.style.display=''; sent.style.display='none'; form.reset(); }, 3000);
-  });
+// subscribe form
+document.getElementById('subscribe').addEventListener('submit', function(e){
+  e.preventDefault();
+  var email = this.querySelector('input[type=email]').value;
+  var form = new FormData(); form.append('email', email);
+  fetch('https://buttondown.com/api/emails/embed-subscribe/orbitaldaily', {method:'POST', body:form})
+    .then(function(){ document.getElementById('subscribe').style.display='none'; document.getElementById('sub-done').style.display='block'; })
+    .catch(function(){ window.open('https://buttondown.com/orbitaldaily?email='+encodeURIComponent(email),'_blank'); });
+});
 
-  // Geolocation + location override
-  const PARKS = [{"name": "Cherry Springs State Park", "lat": 41.66, "lon": -77.82, "bortle": 2}, {"name": "Headlands Dark Sky Park", "lat": 45.75, "lon": -84.63, "bortle": 3}, {"name": "Big Bend National Park", "lat": 29.25, "lon": -103.25, "bortle": 2}, {"name": "Death Valley National Park", "lat": 36.46, "lon": -117.02, "bortle": 2}, {"name": "Natural Bridges NM", "lat": 37.6, "lon": -109.99, "bortle": 2}, {"name": "Chaco Culture NHP", "lat": 36.06, "lon": -107.96, "bortle": 2}, {"name": "Harriman State Park", "lat": 41.26, "lon": -74.14, "bortle": 4}, {"name": "Assateague Island", "lat": 38.05, "lon": -75.2, "bortle": 4}, {"name": "Anza-Borrego Desert", "lat": 33.22, "lon": -116.41, "bortle": 2}, {"name": "Canyonlands National Park", "lat": 38.2, "lon": -109.93, "bortle": 2}, {"name": "Glacier National Park", "lat": 48.5, "lon": -113.8, "bortle": 2}, {"name": "Great Basin National Park", "lat": 38.98, "lon": -114.26, "bortle": 2}, {"name": "Acadia National Park", "lat": 44.35, "lon": -68.21, "bortle": 4}, {"name": "Shenandoah National Park", "lat": 38.53, "lon": -78.35, "bortle": 4}, {"name": "Grand Canyon National Park", "lat": 36.1, "lon": -112.11, "bortle": 2}, {"name": "Dry Tortugas National Park", "lat": 24.63, "lon": -82.87, "bortle": 3}, {"name": "Craters of the Moon NM", "lat": 43.42, "lon": -113.52, "bortle": 2}, {"name": "Black Canyon of the Gunnison", "lat": 38.57, "lon": -107.72, "bortle": 2}, {"name": "Joshua Tree National Park", "lat": 33.88, "lon": -115.9, "bortle": 3}, {"name": "Harmony Borrego Springs", "lat": 33.26, "lon": -116.38, "bortle": 3}];
-  function dist(a,b,c,d){ const R=3958.8,p=Math.PI/180; return 2*R*Math.asin(Math.sqrt(Math.sin((c-a)*p/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin((d-b)*p/2)**2)); }
-  function nearest(lat,lon){ let best=null,bd=Infinity; for(const p of PARKS){const d=dist(lat,lon,p.lat,p.lon);if(d<bd){bd=d;best=p;}} return best?{park:best,miles:Math.round(bd)}:null; }
-  function auroraLevel(lat,kp){ const oval=67-(kp*2.5),gap=lat-oval; if(gap<=0)return"High tonight, watch the horizon"; if(gap<=5)return"Moderate, possible tonight"; return"Low tonight"; }
+// change location
+document.getElementById('change-loc').addEventListener('click', function(e){
+  e.preventDefault();
+  var loc = prompt('Enter your city or zip code:');
+  if (!loc) return;
+  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(loc), {headers:{'Accept-Language':'en'}})
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data && data[0]){
+        var city  = data[0].display_name.split(',')[0];
+        var lat   = parseFloat(data[0].lat);
+        var lon   = parseFloat(data[0].lon);
+        var oval  = 67 - (SERVER_KP * 2.5);
+        var gap   = lat - oval;
+        var alevel = gap<=0?'High':gap<=5?'Moderate':'Low';
+        document.getElementById('loc-name').textContent = city;
+        // find nearest dark sky
+        var best=null, bd=Infinity;
+        DARK_PARKS.forEach(function(p){
+          var R=3958.8,pi=Math.PI/180;
+          var d=2*R*Math.asin(Math.sqrt(Math.sin((p.lat-lat)*pi/2)**2+Math.cos(lat*pi)*Math.cos(p.lat*pi)*Math.sin((p.lon-lon)*pi/2)**2));
+          if(d<bd){bd=d;best=p;}
+        });
+        if(best){ document.getElementById('loc-bortle').textContent = 'Bortle '+best.bortle+' nearby ('+Math.round(bd)+' mi)'; }
+      }
+    }).catch(function(){});
+});
 
-  function applyLocation(lat, lon, label){
-    const kpEl = document.getElementById("server-kp");
-    const kp   = kpEl ? parseFloat(kpEl.textContent)||2 : 2;
-    const aEl  = document.getElementById("aurora-tip-text");
-    const dEl  = document.getElementById("darksky-tip-text");
-    const lEl  = document.getElementById("loc-label");
-    if(aEl) aEl.textContent = auroraLevel(lat, kp);
-    const ds = nearest(lat, lon);
-    if(dEl && ds) dEl.textContent = ds.park.name + " - " + ds.miles + " mi away";
-    if(lEl) lEl.textContent = label || "your location";
-  }
-
-  async function geocodeCity(city){
-    const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(city);
-    const res = await fetch(url, { headers: { "Accept-Language": "en" } });
-    const data = await res.json();
-    if(data && data[0]){ return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), label: data[0].display_name.split(",")[0] }; }
-    return null;
-  }
-
-  document.getElementById('loc-change').addEventListener('click', function(e){
-    e.preventDefault();
-    document.getElementById('loc-override').classList.toggle('open');
-    setTimeout(function(){ document.getElementById('loc-inp').focus(); }, 50);
-  });
-  document.getElementById('loc-go').addEventListener('click', async function(){
-    const city = document.getElementById('loc-inp').value.trim();
-    if(!city) return;
-    this.textContent = "...";
-    const result = await geocodeCity(city);
-    if(result){
-      applyLocation(result.lat, result.lon, result.label);
-      document.getElementById('loc-override').classList.remove('open');
-      document.getElementById('loc-inp').value = '';
-    } else {
-      document.getElementById('loc-inp').placeholder = "City not found";
-    }
-    this.textContent = "Go";
-  });
-  document.getElementById('loc-inp').addEventListener('keydown', function(e){
-    if(e.key === 'Enter') document.getElementById('loc-go').click();
-  });
-
-  async function init(){
-    try{
-      const res = await fetch("https://ipapi.co/json/");
-      const loc = await res.json();
-      const lat = parseFloat(loc.latitude)||40;
-      const lon = parseFloat(loc.longitude)||-74;
-      const city = (loc.city || "your location") + (loc.region_code ? ", " + loc.region_code : "");
-      applyLocation(lat, lon, city);
-    }catch(e){}
-  }
-  document.readyState==="loading"?document.addEventListener("DOMContentLoaded",init):init();
-})();
 </script>
 </body>
 </html>

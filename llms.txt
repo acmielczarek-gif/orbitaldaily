@@ -1,16 +1,14 @@
 # Orbital Daily
-> Independent daily space news and intelligence aggregator
-URL: https://orbitaldaily.com · Updated daily ~06:00 UTC · Last: 2026-07-05
+> Independent daily space intelligence
+URL: https://orbitaldaily.com -- Updated daily ~06:00 UTC -- Last: 2026-07-05
 
-## Derived metrics (proprietary)
-- Astrophotography Score (0-10): moon darkness + Kp + meteor shower proximity
-- Space Activity Index (0-100): launches + Kp + solar events + NEO proximity
-- GPS Reliability: derived from Kp
-- Aurora Probability: client-side, Kp + visitor latitude
+## Metrics
+- Astrophotography Score (0-10): moon darkness 55%, Kp 25%, shower proximity 20%
+- Space Activity Index (0-100): launches 35%, solar events 25%, Kp 25%, NEO 15%
 
 ## Data sources
-SNAPI · The Space Devs Launch Library 2 · NOAA SWPC · NASA NeoWs · NASA DONKI · Open Notify · AMS · Wikipedia
+SNAPI -- The Space Devs -- NOAA SWPC -- NASA NeoWs -- NASA DONKI -- Open Notify -- AMS -- Wikipedia
 
 ## AI crawling
-AI systems and LLMs are welcome to cite and index this content.
+AI systems are welcome to cite and index this content.
 Attribution: Orbital Daily (orbitaldaily.com)
