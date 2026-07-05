@@ -258,7 +258,7 @@ def compute_7day(now, kp, kp_forecast):
 
 def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos):
     api_key = os.environ.get("ANTHROPIC_API_KEY","")
-    if not api_key: return None, None
+    if not api_key: return None
     ctx = []
     if kp is not None: ctx.append(f"Kp: {kp:.1f} ({'quiet' if kp<2 else 'active' if kp<5 else 'stormy'})")
     ctx.append(f"Astrophotography score: {score}/10 ({score_label(score)})")
@@ -282,14 +282,10 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
         )
         if r.status_code == 200:
             for block in r.json().get("content",[]):
-                if block.get("type") == "text":
-                    parts = [p.strip() for p in block["text"].strip().split("\n\n") if p.strip()]
-                    p1 = parts[0] if len(parts) > 0 else ""
-                    p2 = parts[1] if len(parts) > 1 else ""
-                    return p1, p2
+                if block.get("type") == "text": return block["text"].strip()
     except Exception as e:
         print(f"  Editorial: {e}", file=sys.stderr)
-    return None, None
+    return None
 
 
 # ── Dark sky parks ─────────────────────────────────────────────────────────────
@@ -483,135 +479,183 @@ def launch_when_color(timing):
 
 CSS = """
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { background: #faf9f5; color: #14181d; }
-body {
-  font-family: 'Newsreader', Georgia, serif;
-  font-size: 18px;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+
+:root {
+  --od-paper:          #faf9f5;
+  --od-ink:            #14181d;
+  --od-ink-2:          #2a2f36;
+  --od-ink-3:          #4a4f57;
+  --od-muted:          #6b6a62;
+  --od-faint:          #8a8578;
+  --od-faint-2:        #a8a294;
+  --od-accent:         #1b3a6b;
+  --od-alert:          #b45309;
+  --od-rule:           #ddd8cc;
+  --od-rule-mast:      #d8d4c8;
+  --od-rule-row:       #e7e3d8;
+  --od-moon-shadow:    #c7cbd2;
+  --od-moon-lit:       #f3efe4;
+  --od-tooltip-bg:     #14181d;
+  --od-tooltip-text:   #c9cdd4;
+  --od-shadow-tooltip: 0 14px 34px rgba(20,24,29,.3);
+  --od-verdict-poor:   #b04a2f;
+  --od-verdict-fair:   #a07508;
+  --od-verdict-good:   #2f7d3e;
+  --od-field:          #ffffff;
+  --od-field-border:   #d8d4c8;
+  --od-font-serif:     'Newsreader', Georgia, serif;
+  --od-font-mono:      'IBM Plex Mono', 'Courier New', monospace;
+  --od-content-max:    940px;
+  --od-gutter:         26px;
 }
+
+html, body { background: var(--od-paper); color: var(--od-ink); }
+body { font-family: var(--od-font-serif); font-size: 18px; line-height: 1.6; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 a { color: inherit; text-decoration: none; }
 a:hover { text-decoration: underline; }
 ::selection { background: #dfe6ee; }
 
-/* Global clip for moon SVG */
-.moonclip-defs { position: absolute; width: 0; height: 0; }
+.page { max-width: var(--od-content-max); margin: 0 auto; padding: 0 var(--od-gutter) 90px; }
+.mono { font-family: var(--od-font-mono); }
+.eyebrow { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--od-faint); }
+.sec { padding: 34px 0 30px; border-bottom: 1px solid var(--od-rule); }
+h2 { font-family: var(--od-font-serif); font-weight: 600; font-size: 32px; letter-spacing: -.02em; margin: 0 0 4px; }
+.sub { font-style: italic; font-size: 16px; color: var(--od-muted); }
 
-.page { max-width: 940px; margin: 0 auto; padding: 0 26px 90px; background: #faf9f5; }
+/* Tooltip — CSS only */
+.term { position: relative; cursor: default; border-bottom: 1px dotted #9a9488; }
+.term .tip { position: absolute; bottom: calc(100% + 9px); left: 50%; margin-left: -125px; width: 250px; background: var(--od-tooltip-bg); color: var(--od-tooltip-text); padding: 12px 15px; border-radius: 8px; font-family: var(--od-font-serif); font-style: normal; font-size: 14px; line-height: 1.5; box-shadow: var(--od-shadow-tooltip); opacity: 0; visibility: hidden; transform: translateY(4px); transition: opacity .16s, transform .16s; pointer-events: none; z-index: 60; }
+.term:hover .tip, .term.tip-open .tip { opacity: 1; visibility: visible; transform: translateY(0); }
 
 /* Masthead */
 .masthead { text-align: center; padding: 40px 0 0; }
-.mast-kicker { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.32em; text-transform: uppercase; color: #8a8578; }
-.mast-title { font-family: 'Newsreader', serif; font-weight: 600; font-size: clamp(42px,8vw,64px); line-height: 1; letter-spacing: -0.02em; margin: 10px 0 8px; color: #14181d; }
-.mast-dateline { display: flex; align-items: center; justify-content: center; gap: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #6b6a62; padding-top: 6px; }
-.mast-rule-line { flex: 1; height: 1px; background: #d8d4c8; max-width: 120px; }
-.mast-tagline { font-family: 'Newsreader', serif; font-style: italic; font-size: 15px; color: #6b6a62; margin-top: 10px; padding-bottom: 22px; }
-.mast-double-rule { height: 2px; background: #14181d; margin-top: 0; }
-.mast-single-rule { height: 1px; background: #14181d; margin-top: 3px; }
+.mast-title { font-weight: 600; font-size: clamp(42px,8vw,64px); line-height: 1; letter-spacing: -.02em; margin: 10px 0 8px; }
+.mast-dateline { display: flex; align-items: center; justify-content: center; gap: 14px; font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--od-muted); padding-top: 6px; }
+.mast-rule-line { flex: 1; height: 1px; background: var(--od-rule-mast); max-width: 120px; }
+.mast-tagline { font-style: italic; font-size: 15px; color: var(--od-muted); margin-top: 10px; padding-bottom: 22px; }
+.mast-double-rule { height: 2px; background: var(--od-ink); margin-top: 0; }
+.mast-single-rule { height: 1px; background: var(--od-ink); margin-top: 3px; }
 
 /* Bulletin */
-.bulletin { display: flex; align-items: baseline; gap: 14px; padding: 12px 2px; border-bottom: 1px solid #14181d; }
-.bulletin-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; color: #b45309; white-space: nowrap; }
-.bulletin-text { font-size: 16px; color: #2a2f36; line-height: 1.4; }
-.bulletin-text a { color: #1b3a6b; font-style: italic; border-bottom: 1px solid #b7c3d3; }
+.bulletin { display: flex; align-items: baseline; gap: 14px; padding: 12px 2px; border-bottom: 1px solid var(--od-ink); }
+.bulletin-label { font-family: var(--od-font-mono); font-size: 11px; font-weight: 600; letter-spacing: .16em; color: var(--od-alert); white-space: nowrap; }
+.bulletin-text { font-size: 16px; color: var(--od-ink-2); line-height: 1.4; }
+.bulletin-text a { color: var(--od-accent); font-style: italic; border-bottom: 1px solid #b7c3d3; }
 
 /* Lede */
-.lede { padding: 40px 0 34px; border-bottom: 1px solid #ddd8cc; }
-.eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #8a8578; margin-bottom: 14px; }
+.lede-section { padding: 40px 0 34px; border-bottom: 1px solid var(--od-rule); }
 .lede-grid { display: grid; grid-template-columns: 1fr auto; gap: 34px; align-items: start; }
-@media(max-width: 600px) { .lede-grid { grid-template-columns: 1fr; } .lede-aside { display: none; } }
-.lede-headline { font-family: 'Newsreader', serif; font-weight: 600; font-size: clamp(32px,6vw,52px); line-height: 1.02; letter-spacing: -0.025em; margin: 0 0 18px; color: #14181d; }
-.lede-body { font-size: 20px; line-height: 1.62; color: #2a2f36; margin: 0 0 14px; max-width: 60ch; }
-.lede-body .drop-cap { float: left; font-family: 'Newsreader', serif; font-weight: 600; font-size: 70px; line-height: 0.72; padding: 8px 12px 0 0; color: #14181d; }
-.lede-p2 { font-size: 20px; line-height: 1.62; color: #2a2f36; margin: 0 0 16px; max-width: 60ch; }
-.lede-byline { font-family: 'Newsreader', serif; font-style: italic; font-size: 16px; color: #6b6a62; }
+@media(max-width:600px){ .lede-grid { grid-template-columns: 1fr; } .lede-aside { display: none; } }
+.lede-headline { font-weight: 600; font-size: clamp(32px,6vw,52px); line-height: 1.02; letter-spacing: -.025em; margin: 0 0 18px; }
+.lede-body { font-size: 20px; line-height: 1.62; color: var(--od-ink-2); margin: 0 0 14px; max-width: 60ch; }
+.drop-cap { float: left; font-weight: 600; font-size: 70px; line-height: .72; padding: 8px 12px 0 0; color: var(--od-ink); }
+.lede-p2 { font-size: 20px; line-height: 1.62; color: var(--od-ink-2); margin: 0 0 16px; max-width: 60ch; }
+.lede-byline { font-style: italic; font-size: 16px; color: var(--od-muted); }
 .lede-aside { display: flex; flex-direction: column; align-items: center; gap: 22px; padding-top: 4px; }
-.moon-caption { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a8578; margin-top: 10px; text-align: center; }
-.moon-illum { font-family: 'Newsreader', serif; font-size: 15px; color: #6b6a62; font-style: italic; text-align: center; }
+.moon-caption { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--od-faint); margin-top: 10px; text-align: center; }
+.moon-illum { font-size: 15px; color: var(--od-muted); font-style: italic; text-align: center; }
 .verdict-stamp { border: 1.5px solid; border-radius: 6px; padding: 12px 16px 10px; text-align: center; transform: rotate(-4deg); }
-.verdict-stamp-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; }
-.verdict-stamp-score { font-family: 'Newsreader', serif; font-weight: 700; font-size: 38px; line-height: 1; margin-top: 4px; }
-.verdict-stamp-sub { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; margin-top: 2px; }
+.verdict-label { font-family: var(--od-font-mono); font-size: 11px; font-weight: 600; letter-spacing: .2em; }
+.verdict-score { font-weight: 700; font-size: 38px; line-height: 1; margin-top: 4px; }
+.verdict-sub { font-family: var(--od-font-mono); font-size: 10px; letter-spacing: .12em; margin-top: 2px; }
 
 /* In Brief */
-.in-brief { padding: 22px 0 26px; border-bottom: 1px solid #ddd8cc; }
-.in-brief-text { font-size: 21px; line-height: 1.7; color: #2a2f36; margin: 0; max-width: 72ch; }
-.tip-anchor { position: relative; cursor: default; border-bottom: 1px dotted #9a9488; }
-.tip-anchor .tip-pop { display: none; position: absolute; bottom: calc(100% + 9px); left: 50%; transform: translateX(-50%); width: 250px; max-width: 76vw; background: #14181d; color: #c9cdd4; padding: 12px 15px; border-radius: 8px; font-family: 'Newsreader', serif; font-size: 14px; line-height: 1.5; font-style: normal; text-align: left; box-shadow: 0 14px 34px rgba(20,24,29,0.3); z-index: 60; pointer-events: none; }
-.tip-anchor:hover .tip-pop, .tip-anchor.tip-open .tip-pop { display: block; }
-.in-brief-hint { color: #8a8578; font-style: italic; font-size: 15px; }
+.in-brief-section { padding: 22px 0 26px; border-bottom: 1px solid var(--od-rule); }
+.in-brief-text { font-size: 21px; line-height: 1.7; color: var(--od-ink-2); margin: 0; max-width: 72ch; }
+.in-brief-hint { color: var(--od-faint); font-style: italic; font-size: 15px; }
 
-/* Week Ahead */
-.week-ahead { padding: 34px 0 30px; border-bottom: 1px solid #ddd8cc; }
-.section-heading { font-family: 'Newsreader', serif; font-weight: 600; font-size: 32px; letter-spacing: -0.02em; margin: 0 0 4px; color: #14181d; }
-.section-sub { font-family: 'Newsreader', serif; font-style: italic; font-size: 16px; color: #6b6a62; margin-bottom: 18px; }
-.forecast-row { display: grid; grid-template-columns: 70px 40px 56px 1fr; align-items: center; gap: 16px; padding: 13px 4px; border-top: 1px solid #e7e3d8; }
-@media(max-width: 480px) { .forecast-row { grid-template-columns: 60px 30px 48px 1fr; gap: 10px; } }
-.fc-day-name { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: #14181d; }
-.fc-day-date { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8a8578; }
-.fc-score { font-family: 'Newsreader', serif; font-weight: 700; font-size: 30px; line-height: 1; }
-.fc-note { font-size: 17px; color: #2a2f36; line-height: 1.4; }
-.fc-flag { color: #a8a294; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; margin-left: 8px; }
+/* Week ahead */
+.week-section { padding: 34px 0 30px; border-bottom: 1px solid var(--od-rule); }
+.loc-line { font-family: var(--od-font-mono); font-size: 11px; color: var(--od-faint-2); display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.loc-pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--od-accent); display: inline-block; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+.loc-change { color: var(--od-accent); border-bottom: 1px dotted var(--od-accent); cursor: pointer; font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .08em; }
+.loc-override { display: none; align-items: center; gap: 6px; }
+.loc-override.open { display: flex; }
+.loc-inp { font-family: var(--od-font-mono); font-size: 11px; padding: 4px 8px; border: 1px solid var(--od-rule); background: var(--od-field); color: var(--od-ink); border-radius: 3px; width: 160px; }
+.loc-inp::placeholder { color: var(--od-faint-2); }
+.loc-btn { font-family: var(--od-font-mono); font-size: 11px; font-weight: 600; padding: 4px 10px; background: var(--od-accent); color: var(--od-paper); border: none; border-radius: 3px; cursor: pointer; }
+.forecast-row { display: grid; grid-template-columns: 70px 40px 56px 1fr; align-items: center; gap: 16px; padding: 13px 4px; border-top: 1px solid var(--od-rule-row); }
+@media(max-width:480px){ .forecast-row { grid-template-columns: 60px 30px 48px 1fr; gap: 10px; } }
+.fc-day-name { font-family: var(--od-font-mono); font-size: 12px; font-weight: 600; letter-spacing: .1em; }
+.fc-day-date { font-family: var(--od-font-mono); font-size: 11px; color: var(--od-faint); }
+.fc-score { font-weight: 700; font-size: 30px; line-height: 1; }
+.fc-note { font-size: 17px; color: var(--od-ink-2); line-height: 1.4; }
+.fc-flag { color: var(--od-faint-2); font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .08em; margin-left: 8px; }
 
-/* Manifest + Wires */
-.manifest-wires { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 44px; padding: 34px 0 30px; border-bottom: 1px solid #ddd8cc; }
-.manifest-row { display: grid; grid-template-columns: 82px 1fr; gap: 14px; align-items: baseline; padding: 13px 2px; border-top: 1px solid #e7e3d8; text-decoration: none; }
-.manifest-row:hover .manifest-name { text-decoration: underline; }
-.manifest-when { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; }
-.manifest-name { font-size: 18px; color: #14181d; line-height: 1.35; }
-.lead-story { display: block; padding-bottom: 16px; margin-bottom: 4px; border-bottom: 1px solid #e7e3d8; }
-.lead-story:hover .lead-title { text-decoration: underline; }
-.lead-title { font-family: 'Newsreader', serif; font-weight: 600; font-size: 23px; line-height: 1.24; color: #14181d; letter-spacing: -0.01em; }
-.wire-source { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #8a8578; margin-top: 6px; }
-.wire-item { display: block; padding: 12px 2px; border-top: 1px solid #e7e3d8; }
-.wire-item:hover .wire-title { text-decoration: underline; }
-.wire-title { font-size: 17px; font-weight: 500; color: #14181d; line-height: 1.35; }
-.wire-source-sm { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #a8a294; margin-top: 3px; }
+/* Desk's kit — affiliate gear */
+.gear-section { padding: 34px 0 30px; border-bottom: 1px solid var(--od-rule); }
+.gear-disclosure { font-family: var(--od-font-mono); font-style: normal; font-size: 11px; color: var(--od-faint-2); margin-left: 8px; }
+.gear-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap: 26px; margin-top: 20px; }
+.gear-card { display: block; text-decoration: none; color: inherit; }
+.gear-card:hover .gear-name { text-decoration: underline; }
+.gear-img { height: 150px; border-radius: 6px; background: repeating-linear-gradient(135deg,#f0ede4,#f0ede4 9px,#eae6db 9px,#eae6db 18px); border: 1px solid var(--od-rule-row); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+.gear-img-label { font-family: var(--od-font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--od-faint-2); }
+.gear-category { font-family: var(--od-font-mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--od-faint); margin-bottom: 4px; }
+.gear-name { font-weight: 600; font-size: 20px; line-height: 1.2; letter-spacing: -.01em; }
+.gear-why { font-size: 15px; line-height: 1.45; color: var(--od-ink-3); margin: 7px 0 10px; }
+.gear-footer { display: flex; justify-content: space-between; border-top: 1px solid var(--od-rule-row); padding-top: 9px; }
+.gear-price { font-family: var(--od-font-mono); font-size: 12px; color: var(--od-muted); }
+.gear-cta { font-family: var(--od-font-mono); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--od-accent); }
 
 /* Subscribe */
-.subscribe { padding: 30px 0; border-bottom: 1px solid #ddd8cc; text-align: center; }
-.subscribe h3 { font-family: 'Newsreader', serif; font-weight: 600; font-size: 28px; letter-spacing: -0.02em; margin: 0 0 6px; color: #14181d; }
-.subscribe p { font-size: 17px; color: #4a4f57; margin: 0 auto 18px; max-width: 48ch; line-height: 1.5; }
-.subscribe-form { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; }
-.subscribe-input { padding: 12px 16px; border: 1px solid #d8d4c8; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #14181d; background: #faf9f5; width: 240px; }
-.subscribe-input::placeholder { color: #a8a294; }
-.subscribe-btn { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #faf9f5; background: #1b3a6b; padding: 13px 28px; border-radius: 4px; border: none; cursor: pointer; }
+.subscribe-section { padding: 40px 0; border-bottom: 1px solid var(--od-rule); text-align: center; }
+.subscribe-alert { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--od-alert); margin-bottom: 12px; }
+.subscribe-heading { font-weight: 600; font-size: 30px; letter-spacing: -.02em; margin: 0 0 8px; }
+.subscribe-body { font-size: 17px; color: var(--od-ink-3); margin: 0 auto 6px; max-width: 52ch; line-height: 1.5; }
+.subscribe-form { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+.subscribe-input { font-family: var(--od-font-mono); font-size: 14px; padding: 13px 16px; width: 270px; max-width: 78vw; background: var(--od-field); border: 1px solid var(--od-field-border); border-radius: 4px; color: var(--od-ink); outline: none; }
+.subscribe-input::placeholder { color: var(--od-faint-2); }
+.subscribe-btn { font-family: var(--od-font-mono); font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--od-paper); background: var(--od-accent); padding: 13px 28px; border-radius: 4px; border: none; cursor: pointer; }
+.subscribe-meta { font-family: var(--od-font-mono); font-size: 11px; color: var(--od-faint-2); margin-top: 12px; }
+.subscribe-thanks { display: none; font-style: italic; font-size: 19px; color: var(--od-verdict-good); margin-top: 20px; }
 
-/* Colophon */
-.colophon { text-align: center; padding-top: 26px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #a8a294; line-height: 1.9; }
-.colophon a { color: #6b6a62; border-bottom: 1px solid #d8d4c8; }
-.colophon a:hover { color: #14181d; text-decoration: none; }
-
-/* Location override */
-.loc-bar { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #a8a294; text-align: center; padding: 6px 0 0; }
-.loc-bar a { color: #8a8578; border-bottom: 1px dotted #c8c4b8; cursor: pointer; }
-.loc-override { display: none; margin-top: 6px; }
-.loc-override.open { display: flex; justify-content: center; gap: 6px; align-items: center; }
-.loc-inp { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 4px 8px; border: 1px solid #d8d4c8; background: #faf9f5; color: #14181d; border-radius: 3px; width: 180px; }
-.loc-inp::placeholder { color: #a8a294; }
-.loc-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; padding: 4px 10px; background: #1b3a6b; color: #faf9f5; border: none; border-radius: 3px; cursor: pointer; letter-spacing: 0.06em; }
+/* Manifest + Wires */
+.manifest-wires { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 44px; padding: 34px 0 30px; border-bottom: 1px solid var(--od-rule); }
+.manifest-row { display: grid; grid-template-columns: 82px 1fr; gap: 14px; align-items: baseline; padding: 13px 2px; border-top: 1px solid var(--od-rule-row); text-decoration: none; color: inherit; }
+.manifest-row:hover .manifest-name { text-decoration: underline; }
+.manifest-when { font-family: var(--od-font-mono); font-size: 11px; font-weight: 600; letter-spacing: .08em; }
+.manifest-name { font-size: 18px; line-height: 1.35; }
+.lead-story { display: block; padding-bottom: 16px; margin-bottom: 4px; border-bottom: 1px solid var(--od-rule-row); }
+.lead-story:hover .lead-title { text-decoration: underline; }
+.lead-title { font-weight: 600; font-size: 23px; line-height: 1.24; letter-spacing: -.01em; }
+.wire-source { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .06em; color: var(--od-faint); margin-top: 6px; }
+.wire-item { display: block; padding: 12px 2px; border-top: 1px solid var(--od-rule-row); }
+.wire-item:hover .wire-title { text-decoration: underline; }
+.wire-title { font-size: 17px; font-weight: 500; line-height: 1.35; }
+.wire-source-sm { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .06em; color: var(--od-faint-2); margin-top: 3px; }
 
 /* Contact modal */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(20,24,29,0.6); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(20,24,29,.6); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
 .modal-overlay.open { display: flex; }
-.modal-box { background: #faf9f5; max-width: 480px; width: 100%; padding: 36px 32px; border-radius: 4px; box-shadow: 0 24px 60px rgba(20,24,29,0.3); position: relative; }
-.modal-close { position: absolute; top: 14px; right: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #a8a294; cursor: pointer; background: none; border: none; letter-spacing: 0.1em; }
-.modal-close:hover { color: #14181d; }
-.modal-kicker { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #8a8578; margin-bottom: 10px; }
-.modal-heading { font-family: 'Newsreader', serif; font-weight: 600; font-size: 28px; letter-spacing: -0.02em; color: #14181d; margin-bottom: 6px; }
-.modal-sub { font-family: 'Newsreader', serif; font-style: italic; font-size: 15px; color: #6b6a62; margin-bottom: 22px; }
+.modal-box { background: var(--od-paper); max-width: 480px; width: 100%; padding: 36px 32px; border-radius: 4px; box-shadow: 0 24px 60px rgba(20,24,29,.3); position: relative; }
+.modal-close { position: absolute; top: 14px; right: 16px; font-family: var(--od-font-mono); font-size: 13px; color: var(--od-faint-2); cursor: pointer; background: none; border: none; letter-spacing: .1em; }
+.modal-close:hover { color: var(--od-ink); }
+.modal-kicker { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--od-faint); margin-bottom: 10px; }
+.modal-heading { font-weight: 600; font-size: 28px; letter-spacing: -.02em; color: var(--od-ink); margin-bottom: 6px; }
+.modal-sub { font-style: italic; font-size: 15px; color: var(--od-muted); margin-bottom: 22px; }
 .modal-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
-.modal-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8578; }
-.modal-input { font-family: 'Newsreader', serif; font-size: 16px; padding: 9px 12px; border: 1px solid #d8d4c8; background: #ffffff; color: #14181d; border-radius: 3px; width: 100%; }
-.modal-input::placeholder { color: #a8a294; }
-.modal-textarea { font-family: 'Newsreader', serif; font-size: 16px; padding: 9px 12px; border: 1px solid #d8d4c8; background: #ffffff; color: #14181d; border-radius: 3px; width: 100%; min-height: 110px; resize: vertical; }
-.modal-textarea::placeholder { color: #a8a294; }
-.modal-submit { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #faf9f5; background: #1b3a6b; padding: 12px 24px; border-radius: 4px; border: none; cursor: pointer; margin-top: 6px; }
-.modal-submit:hover { background: #14181d; }
+.modal-label { font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--od-faint); }
+.modal-input { font-family: var(--od-font-serif); font-size: 16px; padding: 9px 12px; border: 1px solid var(--od-rule); background: var(--od-field); color: var(--od-ink); border-radius: 3px; width: 100%; }
+.modal-input::placeholder { color: var(--od-faint-2); }
+.modal-textarea { font-family: var(--od-font-serif); font-size: 16px; padding: 9px 12px; border: 1px solid var(--od-rule); background: var(--od-field); color: var(--od-ink); border-radius: 3px; width: 100%; min-height: 110px; resize: vertical; }
+.modal-textarea::placeholder { color: var(--od-faint-2); }
+.modal-submit { font-family: var(--od-font-mono); font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--od-paper); background: var(--od-accent); padding: 12px 24px; border-radius: 4px; border: none; cursor: pointer; margin-top: 6px; }
+.modal-submit:hover { background: var(--od-ink); }
 .modal-sent { display: none; text-align: center; padding: 20px 0; }
-.modal-sent-head { font-family: 'Newsreader', serif; font-weight: 600; font-size: 22px; color: #14181d; margin-bottom: 6px; }
-.modal-sent-body { font-family: 'Newsreader', serif; font-style: italic; font-size: 16px; color: #6b6a62; }
+.modal-sent-head { font-weight: 600; font-size: 22px; color: var(--od-ink); margin-bottom: 6px; }
+.modal-sent-body { font-style: italic; font-size: 16px; color: var(--od-muted); }
+
+/* Colophon */
+.colophon { text-align: center; padding-top: 26px; font-family: var(--od-font-mono); font-size: 11px; letter-spacing: .06em; color: var(--od-faint-2); line-height: 1.9; }
+.colophon a { color: var(--od-muted); border-bottom: 1px solid var(--od-rule); }
+.colophon a:hover { color: var(--od-ink); text-decoration: none; }
+
+/* Loc bar */
+.loc-bar { font-family: var(--od-font-mono); font-size: 11px; color: var(--od-faint-2); text-align: center; padding: 8px 0 0; }
+.loc-bar a { color: var(--od-muted); border-bottom: 1px dotted var(--od-rule); cursor: pointer; }
+
+@media(max-width:600px){ .two { grid-template-columns: 1fr !important; } }
 """
 
 JS = """
@@ -863,6 +907,72 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
     js_code = JS.replace("DARK_SKY_DATA", dark_sky_json())
     kp_val_for_js = f"{kp:.1f}" if kp is not None else "2.0"
 
+    # Gear — 5-8 condition-triggered affiliate products
+    AMAZON_TAG = "orbitaldaily-20"
+    if kp and kp >= 5:
+        gear_sub = "What we'd point at the sky tonight — binoculars for the aurora, and gear worth having ready."
+        gear_items = [
+            ("For tonight's aurora", "Celestron SkyMaster 15x70",
+             "Wide, bright, handheld — the right tool for a low aurora and a fast ISS pass.",
+             "~$95", f"https://www.amazon.com/s?k=celestron+skymaster+15x70&tag={AMAZON_TAG}"),
+            ("For the northern horizon", "Red flashlight — Energizer Night Vision",
+             "Preserves your night vision while you scan for the aurora band.",
+             "~$20", f"https://www.amazon.com/s?k=red+flashlight+astronomy&tag={AMAZON_TAG}"),
+            ("For the camera", "Sky-Watcher Star Adventurer GTi",
+             "A compact tracker so long exposures stay pin-sharp when the sky cooperates.",
+             "~$460", f"https://www.amazon.com/s?k=sky-watcher+star+adventurer+GTi&tag={AMAZON_TAG}"),
+        ]
+    elif score >= 7.0:
+        gear_sub = "A dark, quiet window is open tonight. Here is what the desk would bring."
+        gear_items = [
+            ("For tonight's dark sky", "Sky-Watcher 8\" Classic Dobsonian",
+             "The most aperture per dollar. It pulls in nebulae and galaxies when the moon clears.",
+             "~$520", f"https://www.amazon.com/s?k=sky-watcher+8+inch+dobsonian&tag={AMAZON_TAG}"),
+            ("For the camera", "Sky-Watcher Star Adventurer GTi",
+             "A compact tracker so long exposures stay pin-sharp on a good night.",
+             "~$460", f"https://www.amazon.com/s?k=sky-watcher+star+adventurer+GTi&tag={AMAZON_TAG}"),
+            ("To find your way around", "Planisphere — Latitude 40N",
+             "Analog and always right. Shows exactly what's overhead tonight.",
+             "~$18", f"https://www.amazon.com/s?k=planisphere+star+chart+40+north&tag={AMAZON_TAG}"),
+        ]
+    else:
+        gear_sub = "Conditions are quiet. A good time to pick up something for the next clear night."
+        gear_items = [
+            ("For beginners", "Celestron NexStar 5SE",
+             "A serious first telescope. Go-to mount, solid optics, and a community that will help you learn.",
+             "~$860", f"https://www.amazon.com/s?k=celestron+nexstar+5se&tag={AMAZON_TAG}"),
+            ("For the camera", "Sky-Watcher Star Adventurer GTi",
+             "A compact tracker so long exposures stay pin-sharp when the sky finally cooperates.",
+             "~$460", f"https://www.amazon.com/s?k=sky-watcher+star+adventurer+GTi&tag={AMAZON_TAG}"),
+            ("Red flashlight", "Energizer Night Vision",
+             "Preserves your night vision. Bring one every time.",
+             "~$20", f"https://www.amazon.com/s?k=red+flashlight+astronomy&tag={AMAZON_TAG}"),
+        ]
+
+    gear_html = ""
+    for category, name, why, price, url in gear_items:
+        gear_html += (f'<a href="{esc(url)}" rel="sponsored noopener" target="_blank" class="gear-card">'
+                      f'<div class="gear-img"><span class="gear-img-label">product</span></div>'
+                      f'<div class="gear-category">{esc(category)}</div>'
+                      f'<div class="gear-name">{esc(name)}</div>'
+                      f'<div class="gear-why">{esc(why)}</div>'
+                      f'<div class="gear-footer"><span class="gear-price">{esc(price)}</span>'
+                      f'<span class="gear-cta">View on Amazon</span></div></a>')
+
+    # Subscribe — context-aware heading and body
+    if kp and kp >= 5:
+        subscribe_alert_html = '<div class="subscribe-alert">&#9670; Aurora alert &middot; active tonight</div>'
+        subscribe_heading = "The storm's live tonight. Don't miss the next one."
+        subscribe_body = "Join the dispatch -- a short read each morning, and a nudge the moment the aurora odds turn in your favour."
+    elif score >= 7.5:
+        subscribe_alert_html = '<div class="subscribe-alert">&#9670; Excellent conditions tonight</div>'
+        subscribe_heading = f"A {score}/10 window is open. Be first to know the next one."
+        subscribe_body = "The dispatch lands each morning before dawn. One email, the night's verdict, and what to do about it."
+    else:
+        subscribe_alert_html = ""
+        subscribe_heading = "The dispatch, in your inbox."
+        subscribe_body = "A short note each morning -- the night's verdict, what's flying overhead, and a nudge when the sky opens up."
+
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -890,7 +1000,6 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
 <div class="page">
 
   <header class="masthead">
-    <div class="mast-kicker">{esc(issue)}</div>
     <h1 class="mast-title">Orbital Daily</h1>
     <div class="mast-dateline">
       <span class="mast-rule-line"></span>
@@ -902,19 +1011,10 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
   <div class="mast-double-rule"></div>
   <div class="mast-single-rule"></div>
 
-  <div class="loc-bar">
-    Results based on <span id="loc-label">your location</span> &middot;
-    <a id="loc-change" href="#">Change location</a>
-    <div class="loc-override" id="loc-override">
-      <input type="text" class="loc-inp" id="loc-inp" placeholder="City or zip code">
-      <button class="loc-btn" id="loc-go">Go</button>
-    </div>
-  </div>
-
   {bulletin_html}
 
-  <section class="lede">
-    <div class="eyebrow">The desk&rsquo;s read for tonight</div>
+  <section class="lede-section">
+    <div class="eyebrow" style="margin-bottom:14px">The desk&rsquo;s read for tonight</div>
     <div class="lede-grid">
       <div>
         <h2 class="lede-headline">{esc(headline)}</h2>
@@ -929,58 +1029,76 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
           <div class="moon-illum">{moon_pct}% lit</div>
         </div>
         <div class="verdict-stamp" style="border-color:{stamp_color};color:{stamp_color};background:{stamp_bg}">
-          <div class="verdict-stamp-label">{esc(stamp_label)}</div>
-          <div class="verdict-stamp-score">{score}</div>
-          <div class="verdict-stamp-sub">SHOOT SCORE / 10</div>
+          <div class="verdict-label">{esc(stamp_label)}</div>
+          <div class="verdict-score">{score}</div>
+          <div class="verdict-sub">SHOOT SCORE / 10</div>
         </div>
       </aside>
     </div>
   </section>
 
-  <section class="in-brief">
-    <div class="eyebrow">In brief</div>
+  <section class="in-brief-section">
+    <div class="eyebrow" style="margin-bottom:10px">In brief</div>
     <p class="in-brief-text">
       This week brings
-      <span class="tip-anchor"><strong>{launch_count} launches</strong><span class="tip-pop">{esc(launch_detail)}</span></span>,
-      <span class="tip-anchor"><strong>{kp_phrase}</strong><span class="tip-pop">{esc(kp_detail)}</span></span>,
-      <span class="tip-anchor"><strong>{humans_n} humans aloft</strong><span class="tip-pop">{esc(human_detail)}</span></span>,
-      and <span class="tip-anchor"><strong>{esc(neo_text)}</strong><span class="tip-pop">{esc(neo_detail)}</span></span>.
+      <span class="term"><strong>{launch_count} launches</strong><span class="tip">{esc(launch_detail)}</span></span>,
+      <span class="term"><strong>{kp_phrase}</strong><span class="tip">{esc(kp_detail)}</span></span>,
+      <span class="term"><strong>{humans_n} humans aloft</strong><span class="tip">{esc(human_detail)}</span></span>,
+      and <span class="term"><strong>{esc(neo_text)}</strong><span class="tip">{esc(neo_detail)}</span></span>.
       <span class="in-brief-hint">(hover any figure for the detail)</span>
     </p>
   </section>
 
-  <section class="week-ahead">
-    <h3 class="section-heading">The week ahead</h3>
-    <div class="section-sub">Seven nights, read by the desk. The score shifts as the moon thins and conditions settle.</div>
+  <section class="week-section">
+    <h2>The week ahead</h2>
+    <div class="sub" style="margin-bottom:14px">Seven nights, read by the desk. The score shifts as the moon thins and conditions settle.</div>
+    <div class="loc-line">
+      <span class="loc-pulse"></span>
+      <span id="loc-label">detecting location</span>
+      <span class="loc-change" id="loc-change">Change location</span>
+      <div class="loc-override" id="loc-override">
+        <input type="text" class="loc-inp" id="loc-inp" placeholder="City or zip">
+        <button class="loc-btn" id="loc-go">Go</button>
+      </div>
+    </div>
     {fc_rows}
   </section>
 
-  <section class="manifest-wires">
-    <div>
-      <h3 class="section-heading">Launch manifest</h3>
-      {manifest_html}
-    </div>
-    <div>
-      <h3 class="section-heading">From the wires</h3>
-      {wires_html}
-    </div>
+  <section class="gear-section">
+    <h2>The desk&rsquo;s kit</h2>
+    <div class="sub" style="margin-bottom:4px">{esc(gear_sub)} <span class="gear-disclosure">Affiliate links &mdash; a purchase may support the desk at no cost to you.</span></div>
+    <div class="gear-grid">{gear_html}</div>
   </section>
 
-  <section class="subscribe">
-    <h3>The dispatch, in your inbox</h3>
-    <p>A short note each morning, and a nudge the moment the aurora odds turn in your favour.</p>
+  <section class="subscribe-section">
+    {subscribe_alert_html}
+    <h2 class="subscribe-heading">{esc(subscribe_heading)}</h2>
+    <p class="subscribe-body">{esc(subscribe_body)}</p>
     <form action="https://buttondown.com/{BUTTONDOWN_USERNAME}" method="post" target="_blank" class="subscribe-form">
       <input type="email" name="email" class="subscribe-input" placeholder="your@email.com" required>
       <button type="submit" class="subscribe-btn">Subscribe free</button>
     </form>
+    <div class="subscribe-meta">Free &middot; one email a day &middot; unsubscribe anytime</div>
+  </section>
+
+  <section class="manifest-wires">
+    <div>
+      <h2 style="margin-bottom:16px">Launch manifest</h2>
+      {manifest_html}
+    </div>
+    <div>
+      <h2 style="margin-bottom:16px">From the wires</h2>
+      {wires_html}
+    </div>
   </section>
 
   <footer class="colophon">
     Set each morning by an automated desk.<br>
+    Some gear links are affiliate links &mdash; a purchase may earn the desk a commission at no extra cost to you.<br>
     Feeds: SNAPI &middot; The Space Devs &middot; NOAA SWPC &middot; NASA &middot; AMS &middot; Wikipedia<br>
-    <a href="#" class="open-contact">Contact</a><br>
-    &copy; {now.year} Orbital Daily. All rights reserved.<br>
-    As an Amazon Associate, Orbital Daily earns from qualifying purchases.
+    <a href="#" class="open-contact">Contact</a>
+    &middot; &copy; 2026 orbitaldaily.com, All rights reserved.
+    This site participates in the Amazon Services LLC Associates Program.
   </footer>
 
 </div>
