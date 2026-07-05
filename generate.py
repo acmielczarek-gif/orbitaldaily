@@ -18,7 +18,9 @@ from html import escape
 GA_MEASUREMENT_ID   = "G-WKN4NLN7XC"
 BUTTONDOWN_USERNAME = "orbitaldaily"
 SITE_URL            = "https://orbitaldaily.com"
-NASA_KEY            = os.environ.get("NASA_API_KEY", "DEMO_KEY")
+NASA_KEY            = os.environ.get("NASA_API_KEY",    "DEMO_KEY")
+N2YO_KEY            = os.environ.get("N2YO_API_KEY",    "")
+FINNHUB_KEY         = os.environ.get("FINNHUB_KEY",     "")
 UA                  = {"User-Agent": "OrbitalDaily/1.0 (orbitaldaily.com)"}
 
 
@@ -311,28 +313,53 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
 
 # ── Dark sky parks ─────────────────────────────────────────────────────────────
 
-DARK_SKY_PARKS = [
-    {"name":"Cherry Springs State Park","lat":41.66,"lon":-77.82,"bortle":2,"state":"PA"},
-    {"name":"Headlands Dark Sky Park","lat":45.75,"lon":-84.63,"bortle":3,"state":"MI"},
-    {"name":"Big Bend National Park","lat":29.25,"lon":-103.25,"bortle":2,"state":"TX"},
-    {"name":"Death Valley National Park","lat":36.46,"lon":-117.02,"bortle":2,"state":"CA"},
-    {"name":"Natural Bridges NM","lat":37.60,"lon":-109.99,"bortle":2,"state":"UT"},
-    {"name":"Chaco Culture NHP","lat":36.06,"lon":-107.96,"bortle":2,"state":"NM"},
-    {"name":"Harriman State Park","lat":41.26,"lon":-74.14,"bortle":4,"state":"NY"},
-    {"name":"Assateague Island","lat":38.05,"lon":-75.20,"bortle":4,"state":"MD"},
-    {"name":"Anza-Borrego Desert","lat":33.22,"lon":-116.41,"bortle":2,"state":"CA"},
-    {"name":"Canyonlands National Park","lat":38.20,"lon":-109.93,"bortle":2,"state":"UT"},
-    {"name":"Glacier National Park","lat":48.50,"lon":-113.80,"bortle":2,"state":"MT"},
-    {"name":"Great Basin National Park","lat":38.98,"lon":-114.26,"bortle":2,"state":"NV"},
-    {"name":"Acadia National Park","lat":44.35,"lon":-68.21,"bortle":4,"state":"ME"},
-    {"name":"Shenandoah National Park","lat":38.53,"lon":-78.35,"bortle":4,"state":"VA"},
-    {"name":"Grand Canyon National Park","lat":36.10,"lon":-112.11,"bortle":2,"state":"AZ"},
-    {"name":"Dry Tortugas National Park","lat":24.63,"lon":-82.87,"bortle":3,"state":"FL"},
-    {"name":"Craters of the Moon NM","lat":43.42,"lon":-113.52,"bortle":2,"state":"ID"},
-    {"name":"Black Canyon of the Gunnison","lat":38.57,"lon":-107.72,"bortle":2,"state":"CO"},
-    {"name":"Joshua Tree National Park","lat":33.88,"lon":-115.90,"bortle":3,"state":"CA"},
-    {"name":"Harmony Borrego Springs","lat":33.26,"lon":-116.38,"bortle":3,"state":"CA"},
-]
+def fetch_iss_pass(lat=39.8, lon=-98.6):
+    """N2YO visual pass prediction. Defaults to US geographic center."""
+    if not N2YO_KEY:
+        return None
+    # altitude 0m, 1 day lookahead, 40 deg min elevation
+    r = get(f"https://api.n2yo.com/rest/v1/satellite/visualpasses/25544/{lat}/{lon}/0/1/40&apiKey={N2YO_KEY}")
+    if not r:
+        return None
+    passes = r.json().get("passes", [])
+    if not passes:
+        return None
+    p      = passes[0]
+    start  = datetime.fromtimestamp(p["startUTC"], tz=timezone.utc)
+    max_el = round(p.get("maxEl", 0))
+    start_az = p.get("startAzCompass", "")
+    end_az   = p.get("endAzCompass", "")
+    duration = p.get("duration", 0)
+    return {
+        "time":     start.strftime("%I:%M %p UTC"),
+        "max_el":   max_el,
+        "start_az": start_az,
+        "end_az":   end_az,
+        "duration": duration,
+    }
+
+def fetch_stocks():
+    """Finnhub delayed quotes for space economy tickers."""
+    tickers = ["RKLB", "ASTS", "LUNR", "SPCE", "LMT", "BA"]
+    results = []
+    if not FINNHUB_KEY:
+        return [{"sym": s, "price": "--", "chg": "--", "color": "var(--od-faint-2)"} for s in tickers]
+    for sym in tickers:
+        r = get(f"https://finnhub.io/api/v1/quote?symbol={sym}&token={FINNHUB_KEY}", timeout=8)
+        if r:
+            d     = r.json()
+            price = d.get("c", 0)
+            prev  = d.get("pc", 0)
+            pct   = ((price - prev) / prev * 100) if prev else 0
+            results.append({
+                "sym":   sym,
+                "price": f"${price:.2f}" if price else "--",
+                "chg":   f"{'+' if pct >= 0 else ''}{pct:.1f}%",
+                "color": "var(--od-verdict-good)" if pct >= 0 else "var(--od-verdict-poor)",
+            })
+        else:
+            results.append({"sym": sym, "price": "--", "chg": "--", "color": "var(--od-faint-2)"})
+    return results
 
 def dark_sky_json():
     return json.dumps([{"name":p["name"],"lat":p["lat"],"lon":p["lon"],"bortle":p["bortle"]} for p in DARK_SKY_PARKS])
@@ -604,7 +631,7 @@ PAGE_CSS = """<style>
 
 def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
            neos, flares, history, ed_p1, ed_p2, now, sai_score, sai_status, sai_color,
-           score, moon_illum, moon_name, moon_emoji, seven_day):
+           score, moon_illum, moon_name, moon_emoji, seven_day, stocks=None, iss_pass=None):
 
     global moon_illum_global
     moon_illum_global = moon_illum
@@ -746,44 +773,67 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         for d in seven_day
     ])
 
-    # GEAR JSON -- condition triggered
+    # GEAR JSON -- condition triggered with real affiliate products
     if kp and kp >= 5:
         gear_items = [
-            ("For tonight's aurora",  "Celestron SkyMaster 15x70",
-             "Wide, bright, handheld -- the right glass for a low aurora and a fast ISS pass.",
-             "~$95", f"https://www.amazon.com/s?k=Celestron+SkyMaster+15x70&tag={amazon_tag}"),
-            ("For the northern horizon", "Energizer Night Vision Red Flashlight",
-             "Preserves your night vision while you scan for the aurora band.",
-             "~$20", f"https://www.amazon.com/s?k=red+flashlight+astronomy&tag={amazon_tag}"),
-            ("For the camera",        "Sky-Watcher Star Adventurer GTi",
-             "A compact tracker so long exposures stay pin-sharp when the sky cooperates.",
-             "~$460", f"https://www.amazon.com/s?k=sky-watcher+star+adventurer+GTi&tag={amazon_tag}"),
+            ("For tonight's aurora",
+             "Vaonis Vespera 3 Smart Telescope",
+             "Fully automated, app-controlled. Point it at the aurora band and let it do the work.",
+             "~$1,099", "https://amzn.to/4pcEFUo"),
+            ("Block the glow",
+             "Light Pollution Filters",
+             "Cut through urban skyglow and bring out nebulae even under a lit-up sky.",
+             "from ~$40", "https://amzn.to/3SKInIH"),
+            ("Track the conditions",
+             "Tempest Weather Station",
+             "Wind, rain, pressure -- know exactly what the sky is doing before you pack the car.",
+             "~$329", "https://amzn.to/4p4UFrb"),
         ]
     elif score >= 7.0:
         gear_items = [
-            ("For tonight's dark sky", "Sky-Watcher 8\" Classic Dobsonian",
-             "The most aperture per dollar. Once the moon clears, it pulls in nebulae and galaxies.",
-             "~$520", f"https://www.amazon.com/s?k=sky-watcher+8+inch+dobsonian&tag={amazon_tag}"),
-            ("For the camera",         "Sky-Watcher Star Adventurer GTi",
-             "A compact tracker so long exposures stay pin-sharp on a good night like this.",
-             "~$460", f"https://www.amazon.com/s?k=sky-watcher+star+adventurer+GTi&tag={amazon_tag}"),
-            ("To find your way around","Planisphere -- Latitude 40N",
-             "Analog and always right. Shows exactly what is overhead tonight.",
-             "~$18", f"https://www.amazon.com/s?k=planisphere+star+chart+40+north&tag={amazon_tag}"),
+            ("For tonight's dark window",
+             "Celestron StarSense Explorer DX 130AZ",
+             "App-guided star finding on a solid 130mm reflector. Best value at this aperture.",
+             "~$249", "https://amzn.to/4v9UNan"),
+            ("Step up to computerized",
+             "Celestron NexStar 102SLT",
+             "Go-to mount finds objects automatically. Good for a night when you want to cover ground.",
+             "~$449", "https://amzn.to/4p1xsGm"),
+            ("Compact and smart",
+             "Dwarf Mini Smart Telescope",
+             "Pairs with your phone for guided astrophotography. Portable enough to take anywhere.",
+             "~$299", "https://amzn.to/3Ti2ePs"),
+        ]
+    elif score >= 5.0:
+        gear_items = [
+            ("A great starter",
+             "Celestron StarSense Explorer LT 114AZ",
+             "App-enabled 114mm reflector. The phone does the star-finding, you do the looking.",
+             "~$149", "https://amzn.to/4gFMlML"),
+            ("More aperture",
+             "Celestron StarSense Explorer DX 5-inch",
+             "Five inches of light-gathering on an app-guided mount. Solid step up from the LT.",
+             "~$329", "https://amzn.to/4wovMJz"),
+            ("For the camera",
+             "Sekonic L-858D-U Speedmaster Light Meter",
+             "Nail your exposure under dark skies. The tool working photographers actually use.",
+             "~$599", "https://amzn.to/4vbVHmU"),
         ]
     else:
         gear_items = [
-            ("For beginners",  "Celestron NexStar 5SE",
-             "A serious first telescope. Go-to mount, solid optics, ready for a clear night.",
-             "~$860", f"https://www.amazon.com/s?k=celestron+nexstar+5se&tag={amazon_tag}"),
-            ("For the camera", "Sky-Watcher Star Adventurer GTi",
-             "A compact tracker so long exposures stay pin-sharp when the sky finally cooperates.",
-             "~$460", f"https://www.amazon.com/s?k=sky-watcher+star+adventurer+GTi&tag={amazon_tag}"),
-            ("Always useful",  "Energizer Night Vision Red Flashlight",
-             "Preserves your night vision. Bring one every time.",
-             "~$20", f"https://www.amazon.com/s?k=red+flashlight+astronomy&tag={amazon_tag}"),
+            ("Start here",
+             "Celestron StarSense Explorer LT 114AZ",
+             "The phone does the star-finding. A good scope to have ready when the sky opens up.",
+             "~$149", "https://amzn.to/4gFMlML"),
+            ("Worth the upgrade",
+             "Celestron StarSense Explorer DX 130AZ",
+             "App-guided 130mm reflector. Better aperture, same simplicity. Buy it once.",
+             "~$249", "https://amzn.to/4v9UNan"),
+            ("Track the sky",
+             "Tempest Weather Station",
+             "Know when the clouds will clear before you even look out the window.",
+             "~$329", "https://amzn.to/4p4UFrb"),
         ]
-
     gear_json = json.dumps([
         {"cat": g[0], "name": g[1], "why": g[2], "price": g[3], "url": g[4]}
         for g in gear_items
@@ -807,15 +857,9 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
     ])
     lead_story = news[0] if news else None
 
-    # STOCKS JSON -- static for now, Alpha Vantage in Phase 3
-    stocks_json = json.dumps([
-        {"sym": "RKLB", "price": "--",   "chg": "--",  "color": "var(--od-faint-2)"},
-        {"sym": "ASTS", "price": "--",   "chg": "--",  "color": "var(--od-faint-2)"},
-        {"sym": "LUNR", "price": "--",   "chg": "--",  "color": "var(--od-faint-2)"},
-        {"sym": "SPCE", "price": "--",   "chg": "--",  "color": "var(--od-faint-2)"},
-        {"sym": "LMT",  "price": "--",   "chg": "--",  "color": "var(--od-faint-2)"},
-        {"sym": "BA",   "price": "--",   "chg": "--",  "color": "var(--od-faint-2)"},
-    ])
+    # STOCKS — from Finnhub
+    stocks_data  = stocks if stocks else [{"sym": s, "price": "--", "chg": "--", "color": "var(--od-faint-2)"} for s in ["RKLB","ASTS","LUNR","SPCE","LMT","BA"]]
+    stocks_json  = json.dumps(stocks_data)
 
     # Subscribe section context
     if kp and kp >= 5:
@@ -1070,7 +1114,7 @@ document.getElementById('change-loc').addEventListener('click', function(e){{
         </div>
         <div style="display:flex;align-items:baseline;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--od-rule-row);flex-wrap:wrap;">
           <span class="mono" style="font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);">Overhead tonight</span>
-          <span style="font-size:17px;" id="iss-pass">Check <a href="https://spotthestation.nasa.gov" style="color:var(--od-accent);border-bottom:1px solid #b7c3d3;">spotthestation.nasa.gov</a> for ISS pass times at your location.</span>
+          <span style="font-size:17px;" id="iss-pass">{f'ISS passes <strong>{iss_pass["time"]}</strong> -- rises {iss_pass["start_az"]}, peaks <strong>{iss_pass["max_el"]}&deg;</strong>, visible {iss_pass["duration"]}s.' if iss_pass else 'Check <a href="https://spotthestation.nasa.gov" style="color:var(--od-accent);border-bottom:1px solid #b7c3d3;">spotthestation.nasa.gov</a> for ISS pass times at your location.'}</span>
         </div>
       </div>
     </div>
@@ -1221,6 +1265,8 @@ if __name__ == "__main__":
     humans_n, humans_list = fetch_humans_in_space(); print(f"  Humans in space: {humans_n}")
     neos         = fetch_neo(now);          print(f"  NEOs: {len(neos)}")
     flares       = fetch_solar_flares(now); print(f"  Flares: {len(flares)}")
+    stocks       = fetch_stocks();          print(f"  Stocks: {len(stocks)}")
+    iss_pass     = fetch_iss_pass();        print(f"  ISS pass: {iss_pass['time'] if iss_pass else 'none'}")
 
     _, moon_illum, moon_name, moon_emoji = moon_phase(now)
     moon_illum_global = moon_illum
@@ -1235,7 +1281,8 @@ if __name__ == "__main__":
 
     html = render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
                   neos, flares, history, ed_p1, ed_p2, now, sai, sai_status, sai_color,
-                  score, moon_illum, moon_name, moon_emoji, seven_day)
+                  score, moon_illum, moon_name, moon_emoji, seven_day,
+                  stocks=stocks, iss_pass=iss_pass)
 
     with open("index.html","w",encoding="utf-8") as f: f.write(html)
     print("  index.html")
