@@ -258,34 +258,55 @@ def compute_7day(now, kp, kp_forecast):
 
 def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos):
     api_key = os.environ.get("ANTHROPIC_API_KEY","")
-    if not api_key: return None
+    if not api_key: return None, None
+    kp_text, _ = kp_label(kp)
     ctx = []
-    if kp is not None: ctx.append(f"Kp: {kp:.1f} ({'quiet' if kp<2 else 'active' if kp<5 else 'stormy'})")
+    if kp is not None: ctx.append(f"Kp: {kp:.1f} ({kp_text.lower()})")
     ctx.append(f"Astrophotography score: {score}/10 ({score_label(score)})")
-    if launches: ctx.append(f"Next launch: {launches[0].get('name','')} ({launch_timing(launches[0].get('net',''))})")
-    if showers:  ctx.append(f"Next shower: {showers[0][1]} in {showers[0][0]} days")
-    ctx.append(f"Moon: {moon_name}")
+    ctx.append(f"Moon: {moon_name} ({int(moon_illum_global*100)}% illuminated)")
     if flares:   ctx.append(f"Solar: {flares[0].get('classType','')} flare recently")
     if neos:     ctx.append(f"NEO: {neos[0]['name']} at {neos[0]['ld']:.1f} lunar distances")
+    if launches: ctx.append(f"Next launch: {launches[0].get('name','')} ({launch_timing(launches[0].get('net',''))})")
+    if showers:  ctx.append(f"Next shower: {showers[0][1]} in {showers[0][0]} days")
     if history:  ctx.append(f"Today in history ({history['year']}): {history['text'][:100]}")
+
+    band = score_band(score)
+    if band == "poor":
+        directive = "discourage going out tonight, name what is ruining conditions, point to a better upcoming night"
+    elif band == "fair":
+        directive = "be measured and conditional -- worth trying but with caveats"
+    elif band == "good":
+        directive = "encourage going out, name what makes it worthwhile"
+    else:
+        directive = "be enthusiastic -- this is a genuinely good night, say why"
+
     try:
         r = requests.post(
             "https://api.anthropic.com/v1/messages",
-            headers={"x-api-key": api_key, "anthropic-version": "2023-06-01", "content-type": "application/json"},
-            json={"model":"claude-haiku-4-5-20251001","max_tokens":130,
+            headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
+                     "content-type": "application/json"},
+            json={"model":"claude-haiku-4-5-20251001","max_tokens":300,
                   "messages":[{"role":"user","content":
-                    f"Today's space data:\n{chr(10).join(ctx)}\n\n"
-                    "Write exactly 2 sentences about what makes today notable from a space perspective. "
-                    "Weave the most interesting data points together. Specific and factual. "
-                    "No 'Today is a great day' openings. Informed reader voice."}]},
-            timeout=15
+                    f"Tonight's conditions:\n{chr(10).join(ctx)}\n\n"
+                    f"Write exactly 2 paragraphs of editorial prose for a space intelligence dispatch. "
+                    f"Directive: {directive}. "
+                    "Paragraph 1: describe tonight's actual sky conditions -- moon, Kp, what it means for a photographer or stargazer. "
+                    "Paragraph 2: what to do, what is coming, what to look for. "
+                    "Voice: dry, informed, like a seasoned correspondent's field note. "
+                    "No em-dash openers. No 'tonight is'. No generic openings. No em dashes anywhere. "
+                    "Return only the two paragraphs, separated by a blank line. No labels."}]},
+            timeout=18
         )
         if r.status_code == 200:
             for block in r.json().get("content",[]):
-                if block.get("type") == "text": return block["text"].strip()
+                if block.get("type") == "text":
+                    parts = [p.strip() for p in block["text"].strip().split("\n\n") if p.strip()]
+                    p1 = parts[0] if len(parts) > 0 else ""
+                    p2 = parts[1] if len(parts) > 1 else ""
+                    return p1, p2
     except Exception as e:
         print(f"  Editorial: {e}", file=sys.stderr)
-    return None
+    return None, None
 
 
 # ── Dark sky parks ─────────────────────────────────────────────────────────────
