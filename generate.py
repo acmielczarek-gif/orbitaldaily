@@ -56,13 +56,18 @@ def moon_phase(date):
 
 # ── Astrophotography score ─────────────────────────────────────────────────────
 
-def astro_score(kp, moon_illum, days_to_shower):
+def astro_score(kp, moon_illum, days_to_shower, cloud_pct=None):
     moon_s   = 10.0 * (1.0 - moon_illum)
     kp_s     = max(0.0, 10.0 - (kp if kp is not None else 2.0) * 1.4)
     d        = days_to_shower
     shower_s = (10 if d is not None and d<=1 else
                 10-d if d and d<=7 else
                 max(0, 5-(d-7)*0.5) if d and d<=14 else 0)
+    if cloud_pct is not None:
+        cloud_s = max(0.0, 10.0 - cloud_pct * 0.1)
+        return round(min(10.0, max(0.0,
+            moon_s*.40 + cloud_s*.30 + kp_s*.20 + shower_s*.10)), 1)
+    # Fallback without cloud data
     return round(min(10.0, max(0.0, moon_s*.55 + kp_s*.25 + shower_s*.20)), 1)
 
 def score_color(s):
@@ -243,16 +248,20 @@ def compute_sai(kp, launches, neos, flares):
 
 # ── 7-day forecast ─────────────────────────────────────────────────────────────
 
-def compute_7day(now, kp, kp_forecast):
+def compute_7day(now, kp, kp_forecast, cloud_week=None):
     days = []
     for i in range(7):
-        d  = now + timedelta(days=i)
-        ds = d.strftime("%Y-%m-%d")
+        d   = now + timedelta(days=i)
+        ds  = d.strftime("%Y-%m-%d")
         _, illum, mname, memoji = moon_phase(d)
-        day_kp = kp if i==0 else kp_forecast.get(ds)
-        score  = astro_score(day_kp, illum, next_shower_days_from(d))
+        day_kp    = kp if i==0 else kp_forecast.get(ds)
+        day_cloud = cloud_week.get(ds) if cloud_week else None
+        cloud_pct = day_cloud["cloud_pct"] if day_cloud else None
+        raining   = day_cloud["raining"]   if day_cloud else False
+        score     = astro_score(day_kp, illum, next_shower_days_from(d), cloud_pct)
         days.append({"dt":d,"illum":illum,"moon_name":mname,"moon_emoji":memoji,
-                     "kp":day_kp,"score":score,"estimated": i>=3 or day_kp is None})
+                     "kp":day_kp,"score":score,"estimated": i>=3 or day_kp is None,
+                     "cloud_pct": cloud_pct, "raining": raining})
     return days
 
 
@@ -450,36 +459,51 @@ def compute_visible_planets(now):
     return visible
 
 def fetch_cloud_cover(lat=39.8, lon=-98.6):
-    """Open-Meteo cloud cover and precipitation for tonight's viewing hours."""
+    """Open-Meteo cloud cover for tonight + 7-day forecast."""
     try:
         r = get(
             f"https://api.open-meteo.com/v1/forecast"
             f"?latitude={lat}&longitude={lon}"
-            f"&hourly=cloudcover,precipitation&timezone=UTC&forecast_days=1",
+            f"&hourly=cloudcover,precipitation"
+            f"&daily=cloudcover_mean,precipitation_sum"
+            f"&timezone=UTC&forecast_days=7",
             timeout=10
         )
         if not r:
             return None
-        data    = r.json()
-        times   = data.get("hourly", {}).get("time", [])
-        clouds  = data.get("hourly", {}).get("cloudcover", [])
-        precip  = data.get("hourly", {}).get("precipitation", [])
+        data = r.json()
+        # Tonight -- evening hours (18-23 UTC)
+        times  = data.get("hourly", {}).get("time", [])
+        clouds = data.get("hourly", {}).get("cloudcover", [])
+        precip = data.get("hourly", {}).get("precipitation", [])
         eve_c, eve_p = [], []
         for i, t in enumerate(times):
             hour = int(t.split("T")[1].split(":")[0])
             if 18 <= hour <= 23:
                 if i < len(clouds): eve_c.append(clouds[i])
                 if i < len(precip): eve_p.append(precip[i])
-        if not eve_c:
-            return None
-        return {
-            "cloud_pct":  round(sum(eve_c) / len(eve_c)),
-            "precip_mm":  round(sum(eve_p), 1),
-            "raining":    sum(eve_p) > 0.5,
-        }
+        tonight = None
+        if eve_c:
+            tonight = {
+                "cloud_pct": round(sum(eve_c)/len(eve_c)),
+                "precip_mm": round(sum(eve_p), 1),
+                "raining":   sum(eve_p) > 0.5,
+            }
+        # 7-day daily averages
+        daily_dates  = data.get("daily", {}).get("time", [])
+        daily_clouds = data.get("daily", {}).get("cloudcover_mean", [])
+        daily_precip = data.get("daily", {}).get("precipitation_sum", [])
+        week = {}
+        for i, dt in enumerate(daily_dates):
+            week[dt] = {
+                "cloud_pct": round(daily_clouds[i]) if i < len(daily_clouds) else None,
+                "raining":   (daily_precip[i] or 0) > 1.0 if i < len(daily_precip) else False,
+            }
+        return {"tonight": tonight, "week": week}
     except Exception as e:
         print(f"  Cloud cover: {e}", file=sys.stderr)
         return None
+
     """Short punchy week description for the forecast header."""
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
@@ -738,40 +762,7 @@ Read the full dispatch at orbitaldaily.com
     except Exception as e:
         print(f"  Email error: {e}", file=sys.stderr)
 
-def fetch_week_summary(seven_day, launches, showers):
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if not api_key:
-        return None
-    best   = max(seven_day, key=lambda d: d["score"])
-    scores = [d["score"] for d in seven_day]
-    avg    = round(sum(scores) / len(scores), 1)
-    ctx    = f"Scores this week: {', '.join(str(s) for s in scores)}"
-    ctx   += f"\nBest night: {best['dt'].strftime('%A')} at {best['score']}/10"
-    ctx   += f"\nWeek average: {avg}/10"
-    ctx   += f"\nLaunches: {len(launches)} on the manifest"
-    if showers:
-        ctx += f"\nNext meteor shower: {showers[0][1]} in {showers[0][0]} days"
-    try:
-        r = requests.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
-                     "content-type": "application/json"},
-            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 80,
-                  "messages": [{"role": "user", "content":
-                      f"Week forecast:\n{ctx}\n\n"
-                      "Write 1-2 punchy sentences for space watchers. "
-                      "Call out the best night and anything notable on the manifest. "
-                      "No em dashes. No filler. Specific and direct."}]},
-            timeout=12
-        )
-        if r.status_code == 200:
-            for block in r.json().get("content", []):
-                if block.get("type") == "text":
-                    return block["text"].strip()
-    except Exception as e:
-        print(f"  Week summary: {e}", file=sys.stderr)
-    return None
-  
+
 # ── Renderer ───────────────────────────────────────────────────────────────────
 
 PAGE_CSS = """<style>
@@ -979,7 +970,12 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
          "detail": cloud_detail},
     ])
 
-    # FORECAST JSON
+    # Strip markdown from week_summary (Haiku sometimes returns **bold**)
+    if week_summary:
+        import re as _re
+        week_summary = _re.sub(r'\*+', '', week_summary).strip()
+
+    # FORECAST JSON with cloud cover per day
     forecast_json = json.dumps([
         {
             "day":   d["dt"].strftime("%a").upper(),
@@ -987,6 +983,8 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
             "illum": round(d["illum"], 2),
             "score": d["score"],
             "note":  forecast_note(d["score"], d.get("kp")),
+            "cloud": d.get("cloud_pct"),
+            "rain":  d.get("raining", False),
             "flag":  (
                 next((str(sum(1 for l in launches if l.get("net","").startswith(d["dt"].strftime("%Y-%m-%d")))) + " LAUNCH" +
                       ("" if sum(1 for l in launches if l.get("net","").startswith(d["dt"].strftime("%Y-%m-%d"))) == 1 else "ES")
@@ -998,67 +996,92 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         for d in seven_day
     ])
 
-    # GEAR JSON -- condition triggered with real affiliate products
-    if kp and kp >= 5:
+    # GEAR JSON -- weather + condition aware
+    # Determine effective weather state
+    cloud_pct_now = cloud_data["cloud_pct"] if cloud_data else None
+    raining_now   = cloud_data["raining"]   if cloud_data else False
+
+    if raining_now or (cloud_pct_now is not None and cloud_pct_now >= 70):
+        # Socked in -- no point looking up, pivot to planning gear
+        gear_items = [
+            ("Plan your next session",
+             "The Night Sky 30-40 Degree Star Finder",
+             "A planisphere for your latitude. Learn what is up before the clouds clear.",
+             "", "https://amzn.to/4ym1J7k"),
+            ("The essential field guide",
+             "Turn Left at Orion",
+             "The book every visual observer keeps nearby. Learn the sky on nights like this.",
+             "", "https://amzn.to/4vQfWYt"),
+            ("Protect your gear on a wet night",
+             "Protective Telescope Cover",
+             "23.8\" diameter cover keeps moisture and dust off when the scope has to sit outside.",
+             "", "https://amzn.to/4gnWe1s"),
+        ]
+    elif kp and kp >= 5:
+        # Aurora storm -- get out regardless of score
         gear_items = [
             ("For tonight's aurora",
              "Vaonis Vespera 3 Smart Telescope",
              "Fully automated, app-controlled. Point it at the aurora band and let it do the work.",
-             "~$1,099", "https://amzn.to/4pcEFUo"),
+             "", "https://amzn.to/4pcEFUo"),
             ("Block the glow",
              "Light Pollution Filters",
-             "Cut through urban skyglow and bring out nebulae even under a lit-up sky.",
-             "from ~$40", "https://amzn.to/3SKInIH"),
+             "Cut through urban skyglow and bring out structure even under a lit-up sky.",
+             "", "https://amzn.to/3SKInIH"),
             ("Track the conditions",
              "Tempest Weather Station",
-             "Wind, rain, pressure -- know exactly what the sky is doing before you pack the car.",
-             "~$329", "https://amzn.to/4p4UFrb"),
+             "Wind, rain, pressure -- know exactly what the sky is doing before you commit.",
+             "", "https://amzn.to/4p4UFrb"),
         ]
     elif score >= 7.0:
+        # Excellent and clear -- prime observing gear
         gear_items = [
             ("For tonight's dark window",
              "Celestron StarSense Explorer DX 130AZ",
              "App-guided star finding on a solid 130mm reflector. Best value at this aperture.",
-             "~$249", "https://amzn.to/4v9UNan"),
+             "", "https://amzn.to/4v9UNan"),
             ("Step up to computerized",
              "Celestron NexStar 102SLT",
-             "Go-to mount finds objects automatically. Good for a night when you want to cover ground.",
-             "~$449", "https://amzn.to/4p1xsGm"),
+             "Go-to mount finds everything automatically. Good for a night you want to cover ground.",
+             "", "https://amzn.to/4p1xsGm"),
             ("Compact and smart",
              "Dwarf Mini Smart Telescope",
-             "Pairs with your phone for guided astrophotography. Portable enough to take anywhere.",
-             "~$299", "https://amzn.to/3Ti2ePs"),
+             "Pairs with your phone for guided astrophotography. Portable enough for anywhere.",
+             "", "https://amzn.to/3Ti2ePs"),
         ]
     elif score >= 5.0:
+        # Good conditions -- solid entry gear
         gear_items = [
-            ("A great starter",
+            ("A capable starter",
              "Celestron StarSense Explorer LT 114AZ",
              "App-enabled 114mm reflector. The phone does the star-finding, you do the looking.",
-             "~$149", "https://amzn.to/4gFMlML"),
+             "", "https://amzn.to/4gFMlML"),
             ("More aperture",
              "Celestron StarSense Explorer DX 5-inch",
-             "Five inches of light-gathering on an app-guided mount. Solid step up from the LT.",
-             "~$329", "https://amzn.to/4wovMJz"),
-            ("For the camera",
-             "Sekonic L-858D-U Speedmaster Light Meter",
-             "Nail your exposure under dark skies. The tool working photographers actually use.",
-             "~$599", "https://amzn.to/4vbVHmU"),
+             "Five inches of light-gathering on an app-guided mount. Solid upgrade from the LT.",
+             "", "https://amzn.to/4wovMJz"),
+            ("Keep your gear safe",
+             "Telescope Storage Bag",
+             "40.8\" padded bag fits tube and tripod. Protect the investment between sessions.",
+             "", "https://amzn.to/4f19si6"),
         ]
     else:
+        # Poor or fair -- lean into planning and protection
         gear_items = [
-            ("Start here",
-             "Celestron StarSense Explorer LT 114AZ",
-             "The phone does the star-finding. A good scope to have ready when the sky opens up.",
-             "~$149", "https://amzn.to/4gFMlML"),
-            ("Worth the upgrade",
-             "Celestron StarSense Explorer DX 130AZ",
-             "App-guided 130mm reflector. Better aperture, same simplicity. Buy it once.",
-             "~$249", "https://amzn.to/4v9UNan"),
-            ("Track the sky",
+            ("Learn the sky tonight",
+             "The Night Sky 30-40 Degree Star Finder",
+             "Know what is overhead before the clouds clear. Cheap, accurate, always useful.",
+             "", "https://amzn.to/4ym1J7k"),
+            ("The essential guide",
+             "Turn Left at Orion",
+             "The book that teaches you the night sky. Better nights are coming -- get ready.",
+             "", "https://amzn.to/4vQfWYt"),
+            ("Track when conditions improve",
              "Tempest Weather Station",
-             "Know when the clouds will clear before you even look out the window.",
-             "~$329", "https://amzn.to/4p4UFrb"),
+             "Know the moment the sky clears before you even look out the window.",
+             "", "https://amzn.to/4p4UFrb"),
         ]
+
     gear_json = json.dumps([
         {"cat": g[0], "name": g[1], "why": g[2], "url": g[4]}
         for g in gear_items
@@ -1139,15 +1162,15 @@ function band(s){{ return s<3?'var(--od-verdict-poor)':s<5?'var(--od-verdict-fai
 function rowTint(s){{ return s<3?'rgba(176,74,47,.04)':s>=5?'rgba(47,125,62,.05)':'transparent'; }}
 function esc(s){{ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }}
 
-// render tiles -- 3-col grid
+// render tiles -- 4x2 grid
 document.getElementById('tiles').innerHTML = TILES_DATA.map(function(t,i){{
-  var col = i % 3;
-  var row = Math.floor(i / 3);
+  var col = i % 4;
+  var row = Math.floor(i / 4);
   var borderL = col > 0 ? 'border-left:1px solid var(--od-rule-row);' : '';
   var borderT = row > 0 ? 'border-top:1px solid var(--od-rule-row);' : '';
   var id = t.id ? ' id="'+t.id+'"' : '';
   return '<div class="term" data-tip'+id+' style="padding:16px 18px;cursor:default;'+borderL+borderT+'">'
-    +'<div style="font-size:28px;font-weight:700;line-height:1;letter-spacing:-.02em;color:'+t.color+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(t.value)
+    +'<div style="font-size:26px;font-weight:700;line-height:1;letter-spacing:-.02em;color:'+t.color+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(t.value)
     +(t.unit?'<span style="font-size:11px;color:var(--od-faint-2);margin-left:3px;">'+esc(t.unit)+'</span>':'')+'</div>'
     +'<div style="margin-top:6px;font-family:var(--od-mono);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--od-muted);display:flex;align-items:center;gap:3px;">'
     +esc(t.label)+'<span class="idot">i</span></div>'
@@ -1156,6 +1179,14 @@ document.getElementById('tiles').innerHTML = TILES_DATA.map(function(t,i){{
 
 // render forecast
 document.getElementById('forecast').innerHTML = FORECAST_DATA.map(function(d){{
+  var cloudBadge = '';
+  if(d.rain){{
+    cloudBadge = '<span class="mono" style="color:var(--od-verdict-poor);font-size:11px;letter-spacing:.06em;margin-left:8px;">Rain</span>';
+  }} else if(d.cloud !== null && d.cloud !== undefined){{
+    var cc = d.cloud;
+    var cColor = cc>=70?'var(--od-verdict-poor)':cc>=40?'var(--od-verdict-fair)':'var(--od-faint-2)';
+    cloudBadge = '<span class="mono" style="color:'+cColor+';font-size:11px;letter-spacing:.06em;margin-left:8px;">'+cc+'% cloud</span>';
+  }}
   return '<div style="display:grid;grid-template-columns:70px 40px 56px 1fr;align-items:center;gap:16px;padding:13px 4px;border-top:1px solid var(--od-rule-row);background:'+rowTint(d.score)+';">'
     +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
     +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div></div>'
@@ -1163,6 +1194,7 @@ document.getElementById('forecast').innerHTML = FORECAST_DATA.map(function(d){{
     +'<circle cx="'+moonCx(d.illum)+'" cy="50" r="48" fill="var(--od-moon-lit)" clip-path="url(#moonclip)"/></svg>'
     +'<div style="font-weight:700;font-size:30px;line-height:1;color:'+band(d.score)+';">'+d.score.toFixed(1)+'</div>'
     +'<div style="font-size:17px;color:var(--od-ink-2);line-height:1.4;">'+esc(d.note)
+    +cloudBadge
     +'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:8px;">'+esc(d.flag)+'</span></div></div>';
 }}).join('');
 
@@ -1459,7 +1491,7 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
 
   <section style="padding:20px 0 16px;border-bottom:1px solid var(--od-rule);">
     <div class="eyebrow" style="margin-bottom:14px;">Tonight, at a glance</div>
-    <div id="tiles" style="display:grid;grid-template-columns:repeat(3,1fr);"></div>
+    <div id="tiles" style="display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--od-rule-row);border-radius:4px;overflow:hidden;"></div>
   </section>
 
   <section style="padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
@@ -1588,13 +1620,23 @@ if __name__ == "__main__":
     flares       = fetch_solar_flares(now); print(f"  Flares: {len(flares)}")
     stocks       = fetch_stocks();          print(f"  Stocks: {len(stocks)}")
     iss_pass     = fetch_iss_pass();        print(f"  ISS pass: {iss_pass['time'] if iss_pass else 'none'}")
-    cloud_data   = fetch_cloud_cover();     print(f"  Cloud cover: {cloud_data['cloud_pct']}% ({('rain' if cloud_data['raining'] else 'dry')})") if cloud_data else print("  Cloud cover: unavailable")
+    cloud_data   = fetch_cloud_cover()
+    if cloud_data:
+        tonight_cloud = cloud_data.get("tonight")
+        cloud_week    = cloud_data.get("week", {})
+        c_pct = tonight_cloud["cloud_pct"] if tonight_cloud else None
+        print(f"  Cloud cover: {c_pct}% ({'rain' if tonight_cloud and tonight_cloud['raining'] else 'dry'})" if tonight_cloud else "  Cloud cover: unavailable")
+    else:
+        tonight_cloud = None
+        cloud_week    = {}
+        print("  Cloud cover: unavailable")
 
     _, moon_illum, moon_name, moon_emoji = moon_phase(now)
     moon_illum_global = moon_illum
-    score     = astro_score(kp, moon_illum, showers[0][0] if showers else None)
+    score     = astro_score(kp, moon_illum, showers[0][0] if showers else None,
+                            tonight_cloud["cloud_pct"] if tonight_cloud else None)
     sai, sai_status, sai_color = compute_sai(kp, launches, neos, flares)
-    seven_day = compute_7day(now, kp, kp_forecast)
+    seven_day = compute_7day(now, kp, kp_forecast, cloud_week)
     ed_p1, ed_p2 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos)
     week_sum  = fetch_week_summary(seven_day, launches, showers)
 
@@ -1611,7 +1653,7 @@ if __name__ == "__main__":
                   neos, flares, history, ed_p1, ed_p2, now, sai, sai_status, sai_color,
                   score, moon_illum, moon_name, moon_emoji, seven_day,
                   stocks=stocks, iss_pass=iss_pass, week_summary=week_sum,
-                  cloud_data=cloud_data)
+                  cloud_data=tonight_cloud)
 
     with open("index.html","w",encoding="utf-8") as f: f.write(html)
     print("  index.html")
