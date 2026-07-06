@@ -85,7 +85,7 @@
     <h1 style="font-family:var(--od-serif);font-weight:600;font-size:64px;line-height:1;letter-spacing:-.02em;margin:0 0 8px;">Orbital Daily</h1>
     <div style="display:flex;align-items:center;justify-content:center;gap:14px;font-family:var(--od-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-muted);padding-top:6px;">
       <span style="flex:1;height:1px;background:var(--od-rule-mast);max-width:120px;"></span>
-      <span>Monday · July 6, 2026 · 14:22 UTC</span>
+      <span>Monday · July 6, 2026 · 14:37 UTC</span>
       <span style="flex:1;height:1px;background:var(--od-rule-mast);max-width:120px;"></span>
     </div>
     <div style="font-family:var(--od-serif);font-style:italic;font-size:15px;color:var(--od-muted);margin-top:10px;">Independent space intelligence, read over each morning before it goes out.</div>
@@ -112,8 +112,8 @@
     <div class="lede-grid" style="display:grid;grid-template-columns:1fr auto;gap:34px;align-items:start;">
       <div>
         <h2 style="font-size:52px;line-height:1.02;letter-spacing:-.025em;margin:0 0 18px;">Worth a look tonight.</h2>
-        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 14px;max-width:60ch;"><span style="float:left;font-weight:600;font-size:70px;line-height:.72;padding:8px 12px 0 0;">T</span>he C6.1 solar flare that recently erupted from the Sun&#x27;s surface demands attention tonight, though it arrives without the dramatic aurora that typically accompanies such events. The low Kp index of 1.7 indicates geomagnetic conditions remain quiet, suggesting the flare&#x27;s particle stream either missed Earth&#x27;s magnetosphere entirely or will arrive with minimal fanfare. Nevertheless, this is the kind of solar activity that rewards monitoring, the sort of celestial drama that reminds us the Sun remains fundamentally unpredictable and worth watching even on seemingly ordinary nights.</p>
-        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">For those willing to venture outside, the astrophotography score of 5.9 out of 10 presents a genuine opportunity despite the last quarter moon sitting at 58 percent illumination. The seeing conditions favor wide-field work and constellation imaging, with the moon bright enough to avoid but not so dominant as to ruin the entire sky. Set a reminder for the Perseid shower arriving in just over a month, but tonight offers a reasonable preview of what good conditions actually look like. Meanwhile, the Falcon 9 Block 5 launching in 16 hours on the Transporter 17 rideshare mission provides a final reminder that space remains actively in motion, with commercial spaceflight continuing its relentless rhythm regardless of what the aurora might or might not do.</p>
+        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 14px;max-width:60ch;"><span style="float:left;font-weight:600;font-size:70px;line-height:.72;padding:8px 12px 0 0;">T</span>he C6.1 solar flare that erupted recently has injected enough energy into near-Earth space to keep conditions decidedly quiet at Kp 1.7, but what matters more for your evening is the clarity overhead: a mere 10% cloud cover combined with an astrophotography score of 5.9/10 means the last quarter moon at 58% illumination will provide just enough light for wide-field work without washing out the fainter deep-sky targets. The asteroid 2007 AA2 remains in the neighborhood at 17.8 lunar distances, a harmless but trackable visitor that observers with modest equipment can still locate if they know where to point. Add in the fact that Falcon 9 Block 5 will ignite its engines in roughly 16 hours for the Transporter 17 rideshare mission, and you have the kind of night where multiple threads of space activity converge into something genuinely worth leaving your screen for.</p>
+        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">Step outside within the next few hours while those cloud-free skies persist and your eyes adjust to darkness. If you have imaging equipment, the seeing conditions favor longer exposures of galactic structure and nebulosity across the northern sky. Those without cameras should use binoculars or their unaided eyes to scan for the asteroid or simply observe how the last quarter phase illuminates lunar features in sharp relief. Set a reminder</p>
         <div style="font-style:italic;font-size:16px;color:var(--od-muted);">the Orbital Daily desk</div>
       </div>
       <aside style="display:flex;flex-direction:column;align-items:center;gap:22px;padding-top:4px;">
@@ -124,13 +124,23 @@
             <circle cx="50" cy="50" r="48" fill="none" stroke="#d8d4c8" stroke-width="1"></circle>
           </svg>
           <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--od-faint);margin-top:10px;">Last Quarter</div>
-          <div style="font-size:15px;color:var(--od-muted);font-style:italic;">59% lit</div>
+          <div style="font-size:15px;color:var(--od-muted);font-style:italic;">58% lit</div>
         </div>
         <div class="term" data-tip tabindex="0" style="border:1.5px solid var(--od-verdict-good);border-radius:6px;padding:12px 16px 10px;text-align:center;transform:rotate(-4deg);color:var(--od-verdict-good);background:rgba(47,125,62,.03);">
-          <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.2em;">GOOD</div>
-          <div style="font-weight:700;font-size:38px;line-height:1;margin-top:4px;">5.9</div>
+          <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.2em;" id="stamp-label">GOOD</div>
+          <div style="font-weight:700;font-size:38px;line-height:1;margin-top:4px;" id="stamp-score">5.9</div>
           <div class="mono" style="font-size:10px;letter-spacing:.12em;margin-top:2px;">SHOOT SCORE / 10 &#9432;</div>
+          <div id="stamp-warning" style="display:none;font-family:var(--od-mono);font-size:10px;letter-spacing:.08em;margin-top:6px;padding-top:6px;border-top:1px solid currentColor;opacity:.8;">CLOUD OVERRIDE</div>
           <span class="tip above">Half of it is moon darkness -- a dark, moonless sky beats everything, and nothing rescues a night when the moon is up. A quarter is how calm the magnetic field is; the rest is whether a meteor shower is near its peak.</span>
+        </div>
+        <div id="weather-card" style="display:none;border:1px solid var(--od-rule-row);border-radius:6px;padding:12px 14px;text-align:left;width:100%;background:var(--od-field);">
+          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Local weather</div>
+          <div style="display:flex;align-items:baseline;gap:8px;">
+            <span id="wx-temp" style="font-weight:700;font-size:28px;letter-spacing:-.02em;color:var(--od-ink);">--</span>
+            <span class="mono" style="font-size:11px;color:var(--od-faint-2);">F</span>
+          </div>
+          <div id="wx-condition" style="font-size:15px;color:var(--od-ink-2);margin-top:4px;">Detecting...</div>
+          <div id="wx-cloud" class="mono" style="font-size:11px;color:var(--od-faint-2);margin-top:4px;">--% cloud</div>
         </div>
       </aside>
     </div>
@@ -169,7 +179,7 @@
     <div class="week-head" style="display:grid;grid-template-columns:1fr auto;gap:26px;align-items:start;margin-bottom:6px;">
       <div>
         <h3 style="font-size:32px;margin:0 0 10px;">The week ahead</h3>
-        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">Sunday night peaks at 8.2/10 with excellent viewing conditions. Eight launches on the manifest this week, with the Perseids arriving in 36 days for your next major shower event.</p>
+        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">Sunday night delivers the week&#x27;s best viewing at 8.2/10, perfect for catching the clearest skies. With 8 launches on the manifest and the Perseids arriving in 36 days, there&#x27;s plenty of celestial activity ahead.</p>
       </div>
       <a class="tout" href="https://amzn.to/4v9UNan" target="_blank" rel="sponsored noopener" style="display:block;width:200px;border:1px solid #e2ddd0;border-radius:8px;padding:14px;background:#fdfcf8;flex-shrink:0;">
         <div class="mono" style="font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:8px;">Sponsored</div>
@@ -265,14 +275,17 @@
 </div>
 <script>
 
-var TILES_DATA    = [{"value": "41", "unit": "% dark", "label": "Moon darkness", "color": "var(--od-verdict-fair)", "href": "#moon", "first": true, "detail": "Moon is 59% illuminated tonight. Moon darkness is the single biggest factor in the shoot score -- a dark sky beats everything else."}, {"value": "Low", "unit": "", "label": "Aurora chance", "color": "var(--od-faint-2)", "href": "#aurora", "first": false, "detail": "Kp at 1.7. Geomagnetic field quiet tonight."}, {"value": "1.7", "unit": "Kp", "label": "Geomagnetic field", "color": "var(--od-ink)", "href": "#kp", "first": false, "detail": "Kp index from NOAA SWPC. Above 5 means a geomagnetic storm -- GPS may drift and aurora becomes visible at lower latitudes. Below 2 is ideal for imaging."}, {"value": "17.8", "unit": "LD", "label": "Closest asteroid", "color": "var(--od-ink)", "href": "#neo", "first": false, "detail": "2007 AA2, about 18x the Moon-Earth distance, passing at 7.2 km/s. No impact risk."}, {"value": "Venus", "unit": "", "label": "Planets up tonight", "color": "var(--od-ink)", "href": "#planets", "first": false, "detail": "Visible in the evening sky tonight: Venus (evening sky), Mars (morning sky), Saturn (morning sky)."}, {"value": "Cycle 25", "unit": "", "label": "Solar cycle -- Descending", "color": "var(--od-ink)", "href": "#solar", "first": false, "detail": "Past maximum. Activity gradually declining toward the next quiet period. We are 60% through Cycle 25."}, {"value": "10%", "unit": "", "label": "Cloud cover tonight", "color": "var(--od-verdict-good)", "href": "#clouds", "first": false, "id": "weather-tile", "detail": "Mostly clear tonight (10% cloud cover, 6pm-midnight). Conditions match the forecast."}];
-var FORECAST_DATA = [{"day": "MON", "date": "Jul 6", "illum": 0.59, "score": 6.1, "note": "Decent. Bright planets and clusters well-placed.", "cloud": 2, "rain": false, "flag": ""}, {"day": "TUE", "date": "Jul 7", "illum": 0.48, "score": 5.6, "note": "Fair. Wide-field and bright targets.", "cloud": 32, "rain": false, "flag": "1 LAUNCH"}, {"day": "WED", "date": "Jul 8", "illum": 0.37, "score": 6.1, "note": "Decent. Bright planets and clusters well-placed.", "cloud": 28, "rain": false, "flag": "est."}, {"day": "THU", "date": "Jul 9", "illum": 0.28, "score": 5.8, "note": "Fair. Wide-field and bright targets.", "cloud": 52, "rain": true, "flag": "1 LAUNCH"}, {"day": "FRI", "date": "Jul 10", "illum": 0.19, "score": 6.2, "note": "Decent. Bright planets and clusters well-placed.", "cloud": 51, "rain": false, "flag": "1 LAUNCH"}, {"day": "SAT", "date": "Jul 11", "illum": 0.11, "score": 7.4, "note": "Good window. Most deep-sky targets accessible.", "cloud": 19, "rain": false, "flag": "1 LAUNCH"}, {"day": "SUN", "date": "Jul 12", "illum": 0.05, "score": 8.2, "note": "Excellent conditions. Get out.", "cloud": 0, "rain": false, "flag": "2 LAUNCHES"}];
+var TILES_DATA    = [{"value": "42", "unit": "% dark", "label": "Moon darkness", "color": "var(--od-verdict-fair)", "href": "#moon", "first": true, "detail": "Moon is 58% illuminated tonight. Moon darkness is the single biggest factor in the shoot score -- a dark sky beats everything else."}, {"value": "Low", "unit": "", "label": "Aurora chance", "color": "var(--od-faint-2)", "href": "#aurora", "first": false, "detail": "Kp at 1.7. Geomagnetic field quiet tonight."}, {"value": "1.7", "unit": "Kp", "label": "Geomagnetic field", "color": "var(--od-ink)", "href": "#kp", "first": false, "detail": "Kp index from NOAA SWPC. Above 5 means a geomagnetic storm -- GPS may drift and aurora becomes visible at lower latitudes. Below 2 is ideal for imaging."}, {"value": "17.8", "unit": "LD", "label": "Closest asteroid", "color": "var(--od-ink)", "href": "#neo", "first": false, "detail": "2007 AA2, about 18x the Moon-Earth distance, passing at 7.2 km/s. No impact risk."}, {"value": "Venus", "unit": "", "label": "Planets up tonight", "color": "var(--od-ink)", "href": "#planets", "first": false, "detail": "Visible in the evening sky tonight: Venus (evening sky), Mars (morning sky), Saturn (morning sky)."}, {"value": "Cycle 25", "unit": "", "label": "Solar cycle -- Descending", "color": "var(--od-ink)", "href": "#solar", "first": false, "detail": "Past maximum. Activity gradually declining toward the next quiet period. We are 60% through Cycle 25."}, {"value": "10%", "unit": "", "label": "Cloud cover tonight", "color": "var(--od-verdict-good)", "href": "#clouds", "first": false, "id": "weather-tile", "detail": "Mostly clear tonight (10% cloud cover, 6pm-midnight). Conditions match the forecast."}];
+var FORECAST_DATA = [{"day": "MON", "date": "Jul 6", "illum": 0.58, "score": 6.1, "note": "Decent. Bright planets and clusters well-placed.", "cloud": 2, "rain": false, "flag": ""}, {"day": "TUE", "date": "Jul 7", "illum": 0.48, "score": 5.6, "note": "Fair. Wide-field and bright targets.", "cloud": 32, "rain": false, "flag": "1 LAUNCH"}, {"day": "WED", "date": "Jul 8", "illum": 0.37, "score": 6.1, "note": "Decent. Bright planets and clusters well-placed.", "cloud": 28, "rain": false, "flag": "est."}, {"day": "THU", "date": "Jul 9", "illum": 0.27, "score": 5.8, "note": "Fair. Wide-field and bright targets.", "cloud": 52, "rain": true, "flag": "1 LAUNCH"}, {"day": "FRI", "date": "Jul 10", "illum": 0.19, "score": 6.2, "note": "Decent. Bright planets and clusters well-placed.", "cloud": 51, "rain": false, "flag": "1 LAUNCH"}, {"day": "SAT", "date": "Jul 11", "illum": 0.11, "score": 7.4, "note": "Good window. Most deep-sky targets accessible.", "cloud": 19, "rain": false, "flag": "1 LAUNCH"}, {"day": "SUN", "date": "Jul 12", "illum": 0.05, "score": 8.2, "note": "Excellent conditions. Get out.", "cloud": 0, "rain": false, "flag": "2 LAUNCHES"}];
 var GEAR_DATA     = [{"cat": "A capable starter", "name": "Celestron StarSense Explorer LT 114AZ", "why": "App-enabled 114mm reflector. The phone does the star-finding, you do the looking.", "url": "https://amzn.to/4gFMlML"}, {"cat": "More aperture", "name": "Celestron StarSense Explorer DX 5-inch", "why": "Five inches of light-gathering on an app-guided mount. Solid upgrade from the LT.", "url": "https://amzn.to/4wovMJz"}, {"cat": "Keep your gear safe", "name": "Telescope Storage Bag", "why": "40.8\" padded bag fits tube and tripod. Protect the investment between sessions.", "url": "https://amzn.to/4f19si6"}];
 var LAUNCHES_DATA = [{"when": "T-16H", "color": "var(--od-accent)", "title": "Falcon 9 Block 5 | Transporter 17 (Dedicated SSO Rideshare)", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-transporter-17-dedicated-sso-ride"}, {"when": "JUL 9", "color": "var(--od-ink-2)", "title": "Falcon 9 Block 5 | Starlink Group 10-42", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-10-42"}, {"when": "JUL 10", "color": "var(--od-ink-2)", "title": "Long March 10B | Demo Flight", "url": "https://www.rocketlaunch.live/launch/long-march-10b-demo-flight"}, {"when": "JUL 11", "color": "var(--od-ink-2)", "title": "Falcon 9 Block 5 | Starlink Group 17-48", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-17-48"}, {"when": "JUL 12", "color": "var(--od-ink-2)", "title": "Gravity-1 | Unknown Payload", "url": "https://www.rocketlaunch.live/launch/gravity-1-unknown-payload"}, {"when": "JUL 12", "color": "var(--od-ink-2)", "title": "Vikram-I | Demo Flight", "url": "https://www.rocketlaunch.live/launch/vikram-i-demo-flight"}];
 var WIRES_DATA    = [{"title": "NASA Webb Uncovers Unusual Galaxy Shaped by Cosmic Collision", "source": "NASA", "url": "https://science.nasa.gov/missions/webb/nasa-webb-uncovers-unusual-galaxy-shaped-by-cosmic-collision/"}, {"title": "BAE microchip designed for strategic defense missions passes radiation test", "source": "SpaceNews", "url": "https://spacenews.com/bae-microchip-designed-for-strategic-defense-missions-passes-radiation-test/"}, {"title": "The term \u2018dual-use\u2019 is misleading and dangerous", "source": "SpaceNews", "url": "https://spacenews.com/the-term-dual-use-is-misleading-and-dangerous/"}, {"title": "Connected Aircraft Fleet Set to Exceed 70,000 by 2035", "source": "SpaceNews", "url": "https://spacenews.com/connected-aircraft-fleet-set-to-exceed-70000-by-2035/"}, {"title": "Centre for Space Futures, Novaspace and SpaceTech Gulf  Sign Agreement to Develop Global Space Capability Mapping Dashboard", "source": "SpaceNews", "url": "https://spacenews.com/centre-for-space-futures-novaspace-and-spacetech-gulf-sign-agreement-to-develop-global-space-capability-mapping-dashboard/"}, {"title": "Tianwen-2 arrives at asteroid Kamo\u2019oalewa, first image revealed", "source": "SpaceNews", "url": "https://spacenews.com/tianwen-2-arrives-at-asteroid-kamooalewa-first-image-revealed/"}];
-var STOCKS_DATA   = [{"sym": "RKLB", "price": "$98.75", "chg": "-1.7%", "color": "var(--od-verdict-poor)"}, {"sym": "ASTS", "price": "$83.29", "chg": "-2.2%", "color": "var(--od-verdict-poor)"}, {"sym": "LUNR", "price": "$19.31", "chg": "-1.4%", "color": "var(--od-verdict-poor)"}, {"sym": "SPCE", "price": "$2.68", "chg": "-0.7%", "color": "var(--od-verdict-poor)"}, {"sym": "LMT", "price": "$537.94", "chg": "-1.5%", "color": "var(--od-verdict-poor)"}, {"sym": "BA", "price": "$231.14", "chg": "+2.1%", "color": "var(--od-verdict-good)"}];
+var STOCKS_DATA   = [{"sym": "RKLB", "price": "$97.18", "chg": "-3.3%", "color": "var(--od-verdict-poor)"}, {"sym": "ASTS", "price": "$82.31", "chg": "-3.3%", "color": "var(--od-verdict-poor)"}, {"sym": "LUNR", "price": "$19.16", "chg": "-2.1%", "color": "var(--od-verdict-poor)"}, {"sym": "SPCE", "price": "$2.68", "chg": "-0.7%", "color": "var(--od-verdict-poor)"}, {"sym": "LMT", "price": "$537.43", "chg": "-1.6%", "color": "var(--od-verdict-poor)"}, {"sym": "BA", "price": "$231.33", "chg": "+2.1%", "color": "var(--od-verdict-good)"}];
 var DARK_PARKS    = [{"name": "Cherry Springs State Park", "lat": 41.66, "lon": -77.82, "bortle": 2}, {"name": "Headlands Dark Sky Park", "lat": 45.75, "lon": -84.63, "bortle": 3}, {"name": "Big Bend National Park", "lat": 29.25, "lon": -103.25, "bortle": 2}, {"name": "Death Valley National Park", "lat": 36.46, "lon": -117.02, "bortle": 2}, {"name": "Natural Bridges NM", "lat": 37.6, "lon": -109.99, "bortle": 2}, {"name": "Harriman State Park", "lat": 41.26, "lon": -74.14, "bortle": 4}, {"name": "Assateague Island", "lat": 38.05, "lon": -75.2, "bortle": 4}, {"name": "Anza-Borrego Desert", "lat": 33.22, "lon": -116.41, "bortle": 2}, {"name": "Canyonlands National Park", "lat": 38.2, "lon": -109.93, "bortle": 2}, {"name": "Glacier National Park", "lat": 48.5, "lon": -113.8, "bortle": 2}, {"name": "Great Basin National Park", "lat": 38.98, "lon": -114.26, "bortle": 2}, {"name": "Acadia National Park", "lat": 44.35, "lon": -68.21, "bortle": 4}, {"name": "Shenandoah National Park", "lat": 38.53, "lon": -78.35, "bortle": 4}, {"name": "Grand Canyon National Park", "lat": 36.1, "lon": -112.11, "bortle": 2}, {"name": "Joshua Tree National Park", "lat": 33.88, "lon": -115.9, "bortle": 3}, {"name": "Craters of the Moon NM", "lat": 43.42, "lon": -113.52, "bortle": 2}, {"name": "Black Canyon of the Gunnison", "lat": 38.57, "lon": -107.72, "bortle": 2}, {"name": "Dry Tortugas National Park", "lat": 24.63, "lon": -82.87, "bortle": 3}];
-var SERVER_KP     = 1.7;
+var SERVER_KP          = 1.7;
+var SERVER_MOON_ILLUM  = 0.585;
+var SERVER_DAYS_SHOWER = 36;
+var SERVER_SCORE       = 5.9;
 
 // helpers (same as Claude Design)
 function moonCx(i){ return (50-(1-i)*48).toFixed(1); }
@@ -375,61 +388,201 @@ document.getElementById('subscribe').addEventListener('submit', function(e){
 });
 
 // location helpers
+// Score recomputation formula (mirrors Python astro_score)
+function computeLocalScore(moonIllum, kp, cloudPct, daysShower){
+  var moonS  = 10.0 * (1.0 - moonIllum);
+  var kpS    = Math.max(0, 10.0 - (kp||2.0) * 1.4);
+  var cloudS = Math.max(0, 10.0 - cloudPct * 0.1);
+  var showerS = 0;
+  if(daysShower !== null){
+    if(daysShower<=1)      showerS=10;
+    else if(daysShower<=7) showerS=10-daysShower;
+    else if(daysShower<=14)showerS=Math.max(0,5-(daysShower-7)*0.5);
+  }
+  return Math.min(10,Math.max(0, moonS*0.40 + cloudS*0.30 + kpS*0.20 + showerS*0.10));
+}
+
+function bandColor(s){
+  return s>=5?'var(--od-verdict-good)':s>=3?'var(--od-verdict-fair)':'var(--od-verdict-poor)';
+}
+function stampLabel(s){
+  return s>=7?'EXCELLENT':s>=5?'GOOD':s>=3?'FAIR':'UNFAVOURABLE';
+}
+function wxLabel(code){
+  if(code===0) return 'Clear sky';
+  if(code<=3)  return 'Partly cloudy';
+  if(code<=48) return 'Foggy';
+  if(code<=67) return 'Rain';
+  if(code<=77) return 'Snow';
+  if(code<=82) return 'Showers';
+  return 'Stormy';
+}
+
 function applyLocation(lat, lon, label){
   var oval = 67 - (SERVER_KP * 2.5);
   var gap  = lat - oval;
-  var aLevel = gap<=0?'High tonight':gap<=5?'Possible tonight':'Low tonight';
-  var aColor = gap<=0?'var(--od-verdict-poor)':gap<=5?'var(--od-verdict-fair)':'var(--od-faint-2)';
   var aEl = document.getElementById('aurora-tip-text');
-  if (aEl) { aEl.textContent = aLevel; aEl.style.color = aColor; }
+  if (aEl) {
+    var aLevel = gap<=0?'High tonight':gap<=5?'Possible tonight':'Low tonight';
+    var aColor = gap<=0?'var(--od-verdict-poor)':gap<=5?'var(--od-verdict-fair)':'var(--od-faint-2)';
+    aEl.textContent = aLevel; aEl.style.color = aColor;
+  }
   var best=null, bd=Infinity;
   DARK_PARKS.forEach(function(p){
     var R=3958.8,pi=Math.PI/180;
     var d=2*R*Math.asin(Math.sqrt(Math.sin((p.lat-lat)*pi/2)**2+Math.cos(lat*pi)*Math.cos(p.lat*pi)*Math.sin((p.lon-lon)*pi/2)**2));
     if(d<bd){bd=d;best=p;}
   });
-  var nameEl = document.getElementById('loc-name');
-  var bortleEl = document.getElementById('loc-bortle');
-  if (nameEl && label) nameEl.textContent = label;
-  if (bortleEl && best) bortleEl.textContent = 'Nearest dark sky: '+best.name+' ('+Math.round(bd)+' mi, Bortle '+best.bortle+')';
+  if (document.getElementById('loc-name') && label)
+    document.getElementById('loc-name').textContent = label;
+  if (document.getElementById('loc-bortle') && best)
+    document.getElementById('loc-bortle').textContent = 'Nearest dark sky: '+best.name+' ('+Math.round(bd)+' mi, Bortle '+best.bortle+')';
 
-  // Fetch cloud cover for the detected location
-  fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&hourly=cloudcover,precipitation&timezone=auto&forecast_days=1')
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      var times  = data.hourly.time;
-      var clouds = data.hourly.cloudcover;
-      var precip = data.hourly.precipitation;
-      var ec=[], ep=[];
-      times.forEach(function(t,i){
-        var h = parseInt(t.split('T')[1]);
-        if(h>=18 && h<=23){ ec.push(clouds[i]); ep.push(precip[i]); }
-      });
-      if(!ec.length) return;
-      var avgC = Math.round(ec.reduce(function(a,b){return a+b;},0)/ec.length);
-      var totP = ep.reduce(function(a,b){return a+b;},0);
-      var raining = totP > 0.5;
-      var wEl = document.getElementById('weather-tile');
-      if(!wEl) return;
-      var val, color, detail;
+  // Fetch weather: current + hourly tonight + 7-day daily
+  var url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
+    +'&current=temperature_2m,weathercode,cloudcover'
+    +'&hourly=cloudcover,precipitation'
+    +'&daily=cloudcover_mean,precipitation_sum'
+    +'&temperature_unit=fahrenheit'
+    +'&timezone=auto&forecast_days=7';
+
+  fetch(url).then(function(r){ return r.json(); }).then(function(data){
+
+    // ── Current weather card ───────────────────────────────────────
+    var cur = data.current || {};
+    var wxCard = document.getElementById('weather-card');
+    if(wxCard){
+      wxCard.style.display = 'block';
+      var tempEl = document.getElementById('wx-temp');
+      var condEl = document.getElementById('wx-condition');
+      var cloudEl= document.getElementById('wx-cloud');
+      if(tempEl) tempEl.textContent = cur.temperature_2m ? Math.round(cur.temperature_2m) : '--';
+      if(condEl) condEl.textContent = wxLabel(cur.weathercode || 0);
+      if(cloudEl)cloudEl.textContent = (cur.cloudcover||0)+'% cloud';
+    }
+
+    // ── Tonight's cloud cover (18-23 local) ───────────────────────
+    var times  = (data.hourly||{}).time || [];
+    var hCloud = (data.hourly||{}).cloudcover || [];
+    var hPrecip= (data.hourly||{}).precipitation || [];
+    var ec=[], ep=[];
+    times.forEach(function(t,i){
+      var h = parseInt((t.split('T')[1]||'0'));
+      if(h>=18&&h<=23){ ec.push(hCloud[i]||0); ep.push(hPrecip[i]||0); }
+    });
+    var avgC   = ec.length ? Math.round(ec.reduce(function(a,b){return a+b;},0)/ec.length) : null;
+    var totP   = ep.reduce(function(a,b){return a+b;},0);
+    var raining= totP>0.5;
+
+    // Update weather tile
+    var wEl = document.getElementById('weather-tile');
+    if(wEl && avgC!==null){
+      var wVal, wColor, wDetail;
       if(raining){
-        val='Rain'; color='var(--od-verdict-poor)';
-        detail='Precipitation tonight ('+totP.toFixed(1)+'mm). Observing is off the table.';
+        wVal='Rain'; wColor='var(--od-verdict-poor)';
+        wDetail='Precipitation tonight ('+totP.toFixed(1)+'mm). Observing is off the table.';
       } else if(avgC>=70){
-        val=avgC+'%'; color='var(--od-verdict-poor)';
-        detail='Heavy cloud cover ('+avgC+'%). The score is academic -- nothing to see through that.';
+        wVal=avgC+'%'; wColor='var(--od-verdict-poor)';
+        wDetail='Heavy cloud cover ('+avgC+'%). The score is academic tonight.';
       } else if(avgC>=40){
-        val=avgC+'%'; color='var(--od-verdict-fair)';
-        detail='Partial cloud cover ('+avgC+'%). Gaps possible but unreliable.';
+        wVal=avgC+'%'; wColor='var(--od-verdict-fair)';
+        wDetail='Partial cloud cover ('+avgC+'%). Gaps possible but unreliable.';
       } else {
-        val=avgC+'%'; color='var(--od-verdict-good)';
-        detail='Mostly clear ('+avgC+'%). Conditions match the forecast.';
+        wVal=avgC+'%'; wColor='var(--od-verdict-good)';
+        wDetail='Mostly clear ('+avgC+'%). Conditions match the forecast.';
       }
-      var valEl = wEl.querySelector('div:first-child');
-      var tipEl = wEl.querySelector('.tip');
-      if(valEl) { valEl.innerHTML = '<span style="font-size:28px;font-weight:700;line-height:1;letter-spacing:-.02em;color:'+color+';">'+val+'</span>'; }
-      if(tipEl)  { tipEl.textContent = detail; }
-    }).catch(function(){});
+      var vEl=wEl.querySelector('div:first-child'), tEl=wEl.querySelector('.tip');
+      if(vEl) vEl.innerHTML='<span style="font-size:26px;font-weight:700;color:'+wColor+';">'+wVal+'</span>';
+      if(tEl) tEl.textContent=wDetail;
+    }
+
+    // ── Local score override ───────────────────────────────────────
+    if(avgC!==null){
+      var localScore = computeLocalScore(SERVER_MOON_ILLUM, SERVER_KP, avgC, SERVER_DAYS_SHOWER);
+      var localScore1 = Math.round(localScore*10)/10;
+      var sLabel = stampLabel(localScore1);
+      var sColor = bandColor(localScore1);
+      var sEl = document.getElementById('stamp-score');
+      var lEl = document.getElementById('stamp-label');
+      var warnEl = document.getElementById('stamp-warning');
+      var stampEl = sEl ? sEl.closest('.term') : null;
+      if(sEl) sEl.textContent = localScore1.toFixed(1);
+      if(lEl) lEl.textContent = sLabel;
+      if(stampEl){ stampEl.style.borderColor=sColor; stampEl.style.color=sColor;
+        stampEl.style.background='rgba('+( localScore1>=5?'47,125,62':localScore1>=3?'160,117,8':'176,74,47' )+',.03)'; }
+      if(warnEl && (raining || avgC>=70)){ warnEl.style.display='block'; }
+    }
+
+    // ── 7-day forecast re-render with local cloud ──────────────────
+    var dDates  = (data.daily||{}).time || [];
+    var dClouds = (data.daily||{}).cloudcover_mean || [];
+    var dPrecip = (data.daily||{}).precipitation_sum || [];
+    var cloudByDate = {};
+    dDates.forEach(function(dt,i){
+      cloudByDate[dt] = { cloud: Math.round(dClouds[i]||0), rain: (dPrecip[i]||0)>1 };
+    });
+
+    var updated = FORECAST_DATA.map(function(d){
+      var dateKey = d.date; // e.g. "Jul 6" -- need to match
+      // Find matching daily key (format "2026-07-06")
+      var match = dDates.find(function(dt){
+        var parts = dt.split('-');
+        var mo = parseInt(parts[1]);
+        var dy = parseInt(parts[2]);
+        var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return d.date === months[mo-1]+' '+dy;
+      });
+      if(match && cloudByDate[match]){
+        var wd = cloudByDate[match];
+        var moonIllum = d.illum;
+        var dayKp = SERVER_KP; // use current Kp as best estimate
+        var newScore = computeLocalScore(moonIllum, dayKp, wd.cloud, SERVER_DAYS_SHOWER);
+        return Object.assign({}, d, { cloud: wd.cloud, rain: wd.rain, score: Math.round(newScore*10)/10 });
+      }
+      return d;
+    });
+
+    document.getElementById('forecast').innerHTML = updated.map(function(d){
+      var cloudBadge='';
+      if(d.rain){
+        cloudBadge='<span class="mono" style="color:var(--od-verdict-poor);font-size:11px;letter-spacing:.06em;margin-left:8px;">Rain</span>';
+      } else if(d.cloud!==null&&d.cloud!==undefined){
+        var cc=d.cloud;
+        var cColor=cc>=70?'var(--od-verdict-poor)':cc>=40?'var(--od-verdict-fair)':'var(--od-faint-2)';
+        cloudBadge='<span class="mono" style="color:'+cColor+';font-size:11px;letter-spacing:.06em;margin-left:8px;">'+cc+'% cloud</span>';
+      }
+      function fNote(s){
+        if(s>=9)   return 'Exceptional. As good as it gets.';
+        if(s>=8.5) return 'Prime window. Clear, dark, and calm.';
+        if(s>=8.0) return 'Excellent conditions. Get out.';
+        if(s>=7.5) return 'Strong night. Worth making the effort.';
+        if(s>=7.0) return 'Good window. Most deep-sky targets accessible.';
+        if(s>=6.5) return 'Solid. Push to a dark site if you can.';
+        if(s>=6.0) return 'Decent. Bright planets and clusters well-placed.';
+        if(s>=5.5) return 'Fair. Wide-field and bright targets.';
+        if(s>=5.0) return 'Usable. Stick to brighter objects.';
+        if(s>=4.5) return 'Marginal. Moon washing out faint targets.';
+        if(s>=4.0) return 'Tough. Planets and the moon itself only.';
+        if(s>=3.5) return 'Poor. Wide-field at best.';
+        if(s>=3.0) return 'Difficult. Low expectations.';
+        if(s>=2.0) return 'Very poor. Better nights ahead.';
+        return 'Skip it.';
+      }
+      var cx=(50-(1-d.illum)*48).toFixed(1);
+      var bColor=d.score<3?'var(--od-verdict-poor)':d.score<5?'var(--od-verdict-fair)':'var(--od-verdict-good)';
+      var bg=d.score<3?'rgba(176,74,47,.04)':d.score>=5?'rgba(47,125,62,.05)':'transparent';
+      return '<div style="display:grid;grid-template-columns:70px 40px 56px 1fr;align-items:center;gap:16px;padding:13px 4px;border-top:1px solid var(--od-rule-row);background:'+bg+';">'
+        +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
+        +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div></div>'
+        +'<svg viewBox="0 0 100 100" width="30" height="30" style="display:block;"><circle cx="50" cy="50" r="48" fill="var(--od-moon-shadow)"/>'
+        +'<circle cx="'+cx+'" cy="50" r="48" fill="var(--od-moon-lit)" clip-path="url(#moonclip)"/></svg>'
+        +'<div style="font-weight:700;font-size:30px;line-height:1;color:'+bColor+';">'+d.score.toFixed(1)+'</div>'
+        +'<div style="font-size:17px;color:var(--od-ink-2);line-height:1.4;">'+fNote(d.score)
+        +cloudBadge
+        +'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:8px;">'+d.flag+'</span></div></div>';
+    }).join('');
+
+  }).catch(function(){});
 }
 
 // auto-detect via browser geolocation first, IP fallback
