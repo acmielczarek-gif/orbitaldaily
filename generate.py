@@ -127,31 +127,38 @@ def fetch_launches():
     return r.json().get("results", []) if r else []
 
 def fetch_space_history(date):
-    r = get(f"https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/{date.month}/{date.day}")
-    if not r: return None
-    space_kw = ["space","nasa","astronaut","rocket","satellite","moon","mars","apollo",
-                "shuttle","iss","orbit","launch","cosmonaut","sputnik","hubble","spacex",
-                "crew","telescope","galaxy","comet","asteroid","voyager","mercury","gemini",
-                "mir","tiangong","ariane","vostok","gagarin","armstrong","aldrin","solar",
-                "interstellar","probe","lander","rover","spacewalk","extravehicular"]
-    non_space_kw = ["war","military","battle","invasion","army","navy","politics",
-                    "president","minister","election","assassination","treaty","bomb"]
-    for ev in r.json().get("events", []):
-        text = ev.get("text","").lower()
-        if any(k in text for k in space_kw) and not any(k in text for k in non_space_kw):
-            pages = ev.get("pages", [])
-            url   = pages[0].get("content_urls",{}).get("desktop",{}).get("page","") if pages else ""
-            return {"year": ev.get("year",""), "text": ev.get("text",""), "url": url}
-    # Curated fallback if no space event found today
-    fallback = [
-        {"year": "1957", "text": "Sputnik 1, the first artificial satellite, was launched by the Soviet Union.", "url": "https://en.wikipedia.org/wiki/Sputnik_1"},
-        {"year": "1969", "text": "Apollo 11 astronauts Neil Armstrong and Buzz Aldrin became the first humans to walk on the Moon.", "url": "https://en.wikipedia.org/wiki/Apollo_11"},
-        {"year": "1990", "text": "The Hubble Space Telescope was launched aboard Space Shuttle Discovery.", "url": "https://en.wikipedia.org/wiki/Hubble_Space_Telescope"},
-        {"year": "1998", "text": "The first module of the International Space Station, Zarya, was launched.", "url": "https://en.wikipedia.org/wiki/Zarya"},
-        {"year": "2012", "text": "NASA's Curiosity rover landed on Mars in Gale Crater.", "url": "https://en.wikipedia.org/wiki/Curiosity_(rover)"},
-    ]
     import random
-    return random.choice(fallback)
+    r = get(f"https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/{date.month}/{date.day}")
+    # Unambiguous space-specific terms only -- no generic words like "space", "launch", "orbit"
+    tier1 = [
+        "nasa", "spacex", "apollo", "sputnik", "hubble", "astronaut", "cosmonaut",
+        "spacewalk", "vostok", "gagarin", "armstrong", "aldrin", "tiangong",
+        "international space station", "space station", "space shuttle", "space telescope",
+        "falcon 9", "saturn v", "voyager", "cassini", "curiosity rover", "perseverance",
+        "new horizons", "ariane", "lunar module", "moon landing", "first human in space",
+        "crewed spacecraft", "manned spacecraft", "orbital launch", "rocket launch",
+        "mars rover", "space probe", "satellite launch", "aerospace", "cosmodrome",
+        "extravehicular", "mir station", "challenger", "columbia shuttle", "gemini mission",
+        "mercury astronaut", "skylab", "iss ", "iss,", "iss.", "spacelab"
+    ]
+    curated = [
+        {"year":"1957","text":"Sputnik 1, the first artificial satellite, was launched by the Soviet Union, marking the dawn of the Space Age.","url":"https://en.wikipedia.org/wiki/Sputnik_1"},
+        {"year":"1969","text":"Apollo 11 astronauts Neil Armstrong and Buzz Aldrin became the first humans to walk on the Moon.","url":"https://en.wikipedia.org/wiki/Apollo_11"},
+        {"year":"1990","text":"The Hubble Space Telescope was launched aboard Space Shuttle Discovery into low Earth orbit.","url":"https://en.wikipedia.org/wiki/Hubble_Space_Telescope"},
+        {"year":"1998","text":"The first module of the International Space Station, Zarya, was launched into orbit.","url":"https://en.wikipedia.org/wiki/Zarya"},
+        {"year":"2012","text":"NASA's Curiosity rover successfully landed on Mars in Gale Crater, beginning its mission to assess Mars habitability.","url":"https://en.wikipedia.org/wiki/Curiosity_(rover)"},
+        {"year":"1961","text":"Soviet cosmonaut Yuri Gagarin became the first human to travel into space aboard Vostok 1.","url":"https://en.wikipedia.org/wiki/Vostok_1"},
+        {"year":"1977","text":"NASA launched Voyager 1, which would go on to become the first spacecraft to enter interstellar space.","url":"https://en.wikipedia.org/wiki/Voyager_1"},
+        {"year":"1981","text":"Space Shuttle Columbia launched on STS-1, the first orbital spaceflight of NASA's Space Shuttle program.","url":"https://en.wikipedia.org/wiki/STS-1"},
+    ]
+    if r:
+        for ev in r.json().get("events", []):
+            text = ev.get("text","").lower()
+            if any(k in text for k in tier1):
+                pages = ev.get("pages", [])
+                url   = pages[0].get("content_urls",{}).get("desktop",{}).get("page","") if pages else ""
+                return {"year": ev.get("year",""), "text": ev.get("text",""), "url": url}
+    return random.choice(curated)
 
 def fetch_humans_in_space():
     r = get("http://api.open-notify.org/astros.json")
@@ -464,39 +471,6 @@ def fetch_cloud_cover(lat=39.8, lon=-98.6):
         print(f"  Cloud cover: {e}", file=sys.stderr)
         return None
 
-    """Short punchy week description for the forecast header."""
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if not api_key:
-        return None
-    best   = max(seven_day, key=lambda d: d["score"])
-    scores = [d["score"] for d in seven_day]
-    avg    = round(sum(scores) / len(scores), 1)
-    ctx    = f"Scores this week: {', '.join(str(s) for s in scores)}"
-    ctx   += f"\nBest night: {best['dt'].strftime('%A')} at {best['score']}/10"
-    ctx   += f"\nWeek average: {avg}/10"
-    ctx   += f"\nLaunches: {len(launches)} on the manifest"
-    if showers:
-        ctx += f"\nNext meteor shower: {showers[0][1]} in {showers[0][0]} days"
-    try:
-        r = requests.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
-                     "content-type": "application/json"},
-            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 80,
-                  "messages": [{"role": "user", "content":
-                      f"Week forecast:\n{ctx}\n\n"
-                      "Write 1-2 punchy sentences for space watchers (mix of astrophotographers and space fans). "
-                      "Call out the best night and anything notable on the launch manifest. "
-                      "No em dashes. No filler. Specific and direct."}]},
-            timeout=12
-        )
-        if r.status_code == 200:
-            for block in r.json().get("content", []):
-                if block.get("type") == "text":
-                    return block["text"].strip()
-    except Exception as e:
-        print(f"  Week summary: {e}", file=sys.stderr)
-    return None
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -591,15 +565,16 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
             "https://api.anthropic.com/v1/messages",
             headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
                      "content-type": "application/json"},
-            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 150,
+            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 450,
                   "messages": [{"role": "user", "content":
                       f"Tonight's conditions:\n{chr(10).join(ctx)}\n\n"
-                      f"Write 2-3 sentences for a space intelligence dispatch. "
+                      f"Write a short editorial for a space intelligence dispatch. 3-4 sentences total. "
                       f"Directive: {directive}. "
-                      "Lead with the single most notable thing tonight -- a flare, launch, moon, NEO, whatever is most interesting. "
-                      "One sentence on what to do or what is coming. "
-                      "Voice: dry, direct, punchy. No em dashes. No generic openings. No essays. "
-                      "Return only the sentences with no line breaks between them."}]},
+                      "Sentence 1: Lead with the single most notable thing tonight -- a flare, launch, the moon, a NEO, or weather. Be specific with numbers. "
+                      "Sentence 2-3: What does it mean for someone who wants to go outside tonight or follow space news. Practical and direct. "
+                      "Sentence 4 (optional): What is coming in the next few days worth knowing. "
+                      "Voice: dry, informed, like a field correspondent. No em dashes. No generic openings like 'Tonight is'. No padding. "
+                      "Return only the sentences separated by a single space. No line breaks."}]},
             timeout=18
         )
         if r.status_code == 200:
@@ -1178,14 +1153,11 @@ function band(s){{ return s<3?'var(--od-verdict-poor)':s<5?'var(--od-verdict-fai
 function rowTint(s){{ return s<3?'rgba(176,74,47,.04)':s>=5?'rgba(47,125,62,.05)':'transparent'; }}
 function esc(s){{ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }}
 
-// render tiles -- 4x2 grid with complete borders
+// render tiles -- 4x2 grid, background border trick
 document.getElementById('tiles').innerHTML = TILES_DATA.map(function(t,i){{
-  var col = i % 4;
   var row = Math.floor(i / 4);
-  var borderL = col > 0 ? 'border-left:1px solid var(--od-rule-row);' : '';
-  var borderT = row > 0 ? 'border-top:1px solid var(--od-rule-row);' : '';
   var id = t.id ? ' id="'+t.id+'"' : '';
-  return '<div class="term" data-tip'+id+' style="padding:16px 18px;cursor:default;'+borderL+borderT+'">'
+  return '<div class="term" data-tip'+id+' style="padding:16px 18px;cursor:default;background:var(--od-paper);">'
     +'<div style="font-size:26px;font-weight:700;line-height:1;letter-spacing:-.02em;color:'+t.color+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(t.value)
     +(t.unit?'<span style="font-size:11px;color:var(--od-faint-2);margin-left:3px;">'+esc(t.unit)+'</span>':'')+'</div>'
     +'<div style="margin-top:6px;font-family:var(--od-mono);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--od-muted);display:flex;align-items:center;gap:3px;">'
@@ -1863,7 +1835,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
 
   <section style="padding:20px 0 16px;border-bottom:1px solid var(--od-rule);">
     <div class="eyebrow" style="margin-bottom:14px;">Tonight, at a glance</div>
-    <div id="tiles" style="display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--od-rule-row);border-radius:4px;overflow:hidden;"></div>
+    <div id="tiles" style="display:grid;grid-template-columns:repeat(4,1fr);background:var(--od-rule-row);gap:1px;padding:1px;border-radius:4px;overflow:hidden;"></div>
   </section>
 
   <section style="padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
