@@ -2,7 +2,8 @@ name: Regenerate Orbital Daily
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 6 * * *'    # Morning -- newsletter + full update
+    - cron: '0 18 * * *'   # Afternoon -- refresh only, no email
   workflow_dispatch:
 
 permissions:
@@ -36,6 +37,6 @@ jobs:
           git config user.email "bot@orbitaldaily.com"
           git add index.html sitemap.xml llms.txt
           git diff --staged --quiet || (
-            git commit -m "Daily update $(date -u +%Y-%m-%d)"
+            git commit -m "Daily update $(date -u +%Y-%m-%dT%H:%M)"
             git push
           )
