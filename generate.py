@@ -129,14 +129,29 @@ def fetch_launches():
 def fetch_space_history(date):
     r = get(f"https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/{date.month}/{date.day}")
     if not r: return None
-    kw = ["space","nasa","astronaut","rocket","satellite","moon","mars","apollo",
-          "shuttle","iss","orbit","launch","cosmonaut","sputnik","hubble","spacex","crew"]
+    space_kw = ["space","nasa","astronaut","rocket","satellite","moon","mars","apollo",
+                "shuttle","iss","orbit","launch","cosmonaut","sputnik","hubble","spacex",
+                "crew","telescope","galaxy","comet","asteroid","voyager","mercury","gemini",
+                "mir","tiangong","ariane","vostok","gagarin","armstrong","aldrin","solar",
+                "interstellar","probe","lander","rover","spacewalk","extravehicular"]
+    non_space_kw = ["war","military","battle","invasion","army","navy","politics",
+                    "president","minister","election","assassination","treaty","bomb"]
     for ev in r.json().get("events", []):
-        if any(k in ev.get("text","").lower() for k in kw):
+        text = ev.get("text","").lower()
+        if any(k in text for k in space_kw) and not any(k in text for k in non_space_kw):
             pages = ev.get("pages", [])
             url   = pages[0].get("content_urls",{}).get("desktop",{}).get("page","") if pages else ""
             return {"year": ev.get("year",""), "text": ev.get("text",""), "url": url}
-    return None
+    # Curated fallback if no space event found today
+    fallback = [
+        {"year": "1957", "text": "Sputnik 1, the first artificial satellite, was launched by the Soviet Union.", "url": "https://en.wikipedia.org/wiki/Sputnik_1"},
+        {"year": "1969", "text": "Apollo 11 astronauts Neil Armstrong and Buzz Aldrin became the first humans to walk on the Moon.", "url": "https://en.wikipedia.org/wiki/Apollo_11"},
+        {"year": "1990", "text": "The Hubble Space Telescope was launched aboard Space Shuttle Discovery.", "url": "https://en.wikipedia.org/wiki/Hubble_Space_Telescope"},
+        {"year": "1998", "text": "The first module of the International Space Station, Zarya, was launched.", "url": "https://en.wikipedia.org/wiki/Zarya"},
+        {"year": "2012", "text": "NASA's Curiosity rover landed on Mars in Gale Crater.", "url": "https://en.wikipedia.org/wiki/Curiosity_(rover)"},
+    ]
+    import random
+    return random.choice(fallback)
 
 def fetch_humans_in_space():
     r = get("http://api.open-notify.org/astros.json")
@@ -576,19 +591,15 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
             "https://api.anthropic.com/v1/messages",
             headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
                      "content-type": "application/json"},
-            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 300,
+            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 150,
                   "messages": [{"role": "user", "content":
                       f"Tonight's conditions:\n{chr(10).join(ctx)}\n\n"
-                      f"Write exactly 2 paragraphs of editorial prose for a space intelligence dispatch. "
+                      f"Write 2-3 sentences for a space intelligence dispatch. "
                       f"Directive: {directive}. "
-                      "Lead with whatever is MOST interesting tonight -- sometimes that's the astrophotography score, "
-                      "sometimes it's a solar flare, an incoming CME, an asteroid, or a launch. "
-                      "Write for both astrophotographers and space-curious readers. "
-                      "Paragraph 1: what is most notable tonight in space. "
-                      "Paragraph 2: what to do about it, what is coming. "
-                      "Voice: dry, informed, seasoned correspondent. "
-                      "No em dashes anywhere. No generic openings. "
-                      "Return only the two paragraphs separated by a blank line. No labels."}]},
+                      "Lead with the single most notable thing tonight -- a flare, launch, moon, NEO, whatever is most interesting. "
+                      "One sentence on what to do or what is coming. "
+                      "Voice: dry, direct, punchy. No em dashes. No generic openings. No essays. "
+                      "Return only the sentences with no line breaks between them."}]},
             timeout=18
         )
         if r.status_code == 200:
@@ -735,12 +746,12 @@ def fetch_week_summary(seven_day, launches, showers):
             "https://api.anthropic.com/v1/messages",
             headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
                      "content-type": "application/json"},
-            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 80,
+            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 150,
                   "messages": [{"role": "user", "content":
                       f"Week forecast:\n{ctx}\n\n"
                       "Write 1-2 punchy sentences for space watchers. "
-                      "Call out the best night and anything notable on the manifest. "
-                      "No em dashes. No markdown formatting. No bold. No filler. Specific and direct."}]},
+                      "Name the best night specifically. Call out any launches. "
+                      "No em dashes. No markdown. No bold. No filler. Max 40 words."}]},
             timeout=12
         )
         if r.status_code == 200:
@@ -802,6 +813,8 @@ PAGE_CSS = """<style>
     #gear{ grid-template-columns:1fr !important; }
     #tiles{ grid-template-columns:repeat(2,1fr) !important; }
     .activity-grid > div:first-child{ border-right:none !important; padding-right:0 !important; border-bottom:1px solid var(--od-rule-row); padding-bottom:20px; margin-bottom:4px; }
+    .mob-br{ display:inline !important; }
+    #loc-bortle{ display:block; margin-top:2px; }
   }
 </style>
 </head>"""
@@ -1165,7 +1178,7 @@ function band(s){{ return s<3?'var(--od-verdict-poor)':s<5?'var(--od-verdict-fai
 function rowTint(s){{ return s<3?'rgba(176,74,47,.04)':s>=5?'rgba(47,125,62,.05)':'transparent'; }}
 function esc(s){{ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }}
 
-// render tiles -- 4x2 grid
+// render tiles -- 4x2 grid with complete borders
 document.getElementById('tiles').innerHTML = TILES_DATA.map(function(t,i){{
   var col = i % 4;
   var row = Math.floor(i / 4);
@@ -1190,15 +1203,20 @@ document.getElementById('forecast').innerHTML = FORECAST_DATA.map(function(d){{
     var cColor = cc>=70?'var(--od-verdict-poor)':cc>=40?'var(--od-verdict-fair)':'var(--od-faint-2)';
     cloudBadge = '<span class="mono" style="color:'+cColor+';font-size:11px;letter-spacing:.06em;margin-left:8px;">'+cc+'% cloud</span>';
   }}
-  return '<div style="display:grid;grid-template-columns:70px 40px 56px 1fr;align-items:center;gap:16px;padding:13px 4px;border-top:1px solid var(--od-rule-row);background:'+rowTint(d.score)+';">'
+  var bColor1=band(d.score);
+  var bg1=rowTint(d.score);
+  var cx1=moonCx(d.illum);
+  return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 4px;border-top:1px solid var(--od-rule-row);background:'+bg1+';">'
     +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
-    +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div></div>'
-    +'<svg viewBox="0 0 100 100" width="30" height="30" style="display:block;"><circle cx="50" cy="50" r="48" fill="var(--od-moon-shadow)"/>'
-    +'<circle cx="'+moonCx(d.illum)+'" cy="50" r="48" fill="var(--od-moon-lit)" clip-path="url(#moonclip)"/></svg>'
-    +'<div style="font-weight:700;font-size:30px;line-height:1;color:'+band(d.score)+';">'+d.score.toFixed(1)+'</div>'
-    +'<div style="font-size:17px;color:var(--od-ink-2);line-height:1.4;">'+esc(d.note)
-    +cloudBadge
-    +'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:8px;">'+esc(d.flag)+'</span></div></div>';
+    +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div>'
+    +'<div style="font-weight:700;font-size:24px;line-height:1;color:'+bColor1+';margin-top:4px;">'+d.score.toFixed(1)+'</div></div>'
+    +'<svg viewBox="0 0 100 100" width="30" height="30" style="display:block;margin-top:2px;"><circle cx="50" cy="50" r="48" fill="var(--od-moon-shadow)"/>'
+    +'<circle cx="'+cx1+'" cy="50" r="48" fill="var(--od-moon-lit)" clip-path="url(#moonclip)"/></svg>'
+    +'<div>'
+    +'<div style="font-size:16px;color:var(--od-ink-2);line-height:1.4;">'+esc(d.note)+'</div>'
+    +'<div style="margin-top:4px;">'+cloudBadge
+    +(d.flag?'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:6px;">'+esc(d.flag)+'</span>':'')
+    +'</div></div></div>';
 }}).join('');
 
 // render gear -- no image placeholder
@@ -1314,6 +1332,28 @@ function applyLocation(lat, lon, label){{
   ['rail-city','rail-city-mobile'].forEach(function(id){{
     var el=document.getElementById(id); if(el) el.textContent=label||'your location';
   }});
+
+  // Bortle estimate + drive time for dark sky
+  var bortle = estimateBortle(lat, lon, label);
+  var driveMins = best ? Math.round(bd / 50 * 60) : null;
+  var darkSkyText = best
+    ? best.name + ' -- ' + Math.round(bd) + ' mi'
+    + (driveMins ? ' (about ' + (driveMins >= 60 ? Math.round(driveMins/60)+'h' : driveMins+'min') + ' drive)' : '')
+    + ' Bortle ' + best.bortle
+    : 'No dark sky park found nearby';
+  var bortleEl = document.getElementById('loc-bortle');
+  if(bortleEl && best){{
+    var miText = Math.round(bd)+' mi';
+    var driveText = driveMins ? ' (~'+(driveMins>=60?Math.round(driveMins/60)+'h':driveMins+'min')+')' : '';
+    bortleEl.innerHTML = best.name+' <br style="display:none" class="mob-br">'+miText+driveText+' &middot; Bortle '+best.bortle;
+  }}
+
+  // Update location bar Bortle
+  var nameEl = document.getElementById('loc-name');
+  if(nameEl && label) nameEl.textContent = label + ' (Bortle ' + bortle + ')';
+
+  // Fetch ISS pass for user location
+  fetchISSPass(lat, lon);
 
   // Fetch weather: current + hourly tonight + 7-day daily
   var url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
@@ -1462,6 +1502,21 @@ function applyLocation(lat, lon, label){{
       return d;
     }});
 
+    // Remove loading state
+    var loadEl = document.getElementById('forecast-loading');
+    if(loadEl) loadEl.style.display='none';
+
+    // Personalized best night phrasing in week-ahead header
+    var bestDay = updated.reduce(function(a,b){{ return b.score>a.score?b:a; }});
+    var weekSubEl = document.getElementById('week-sub');
+    if(weekSubEl && bestDay){{
+      var socked = updated[0].rain || updated[0].cloud >= 70;
+      var prefix = socked ? 'Tonight is socked in. ' : '';
+      weekSubEl.textContent = prefix + bestDay.day.charAt(0)+bestDay.day.slice(1).toLowerCase()
+        + ' looks like your best night at ' + bestDay.score.toFixed(1) + '/10 from '
+        + (document.getElementById('loc-name')||{{}}).textContent.split(' (')[0] + '.';
+    }}
+
     document.getElementById('forecast').innerHTML = updated.map(function(d){{
       var cloudBadge='';
       if(d.rain){{
@@ -1491,49 +1546,104 @@ function applyLocation(lat, lon, label){{
       var cx=(50-(1-d.illum)*48).toFixed(1);
       var bColor=d.score<3?'var(--od-verdict-poor)':d.score<5?'var(--od-verdict-fair)':'var(--od-verdict-good)';
       var bg=d.score<3?'rgba(176,74,47,.04)':d.score>=5?'rgba(47,125,62,.05)':'transparent';
-      return '<div style="display:grid;grid-template-columns:70px 40px 56px 1fr;align-items:center;gap:16px;padding:13px 4px;border-top:1px solid var(--od-rule-row);background:'+bg+';">'
+      return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 4px;border-top:1px solid var(--od-rule-row);background:'+bg+';">'
         +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
-        +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div></div>'
-        +'<svg viewBox="0 0 100 100" width="30" height="30" style="display:block;"><circle cx="50" cy="50" r="48" fill="var(--od-moon-shadow)"/>'
+        +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div>'
+        +'<div style="font-weight:700;font-size:24px;line-height:1;color:'+bColor+';margin-top:4px;">'+d.score.toFixed(1)+'</div></div>'
+        +'<svg viewBox="0 0 100 100" width="30" height="30" style="display:block;margin-top:2px;"><circle cx="50" cy="50" r="48" fill="var(--od-moon-shadow)"/>'
         +'<circle cx="'+cx+'" cy="50" r="48" fill="var(--od-moon-lit)" clip-path="url(#moonclip)"/></svg>'
-        +'<div style="font-weight:700;font-size:30px;line-height:1;color:'+bColor+';">'+d.score.toFixed(1)+'</div>'
-        +'<div style="font-size:17px;color:var(--od-ink-2);line-height:1.4;">'+fNote(d.score)
-        +cloudBadge
-        +'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:8px;">'+d.flag+'</span></div></div>';
+        +'<div>'
+        +'<div style="font-size:16px;color:var(--od-ink-2);line-height:1.4;">'+fNote(d.score)+'</div>'
+        +'<div style="margin-top:4px;">'+cloudBadge
+        +(d.flag?'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:6px;">'+d.flag+'</span>':'')
+        +'</div></div></div>';
     }}).join('');
 
   }}).catch(function(){{}});
 }}
 
 // auto-detect via browser geolocation first, IP fallback
+// ISS pass client-side via N2YO
+function fetchISSPass(lat, lon){{
+  var key = '{N2YO_KEY}';
+  if(!key) return;
+  fetch('https://api.n2yo.com/rest/v1/satellite/visualpasses/25544/'+lat+'/'+lon+'/0/1/40&apiKey='+key)
+    .then(function(r){{ return r.json(); }})
+    .then(function(data){{
+      var passes = (data.passes||[]);
+      if(!passes.length) return;
+      var p = passes[0];
+      var t = new Date(p.startUTC*1000);
+      var hrs = t.getUTCHours().toString().padStart(2,'0');
+      var min = t.getUTCMinutes().toString().padStart(2,'0');
+      var ampm = t.getUTCHours()<12?'AM':'PM';
+      var h12 = t.getUTCHours()%12||12;
+      var timeStr = h12+':'+min+' '+ampm+' UTC';
+      var el = document.getElementById('iss-pass');
+      if(el) el.innerHTML = 'ISS passes <strong>'+timeStr+'</strong> -- rises '+p.startAzCompass+', peaks <strong>'+Math.round(p.maxEl)+'&deg;</strong>, visible '+p.duration+'s.';
+    }}).catch(function(){{}});
+}}
+
+// Bortle estimate from population density (rough but useful)
+function estimateBortle(lat, lon, city){{
+  // Use dark parks list to estimate -- if nearest is >100mi and urban, assume Bortle 8-9
+  var best=null, bd=Infinity;
+  DARK_PARKS.forEach(function(p){{
+    var R=3958.8,pi=Math.PI/180;
+    var d=2*R*Math.asin(Math.sqrt(Math.sin((p.lat-lat)*pi/2)**2+Math.cos(lat*pi)*Math.cos(p.lat*pi)*Math.sin((p.lon-lon)*pi/2)**2));
+    if(d<bd){{bd=d;best=p;}}
+  }});
+  // Rough Bortle by distance to nearest dark sky
+  if(bd<15)  return 3;
+  if(bd<30)  return 5;
+  if(bd<60)  return 6;
+  if(bd<100) return 7;
+  return 8;
+}}
+
 function initLocation(){{
+  // Check localStorage for saved location
+  try{{
+    var saved = localStorage.getItem('od_location');
+    if(saved){{
+      var loc = JSON.parse(saved);
+      applyLocation(loc.lat, loc.lon, loc.city);
+      return;
+    }}
+  }}catch(e){{}}
+
   if (navigator.geolocation) {{
     navigator.geolocation.getCurrentPosition(
       function(pos){{
         var lat = pos.coords.latitude;
         var lon = pos.coords.longitude;
-        // reverse geocode for city name
         fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lon, {{headers:{{'Accept-Language':'en'}}}})
           .then(function(r){{ return r.json(); }})
           .then(function(d){{
             var city = (d.address && (d.address.city || d.address.town || d.address.village)) || 'your location';
+            try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city}})); }}catch(e){{}}
             applyLocation(lat, lon, city);
           }}).catch(function(){{ applyLocation(lat, lon, 'your location'); }});
       }},
       function(){{
-        // geolocation denied -- fall back to IP
         fetch('https://ipapi.co/json/')
           .then(function(r){{ return r.json(); }})
-          .then(function(d){{ applyLocation(parseFloat(d.latitude)||40, parseFloat(d.longitude)||-74, d.city||'your location'); }})
-          .catch(function(){{}});
+          .then(function(d){{
+            var lat=parseFloat(d.latitude)||40, lon=parseFloat(d.longitude)||-74, city=d.city||'your location';
+            try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city}})); }}catch(e){{}}
+            applyLocation(lat, lon, city);
+          }}).catch(function(){{}});
       }},
       {{timeout: 8000}}
     );
   }} else {{
     fetch('https://ipapi.co/json/')
       .then(function(r){{ return r.json(); }})
-      .then(function(d){{ applyLocation(parseFloat(d.latitude)||40, parseFloat(d.longitude)||-74, d.city||'your location'); }})
-      .catch(function(){{}});
+      .then(function(d){{
+        var lat=parseFloat(d.latitude)||40, lon=parseFloat(d.longitude)||-74, city=d.city||'your location';
+        try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city}})); }}catch(e){{}}
+        applyLocation(lat, lon, city);
+      }}).catch(function(){{}});
   }}
 }}
 
@@ -1547,7 +1657,10 @@ document.getElementById('change-loc').addEventListener('click', function(e){{
     .then(function(data){{
       if (data && data[0]){{
         var city = data[0].display_name.split(',')[0];
-        applyLocation(parseFloat(data[0].lat), parseFloat(data[0].lon), city);
+        var lat  = parseFloat(data[0].lat);
+        var lon  = parseFloat(data[0].lon);
+        try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city}})); }}catch(e){{}}
+        applyLocation(lat, lon, city);
       }}
     }}).catch(function(){{}});
 }});
@@ -1563,7 +1676,7 @@ document.getElementById('contact-form').addEventListener('submit',function(e){{
   var name=document.getElementById('c-name').value;
   var email=document.getElementById('c-email').value;
   var msg=document.getElementById('c-message').value;
-  window.location.href='mailto:acmielczarek@gmail.com?subject='+encodeURIComponent('Message from '+name)+'&body='+encodeURIComponent(msg+'\\n\\nFrom: '+name+' <'+email+'>');
+  window.location.href='mailto:acmielczarek@gmail.com?subject='+encodeURIComponent('Message from '+name)+'&body='+encodeURIComponent(msg+'\n\nFrom: '+name+' <'+email+'>');
   document.getElementById('contact-form').style.display='none';
   document.getElementById('contact-sent').style.display='block';
   setTimeout(function(){{document.getElementById('contact-overlay').style.display='none';document.getElementById('contact-form').style.display='';document.getElementById('contact-sent').style.display='none';document.getElementById('contact-form').reset();}},3000);
@@ -1617,7 +1730,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
 <div class="wrap">
 
   <header style="text-align:center;padding:40px 0 0;">
-    <h1 style="font-family:var(--od-serif);font-weight:600;font-size:64px;line-height:1;letter-spacing:-.02em;margin:0 0 8px;">Orbital Daily</h1>
+    <h1 style="font-family:var(--od-serif);font-weight:600;font-size:clamp(32px,8vw,64px);line-height:1;letter-spacing:-.02em;margin:0 0 8px;">Orbital Daily</h1>
     <div style="display:flex;align-items:center;justify-content:center;gap:14px;font-family:var(--od-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-muted);padding-top:6px;">
       <span style="flex:1;height:1px;background:var(--od-rule-mast);max-width:120px;"></span>
       <span>{esc(date_str)}</span>
@@ -1757,7 +1870,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
     <div class="week-head" style="display:grid;grid-template-columns:1fr auto;gap:26px;align-items:start;margin-bottom:6px;">
       <div>
         <h3 style="font-size:32px;margin:0 0 10px;">The week ahead</h3>
-        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">{esc(week_summary) if week_summary else "Seven nights scored. Check back for the best window this week."}</p>
+        <p id="week-sub" style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">{esc(week_summary) if week_summary else "Seven nights scored. Check back for the best window this week."}</p>
       </div>
       <a class="tout" href="https://amzn.to/4v9UNan" target="_blank" rel="sponsored noopener" style="display:block;width:200px;border:1px solid #e2ddd0;border-radius:8px;padding:14px;background:#fdfcf8;flex-shrink:0;">
         <div class="mono" style="font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:8px;">Sponsored</div>
@@ -1766,7 +1879,9 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
         <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);">View on Amazon</div>
       </a>
     </div>
-    <div id="forecast" style="margin-top:4px;"></div>
+    <div id="forecast" style="margin-top:4px;">
+      <div id="forecast-loading" class="mono" style="font-size:11px;color:var(--od-faint-2);padding:16px 4px;letter-spacing:.06em;">Updating to your location...</div>
+    </div>
   </section>
 
   <section style="padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
