@@ -265,61 +265,6 @@ def compute_7day(now, kp, kp_forecast, cloud_week=None):
     return days
 
 
-# ── Claude editorial note ──────────────────────────────────────────────────────
-
-def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos):
-    api_key = os.environ.get("ANTHROPIC_API_KEY","")
-    if not api_key: return None, None
-    kp_text, _ = kp_label(kp)
-    ctx = []
-    if kp is not None: ctx.append(f"Kp: {kp:.1f} ({kp_text.lower()})")
-    ctx.append(f"Astrophotography score: {score}/10 ({score_label(score)})")
-    ctx.append(f"Moon: {moon_name} ({int(moon_illum_global*100)}% illuminated)")
-    if flares:   ctx.append(f"Solar: {flares[0].get('classType','')} flare recently")
-    if neos:     ctx.append(f"NEO: {neos[0]['name']} at {neos[0]['ld']:.1f} lunar distances")
-    if launches: ctx.append(f"Next launch: {launches[0].get('name','')} ({launch_timing(launches[0].get('net',''))})")
-    if showers:  ctx.append(f"Next shower: {showers[0][1]} in {showers[0][0]} days")
-    if history:  ctx.append(f"Today in history ({history['year']}): {history['text'][:100]}")
-
-    band = score_band(score)
-    if band == "poor":
-        directive = "discourage going out tonight, name what is ruining conditions, point to a better upcoming night"
-    elif band == "fair":
-        directive = "be measured and conditional -- worth trying but with caveats"
-    elif band == "good":
-        directive = "encourage going out, name what makes it worthwhile"
-    else:
-        directive = "be enthusiastic -- this is a genuinely good night, say why"
-
-    try:
-        r = requests.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
-                     "content-type": "application/json"},
-            json={"model":"claude-haiku-4-5-20251001","max_tokens":300,
-                  "messages":[{"role":"user","content":
-                    f"Tonight's conditions:\n{chr(10).join(ctx)}\n\n"
-                    f"Write exactly 2 paragraphs of editorial prose for a space intelligence dispatch. "
-                    f"Directive: {directive}. "
-                    "Paragraph 1: describe tonight's actual sky conditions -- moon, Kp, what it means for a photographer or stargazer. "
-                    "Paragraph 2: what to do, what is coming, what to look for. "
-                    "Voice: dry, informed, like a seasoned correspondent's field note. "
-                    "No em-dash openers. No 'tonight is'. No generic openings. No em dashes anywhere. "
-                    "Return only the two paragraphs, separated by a blank line. No labels."}]},
-            timeout=18
-        )
-        if r.status_code == 200:
-            for block in r.json().get("content",[]):
-                if block.get("type") == "text":
-                    parts = [p.strip() for p in block["text"].strip().split("\n\n") if p.strip()]
-                    p1 = parts[0] if len(parts) > 0 else ""
-                    p2 = parts[1] if len(parts) > 1 else ""
-                    return p1, p2
-    except Exception as e:
-        print(f"  Editorial: {e}", file=sys.stderr)
-    return None, None
-
-
 # ── Dark sky parks ─────────────────────────────────────────────────────────────
 
 def fetch_iss_pass(lat=39.8, lon=-98.6):
@@ -537,7 +482,6 @@ def fetch_cloud_cover(lat=39.8, lon=-98.6):
     except Exception as e:
         print(f"  Week summary: {e}", file=sys.stderr)
     return None
-    return json.dumps([{"name":p["name"],"lat":p["lat"],"lon":p["lon"],"bortle":p["bortle"]} for p in DARK_SKY_PARKS])
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -761,6 +705,43 @@ Read the full dispatch at orbitaldaily.com
             print(f"  Email failed: {r.status_code} -- {r.text[:200]}", file=sys.stderr)
     except Exception as e:
         print(f"  Email error: {e}", file=sys.stderr)
+
+
+def fetch_week_summary(seven_day, launches, showers):
+    """Short punchy week description for the forecast header."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return None
+    best   = max(seven_day, key=lambda d: d["score"])
+    scores = [d["score"] for d in seven_day]
+    avg    = round(sum(scores) / len(scores), 1)
+    ctx    = f"Scores this week: {', '.join(str(s) for s in scores)}"
+    ctx   += f"\nBest night: {best['dt'].strftime('%A')} at {best['score']}/10"
+    ctx   += f"\nWeek average: {avg}/10"
+    ctx   += f"\nLaunches: {len(launches)} on the manifest"
+    if showers:
+        ctx += f"\nNext meteor shower: {showers[0][1]} in {showers[0][0]} days"
+    try:
+        r = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
+                     "content-type": "application/json"},
+            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 80,
+                  "messages": [{"role": "user", "content":
+                      f"Week forecast:\n{ctx}\n\n"
+                      "Write 1-2 punchy sentences for space watchers. "
+                      "Call out the best night and anything notable on the manifest. "
+                      "No em dashes. No markdown formatting. No bold. No filler. Specific and direct."}]},
+            timeout=12
+        )
+        if r.status_code == 200:
+            for block in r.json().get("content", []):
+                if block.get("type") == "text":
+                    import re as _re
+                    return _re.sub(r'\*+', '', block["text"]).strip()
+    except Exception as e:
+        print(f"  Week summary: {e}", file=sys.stderr)
+    return None
 
 
 # ── Renderer ───────────────────────────────────────────────────────────────────
@@ -1129,7 +1110,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         href = f' <a href="{esc(history["url"])}" style="color:var(--od-accent);">Read more</a>' if history.get("url") else ""
         hist_html = (f'<div style="background:#f5f3ee;border-bottom:1px solid var(--od-rule);padding:8px 26px;'
                      f'font-family:var(--od-mono);font-size:11px;letter-spacing:.06em;color:var(--od-faint-2);text-align:center;">'
-                     f'<strong style="color:var(--od-ink);">{esc(str(history["year"]))}</strong> &mdash; {esc(history["text"])}{href}</div>')
+                     f'<strong style="color:var(--od-ink);">{esc(str(history["year"]))}</strong> {esc(history["text"])}{href}</div>')
 
     # Lead story
     if lead_story:
@@ -1363,6 +1344,21 @@ document.getElementById('change-loc').addEventListener('click', function(e){{
 
 // run on load
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',initLocation):initLocation();
+// contact modal
+document.querySelectorAll('.open-contact').forEach(function(el){{
+  el.addEventListener('click',function(e){{e.preventDefault();document.getElementById('contact-overlay').style.display='flex';}});
+}});
+document.getElementById('contact-form').addEventListener('submit',function(e){{
+  e.preventDefault();
+  var name=document.getElementById('c-name').value;
+  var email=document.getElementById('c-email').value;
+  var msg=document.getElementById('c-message').value;
+  window.location.href='mailto:hello@orbitaldaily.com?subject='+encodeURIComponent('Message from '+name)+'&body='+encodeURIComponent(msg+'\n\nFrom: '+name+' <'+email+'>');
+  document.getElementById('contact-form').style.display='none';
+  document.getElementById('contact-sent').style.display='block';
+  setTimeout(function(){{document.getElementById('contact-overlay').style.display='none';document.getElementById('contact-form').style.display='';document.getElementById('contact-sent').style.display='none';document.getElementById('contact-form').reset();}},3000);
+}});
+document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.getElementById('contact-overlay').style.display='none';}});
 """
 
     # Meta tags
@@ -1557,11 +1553,41 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
     Some gear links are affiliate links -- a purchase may earn the desk a commission at no extra cost to you.<br>
     &copy; 2026 orbitaldaily.com, All rights reserved.<br>
     This site is a participant in the Amazon Services LLC Associates Program.<br>
+    <a href="#" class="open-contact" style="color:var(--od-muted);border-bottom:1px solid var(--od-rule);">Contact</a><br>
     Feeds: SNAPI &middot; The Space Devs &middot; NOAA SWPC &middot; NASA &middot; AMS &middot; Wikipedia
   </footer>
 
 </div>
 
+
+<!-- Contact modal -->
+<div class="modal-overlay" id="contact-overlay" style="display:none;position:fixed;inset:0;background:rgba(20,24,29,.6);z-index:200;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--od-paper);max-width:480px;width:100%;padding:36px 32px;border-radius:4px;box-shadow:0 24px 60px rgba(20,24,29,.3);position:relative;">
+    <button onclick="document.getElementById('contact-overlay').style.display='none'" style="position:absolute;top:14px;right:16px;font-family:var(--od-mono);font-size:13px;color:var(--od-faint-2);cursor:pointer;background:none;border:none;letter-spacing:.1em;">ESC</button>
+    <div style="font-family:var(--od-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--od-faint);margin-bottom:10px;">Get in touch</div>
+    <div style="font-weight:600;font-size:28px;letter-spacing:-.02em;margin-bottom:6px;">Write to the desk</div>
+    <div style="font-style:italic;font-size:15px;color:var(--od-muted);margin-bottom:22px;">Tips, corrections, telescope talk, anything.</div>
+    <form id="contact-form">
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px;">
+        <label style="font-family:var(--od-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--od-faint);">Name</label>
+        <input type="text" id="c-name" placeholder="Your name" required style="font-family:var(--od-serif);font-size:16px;padding:9px 12px;border:1px solid var(--od-rule);background:var(--od-field);color:var(--od-ink);border-radius:3px;width:100%;">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px;">
+        <label style="font-family:var(--od-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--od-faint);">Email</label>
+        <input type="email" id="c-email" placeholder="your@email.com" required style="font-family:var(--od-serif);font-size:16px;padding:9px 12px;border:1px solid var(--od-rule);background:var(--od-field);color:var(--od-ink);border-radius:3px;width:100%;">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px;">
+        <label style="font-family:var(--od-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--od-faint);">Message</label>
+        <textarea id="c-message" placeholder="What's on your mind?" required style="font-family:var(--od-serif);font-size:16px;padding:9px 12px;border:1px solid var(--od-rule);background:var(--od-field);color:var(--od-ink);border-radius:3px;width:100%;min-height:110px;resize:vertical;"></textarea>
+      </div>
+      <button type="submit" style="font-family:var(--od-mono);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--od-paper);background:var(--od-accent);padding:12px 24px;border-radius:4px;border:none;cursor:pointer;margin-top:6px;">Send message</button>
+    </form>
+    <div id="contact-sent" style="display:none;text-align:center;padding:20px 0;">
+      <div style="font-weight:600;font-size:22px;margin-bottom:6px;">Message sent.</div>
+      <div style="font-style:italic;font-size:16px;color:var(--od-muted);">We will read it over with the morning dispatch.</div>
+    </div>
+  </div>
+</div>
 <script>
 {client_js}
 </script>
