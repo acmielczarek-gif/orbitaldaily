@@ -793,7 +793,10 @@ PAGE_CSS = """<style>
   @keyframes odpulse{ 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.3;transform:scale(.75);} }
   .pulse{ width:8px; height:8px; border-radius:50%; background:var(--od-accent); animation:odpulse 1.6s ease-in-out infinite; display:inline-block; }
   @media(max-width:640px){
-    .lede-grid,.activity-grid{ grid-template-columns:1fr !important; }
+    .lede-grid{ grid-template-columns:1fr !important; }
+    .lede-grid > aside { display:none !important; }
+    .mobile-metrics{ display:flex !important; }
+    .activity-grid{ grid-template-columns:1fr !important; }
     .week-head{ grid-template-columns:1fr !important; }
     .tout{ display:none !important; }
     #gear{ grid-template-columns:1fr !important; }
@@ -916,22 +919,27 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         if cloud_data["raining"]:
             cloud_val   = "Rain"
             cloud_color = "var(--od-verdict-poor)"
+            cloud_label = "Precipitation tonight -- observing off"
             cloud_detail = f"Precipitation tonight -- {cloud_data['precip_mm']}mm expected. Observing is off the table. Check back tomorrow."
         elif c >= 70:
             cloud_val   = f"{c}%"
             cloud_color = "var(--od-verdict-poor)"
+            cloud_label = "Heavy cloud -- score is academic"
             cloud_detail = f"Heavy cloud cover tonight ({c}% average, 6pm-midnight). The score is academic -- nothing to see through that."
         elif c >= 40:
             cloud_val   = f"{c}%"
             cloud_color = "var(--od-verdict-fair)"
+            cloud_label = "Partial cloud -- gaps possible"
             cloud_detail = f"Partial cloud cover ({c}%). Gaps are possible but conditions are unreliable. Worth watching the sky before committing."
         else:
             cloud_val   = f"{c}%"
             cloud_color = "var(--od-verdict-good)"
+            cloud_label = "Mostly clear -- conditions good"
             cloud_detail = f"Mostly clear tonight ({c}% cloud cover, 6pm-midnight). Conditions match the forecast."
     else:
         cloud_val   = "--"
         cloud_color = "var(--od-faint-2)"
+        cloud_label = "Detecting your location..."
         cloud_detail = "Cloud cover data unavailable. Check local forecasts before heading out."
 
     # TILES JSON -- 7 tiles, 3-col grid
@@ -1302,6 +1310,11 @@ function applyLocation(lat, lon, label){{
   if (document.getElementById('loc-bortle') && best)
     document.getElementById('loc-bortle').textContent = 'Nearest dark sky: '+best.name+' ('+Math.round(bd)+' mi, Bortle '+best.bortle+')';
 
+  // Update rail city label
+  ['rail-city','rail-city-mobile'].forEach(function(id){{
+    var el=document.getElementById(id); if(el) el.textContent=label||'your location';
+  }});
+
   // Fetch weather: current + hourly tonight + 7-day daily
   var url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
     +'&current=temperature_2m,weathercode,cloudcover'
@@ -1312,17 +1325,15 @@ function applyLocation(lat, lon, label){{
 
   fetch(url).then(function(r){{ return r.json(); }}).then(function(data){{
 
-    // ── Current weather card ───────────────────────────────────────
+    // ── Current weather card (rail) ───────────────────────────────
     var cur = data.current || {{}};
-    var wxCard = document.getElementById('weather-card');
-    if(wxCard){{
-      wxCard.style.display = 'block';
-      var tempEl = document.getElementById('wx-temp');
-      var condEl = document.getElementById('wx-condition');
-      var cloudEl= document.getElementById('wx-cloud');
-      if(tempEl) tempEl.textContent = cur.temperature_2m ? Math.round(cur.temperature_2m) : '--';
-      if(condEl) condEl.textContent = wxLabel(cur.weathercode || 0);
-      if(cloudEl)cloudEl.textContent = (cur.cloudcover||0)+'% cloud';
+    if(cur.temperature_2m !== undefined){{
+      var tempEl = document.getElementById('rail-temp');
+      var condEl = document.getElementById('rail-condition');
+      var tempRow= document.getElementById('rail-temp-row');
+      if(tempEl) tempEl.textContent = Math.round(cur.temperature_2m);
+      if(condEl) condEl.textContent = wxLabel(cur.weathercode||0);
+      if(tempRow) tempRow.style.display='flex';
     }}
 
     // ── Tonight's cloud cover (18-23 local) ───────────────────────
@@ -1366,15 +1377,60 @@ function applyLocation(lat, lon, label){{
       var localScore1 = Math.round(localScore*10)/10;
       var sLabel = stampLabel(localScore1);
       var sColor = bandColor(localScore1);
+      var socked = raining || avgC>=70;
+
+      // Update stamp (legacy)
       var sEl = document.getElementById('stamp-score');
       var lEl = document.getElementById('stamp-label');
       var warnEl = document.getElementById('stamp-warning');
       var stampEl = sEl ? sEl.closest('.term') : null;
       if(sEl) sEl.textContent = localScore1.toFixed(1);
       if(lEl) lEl.textContent = sLabel;
-      if(stampEl){{ stampEl.style.borderColor=sColor; stampEl.style.color=sColor;
-        stampEl.style.background='rgba('+( localScore1>=5?'47,125,62':localScore1>=3?'160,117,8':'176,74,47' )+',.03)'; }}
-      if(warnEl && (raining || avgC>=70)){{ warnEl.style.display='block'; }}
+      if(stampEl){{ stampEl.style.borderColor=sColor; stampEl.style.color=sColor; }}
+      if(warnEl && socked) warnEl.style.display='block';
+
+      // Update rail score card (desktop + mobile)
+      ['rail-score','rail-score-mobile'].forEach(function(id){{
+        var el=document.getElementById(id);
+        if(el){{ el.textContent=localScore1.toFixed(1); el.style.color=sColor; }}
+      }});
+      ['rail-stamp','rail-stamp-mobile'].forEach(function(id){{
+        var el=document.getElementById(id);
+        if(el){{ el.textContent=sLabel; el.style.color=sColor; }}
+      }});
+      ['rail-score-label','rail-score-label-mobile'].forEach(function(id){{
+        var el=document.getElementById(id);
+        if(el) el.textContent='local forecast';
+      }});
+      var rwEl=document.getElementById('rail-score-warning');
+      if(rwEl && socked) rwEl.style.display='block';
+
+      // Update cloud card
+      var wVal,wColor,wLabel;
+      if(raining){{
+        wVal='Rain'; wColor='var(--od-verdict-poor)'; wLabel='Precipitation tonight -- observing off';
+      }} else if(avgC>=70){{
+        wVal=avgC+'%'; wColor='var(--od-verdict-poor)'; wLabel='Heavy cloud -- score is academic';
+      }} else if(avgC>=40){{
+        wVal=avgC+'%'; wColor='var(--od-verdict-fair)'; wLabel='Partial cloud -- gaps possible';
+      }} else {{
+        wVal=avgC+'%'; wColor='var(--od-verdict-good)'; wLabel='Mostly clear -- conditions good';
+      }}
+      ['rail-cloud-val','rail-cloud-val-mobile'].forEach(function(id){{
+        var el=document.getElementById(id);
+        if(el){{ el.textContent=wVal; el.style.color=wColor; }}
+      }});
+      ['rail-cloud-label','rail-cloud-label-mobile'].forEach(function(id){{
+        var el=document.getElementById(id); if(el) el.textContent=wLabel;
+      }});
+
+      // Update weather tile (at-a-glance)
+      var wEl = document.getElementById('weather-tile');
+      if(wEl){{
+        var vEl2=wEl.querySelector('div:first-child'), tEl2=wEl.querySelector('.tip');
+        if(vEl2) vEl2.innerHTML='<span style="font-size:26px;font-weight:700;color:'+wColor+';">'+wVal+'</span>';
+        if(tEl2) tEl2.textContent=wLabel;
+      }}
     }}
 
     // ── 7-day forecast re-render with local cloud ──────────────────
@@ -1507,7 +1563,7 @@ document.getElementById('contact-form').addEventListener('submit',function(e){{
   var name=document.getElementById('c-name').value;
   var email=document.getElementById('c-email').value;
   var msg=document.getElementById('c-message').value;
-  window.location.href='mailto:acmielczarek@gmail.com?subject='+encodeURIComponent('Message from '+name)+'&body='+encodeURIComponent(msg+'\\n\\nFrom: '+name+' <'+email+'>');
+  window.location.href='mailto:acmielczarek@gmail.com?subject='+encodeURIComponent('Message from '+name)+'&body='+encodeURIComponent(msg+'\n\nFrom: '+name+' <'+email+'>');
   document.getElementById('contact-form').style.display='none';
   document.getElementById('contact-sent').style.display='block';
   setTimeout(function(){{document.getElementById('contact-overlay').style.display='none';document.getElementById('contact-form').style.display='';document.getElementById('contact-sent').style.display='none';document.getElementById('contact-form').reset();}},3000);
@@ -1587,40 +1643,83 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
   </div>
 
   <section style="padding:40px 0 34px;border-bottom:1px solid var(--od-rule);">
-    <div class="eyebrow" style="margin-bottom:14px;">The desk&rsquo;s read for tonight</div>
-    <div class="lede-grid" style="display:grid;grid-template-columns:1fr auto;gap:34px;align-items:start;">
+
+    <!-- Mobile metrics strip (hidden on desktop, shows above lede) -->
+    <div class="mobile-metrics" style="display:none;flex-direction:column;gap:0;border:1px solid var(--od-rule-row);border-radius:6px;overflow:hidden;margin-bottom:28px;">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--od-rule-row);">
+        <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:6px;">Space Activity Index</div>
+        <div style="display:flex;align-items:baseline;gap:6px;">
+          <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;">{sai_score}</span>
+          <span class="mono" style="font-size:12px;color:var(--od-faint-2);">/100</span>
+          <span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);margin-left:4px;">{esc(sai_status.title())} skies</span>
+        </div>
+        <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:8px;max-width:200px;"><div style="width:{sai_score}%;height:100%;background:var(--od-accent);"></div></div>
+      </div>
+      <div style="padding:14px 16px;border-bottom:1px solid var(--od-rule-row);">
+        <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:6px;">Shoot Score <span id="rail-score-label-mobile" style="color:var(--od-faint-2);letter-spacing:.06em;text-transform:none;font-size:10px;">global forecast</span></div>
+        <div style="display:flex;align-items:baseline;gap:6px;">
+          <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;color:{stamp_color};" id="rail-score-mobile">{score}</span>
+          <span class="mono" style="font-size:12px;color:var(--od-faint-2);">/10</span>
+          <span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;" id="rail-stamp-mobile" style="color:{stamp_color};">{esc(stamp_label)}</span>
+        </div>
+      </div>
+      <div style="padding:14px 16px;">
+        <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:6px;">Your sky tonight &middot; <span id="rail-city-mobile" style="letter-spacing:.04em;font-size:10px;text-transform:none;">detecting...</span></div>
+        <div style="font-weight:700;font-size:28px;line-height:1;letter-spacing:-.02em;" id="rail-cloud-val-mobile" style="color:{cloud_color};">{cloud_val}</div>
+        <div class="mono" style="font-size:11px;color:var(--od-faint-2);margin-top:4px;" id="rail-cloud-label-mobile">{cloud_label}</div>
+      </div>
+    </div>
+
+    <div class="eyebrow" style="margin-bottom:6px;">The desk&rsquo;s read for tonight</div>
+    <div class="mono" style="font-size:11px;color:var(--od-faint-2);margin-bottom:18px;letter-spacing:.04em;">Global space intelligence &middot; local conditions on the right</div>
+
+    <div class="lede-grid" style="display:grid;grid-template-columns:1fr 220px;gap:34px;align-items:start;">
       <div>
         <h2 style="font-size:52px;line-height:1.02;letter-spacing:-.025em;margin:0 0 18px;">{esc(headline)}</h2>
         {p1_html}
         {p2_html}
         <div style="font-style:italic;font-size:16px;color:var(--od-muted);">the Orbital Daily desk</div>
       </div>
-      <aside style="display:flex;flex-direction:column;align-items:center;gap:22px;padding-top:4px;">
-        <div style="text-align:center;">
-          <svg viewBox="0 0 100 100" width="104" height="104" style="display:block;">
-            <circle cx="50" cy="50" r="48" fill="var(--od-moon-shadow)"></circle>
-            <circle cx="{cx}" cy="50" r="48" fill="var(--od-moon-lit)" clip-path="url(#moonclip)"></circle>
-            <circle cx="50" cy="50" r="48" fill="none" stroke="#d8d4c8" stroke-width="1"></circle>
-          </svg>
-          <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--od-faint);margin-top:10px;">{esc(moon_name)}</div>
-          <div style="font-size:15px;color:var(--od-muted);font-style:italic;">{moon_pct}% lit</div>
-        </div>
-        <div class="term" data-tip tabindex="0" style="border:1.5px solid {stamp_color};border-radius:6px;padding:12px 16px 10px;text-align:center;transform:rotate(-4deg);color:{stamp_color};background:{stamp_bg};">
-          <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.2em;" id="stamp-label">{esc(stamp_label)}</div>
-          <div style="font-weight:700;font-size:38px;line-height:1;margin-top:4px;" id="stamp-score">{score}</div>
-          <div class="mono" style="font-size:10px;letter-spacing:.12em;margin-top:2px;">SHOOT SCORE / 10 &#9432;</div>
-          <div id="stamp-warning" style="display:none;font-family:var(--od-mono);font-size:10px;letter-spacing:.08em;margin-top:6px;padding-top:6px;border-top:1px solid currentColor;opacity:.8;">CLOUD OVERRIDE</div>
-          <span class="tip above">Half of it is moon darkness -- a dark, moonless sky beats everything, and nothing rescues a night when the moon is up. A quarter is how calm the magnetic field is; the rest is whether a meteor shower is near its peak.</span>
-        </div>
-        <div id="weather-card" style="display:none;border:1px solid var(--od-rule-row);border-radius:6px;padding:12px 14px;text-align:left;width:100%;background:var(--od-field);">
-          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Local weather</div>
-          <div style="display:flex;align-items:baseline;gap:8px;">
-            <span id="wx-temp" style="font-weight:700;font-size:28px;letter-spacing:-.02em;color:var(--od-ink);">--</span>
-            <span class="mono" style="font-size:11px;color:var(--od-faint-2);">F</span>
+
+      <aside style="display:flex;flex-direction:column;gap:12px;padding-top:4px;">
+
+        <!-- SAI card -->
+        <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:16px;background:var(--od-field);">
+          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Space Activity Index &#9432;</div>
+          <div style="display:flex;align-items:baseline;gap:6px;">
+            <span style="font-weight:700;font-size:42px;line-height:1;letter-spacing:-.02em;">{sai_score}</span>
+            <span class="mono" style="font-size:13px;color:var(--od-faint-2);">/100</span>
           </div>
-          <div id="wx-condition" style="font-size:15px;color:var(--od-ink-2);margin-top:4px;">Detecting...</div>
-          <div id="wx-cloud" class="mono" style="font-size:11px;color:var(--od-faint-2);margin-top:4px;">--% cloud</div>
+          <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--od-accent);margin-top:4px;">{esc(sai_status.title())} skies</div>
+          <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:10px;"><div style="width:{sai_score}%;height:100%;background:var(--od-accent);"></div></div>
+          <span class="tip below">How awake the space world is tonight -- mostly how busy the launch pads are, plus the Sun&rsquo;s mood, how charged the sky is, and whether any asteroid is swinging close.</span>
         </div>
+
+        <!-- Shoot score card -->
+        <div style="border:1px solid var(--od-rule-row);border-radius:6px;padding:16px;background:var(--od-field);">
+          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Shoot Score &middot; <span id="rail-score-label" style="color:var(--od-faint-2);letter-spacing:.04em;font-size:10px;text-transform:none;font-weight:400;">global forecast</span></div>
+          <div style="display:flex;align-items:baseline;gap:6px;">
+            <span style="font-weight:700;font-size:42px;line-height:1;letter-spacing:-.02em;color:{stamp_color};" id="rail-score">{score}</span>
+            <span class="mono" style="font-size:13px;color:var(--od-faint-2);">/10</span>
+          </div>
+          <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:{stamp_color};" id="rail-stamp">{esc(stamp_label)}</div>
+          <div id="rail-score-warning" style="display:none;font-family:var(--od-mono);font-size:10px;color:var(--od-verdict-poor);letter-spacing:.06em;margin-top:6px;">cloud override active</div>
+        </div>
+
+        <!-- Cloud / weather card -->
+        <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:16px;background:var(--od-field);">
+          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Your sky tonight &#9432;</div>
+          <div style="font-family:var(--od-mono);font-size:11px;color:var(--od-muted);margin-bottom:8px;" id="rail-city">detecting location...</div>
+          <div style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;" id="rail-cloud-val" style="color:{cloud_color};">{cloud_val}</div>
+          <div class="mono" style="font-size:11px;color:var(--od-faint-2);margin-top:6px;" id="rail-cloud-label">{cloud_label}</div>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--od-rule-row);display:flex;align-items:baseline;gap:6px;" id="rail-temp-row" style="display:none;">
+            <span style="font-weight:600;font-size:22px;" id="rail-temp">--</span>
+            <span class="mono" style="font-size:11px;color:var(--od-faint-2);">F</span>
+            <span style="font-size:14px;color:var(--od-muted);" id="rail-condition"></span>
+          </div>
+          <span class="tip below">Cloud cover and temperature for your detected location, updated live. This is what the sky actually looks like -- the shoot score adjusts to match.</span>
+        </div>
+
       </aside>
     </div>
   </section>
