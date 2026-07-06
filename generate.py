@@ -540,7 +540,7 @@ def launch_when_color(timing):
 
 # ── fetch_editorial — 2 paragraphs, returns (p1, p2) ──────────────────────────
 
-def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos):
+def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=None):
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key: return None, None
     kp_text, _ = kp_label(kp)
@@ -548,19 +548,28 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
     if kp is not None: ctx.append(f"Kp: {kp:.1f} ({kp_text.lower()})")
     ctx.append(f"Astrophotography score: {score}/10 ({score_label(score)})")
     ctx.append(f"Moon: {moon_name} ({int(moon_illum_global * 100)}% illuminated)")
+    if cloud_data:
+        if cloud_data.get("raining"):
+            ctx.append(f"Weather: Rain tonight -- observing is off the table")
+        else:
+            ctx.append(f"Weather: {cloud_data.get('cloud_pct', 0)}% cloud cover tonight")
     if flares:   ctx.append(f"Solar: {flares[0].get('classType', '')} flare recently")
     if neos:     ctx.append(f"NEO: {neos[0]['name']} at {neos[0]['ld']:.1f} lunar distances")
     if launches: ctx.append(f"Next launch: {launches[0].get('name', '')} ({launch_timing(launches[0].get('net', ''))})")
     if showers:  ctx.append(f"Next shower: {showers[0][1]} in {showers[0][0]} days")
     if history:  ctx.append(f"Today in history ({history['year']}): {history['text'][:100]}")
 
-    band = score_band(score)
-    directive = {
-        "poor":      "discourage going out tonight, name what is ruining conditions, point to a better night ahead",
-        "fair":      "be measured and conditional -- worth trying but only with caveats",
-        "good":      "encourage going out, name what makes it worthwhile",
-        "excellent": "be enthusiastic -- this is a genuinely good night, say why",
-    }[band]
+    # Override directive if weather is bad
+    if cloud_data and (cloud_data.get("raining") or cloud_data.get("cloud_pct", 0) >= 70):
+        directive = "be direct -- it is socked in tonight, observing is impossible, acknowledge it plainly and pivot to what is interesting in space this week instead"
+    else:
+        band = score_band(score)
+        directive = {
+            "poor":      "discourage going out tonight, name what is ruining conditions, point to a better night ahead",
+            "fair":      "be measured and conditional -- worth trying but only with caveats",
+            "good":      "encourage going out, name what makes it worthwhile",
+            "excellent": "be enthusiastic -- this is a genuinely good night, say why",
+        }[band]
 
     try:
         r = requests.post(
@@ -1121,7 +1130,9 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         lead_html = ""
 
     # Client-side JS -- geolocation + tooltips + data injection
-    kp_val_js = f"{kp:.1f}" if kp is not None else "2.0"
+    kp_val_js         = f"{kp:.1f}" if kp is not None else "2.0"
+    days_shower_js    = str(showers[0][0]) if showers else "null"
+    server_score_js   = str(score)
     dark_sky_data = json.dumps([
         {"name": p["name"], "lat": p["lat"], "lon": p["lon"], "bortle": p["bortle"]}
         for p in DARK_SKY_PARKS
@@ -1135,7 +1146,10 @@ var LAUNCHES_DATA = {launches_json};
 var WIRES_DATA    = {wires_json};
 var STOCKS_DATA   = {stocks_json};
 var DARK_PARKS    = {dark_sky_data};
-var SERVER_KP     = {kp_val_js};
+var SERVER_KP          = {kp_val_js};
+var SERVER_MOON_ILLUM  = {round(moon_illum, 3)};
+var SERVER_DAYS_SHOWER = {days_shower_js};
+var SERVER_SCORE       = {server_score_js};
 
 // helpers (same as Claude Design)
 function moonCx(i){{ return (50-(1-i)*48).toFixed(1); }}
@@ -1238,61 +1252,201 @@ document.getElementById('subscribe').addEventListener('submit', function(e){{
 }});
 
 // location helpers
+// Score recomputation formula (mirrors Python astro_score)
+function computeLocalScore(moonIllum, kp, cloudPct, daysShower){{
+  var moonS  = 10.0 * (1.0 - moonIllum);
+  var kpS    = Math.max(0, 10.0 - (kp||2.0) * 1.4);
+  var cloudS = Math.max(0, 10.0 - cloudPct * 0.1);
+  var showerS = 0;
+  if(daysShower !== null){{
+    if(daysShower<=1)      showerS=10;
+    else if(daysShower<=7) showerS=10-daysShower;
+    else if(daysShower<=14)showerS=Math.max(0,5-(daysShower-7)*0.5);
+  }}
+  return Math.min(10,Math.max(0, moonS*0.40 + cloudS*0.30 + kpS*0.20 + showerS*0.10));
+}}
+
+function bandColor(s){{
+  return s>=5?'var(--od-verdict-good)':s>=3?'var(--od-verdict-fair)':'var(--od-verdict-poor)';
+}}
+function stampLabel(s){{
+  return s>=7?'EXCELLENT':s>=5?'GOOD':s>=3?'FAIR':'UNFAVOURABLE';
+}}
+function wxLabel(code){{
+  if(code===0) return 'Clear sky';
+  if(code<=3)  return 'Partly cloudy';
+  if(code<=48) return 'Foggy';
+  if(code<=67) return 'Rain';
+  if(code<=77) return 'Snow';
+  if(code<=82) return 'Showers';
+  return 'Stormy';
+}}
+
 function applyLocation(lat, lon, label){{
   var oval = 67 - (SERVER_KP * 2.5);
   var gap  = lat - oval;
-  var aLevel = gap<=0?'High tonight':gap<=5?'Possible tonight':'Low tonight';
-  var aColor = gap<=0?'var(--od-verdict-poor)':gap<=5?'var(--od-verdict-fair)':'var(--od-faint-2)';
   var aEl = document.getElementById('aurora-tip-text');
-  if (aEl) {{ aEl.textContent = aLevel; aEl.style.color = aColor; }}
+  if (aEl) {{
+    var aLevel = gap<=0?'High tonight':gap<=5?'Possible tonight':'Low tonight';
+    var aColor = gap<=0?'var(--od-verdict-poor)':gap<=5?'var(--od-verdict-fair)':'var(--od-faint-2)';
+    aEl.textContent = aLevel; aEl.style.color = aColor;
+  }}
   var best=null, bd=Infinity;
   DARK_PARKS.forEach(function(p){{
     var R=3958.8,pi=Math.PI/180;
     var d=2*R*Math.asin(Math.sqrt(Math.sin((p.lat-lat)*pi/2)**2+Math.cos(lat*pi)*Math.cos(p.lat*pi)*Math.sin((p.lon-lon)*pi/2)**2));
     if(d<bd){{bd=d;best=p;}}
   }});
-  var nameEl = document.getElementById('loc-name');
-  var bortleEl = document.getElementById('loc-bortle');
-  if (nameEl && label) nameEl.textContent = label;
-  if (bortleEl && best) bortleEl.textContent = 'Nearest dark sky: '+best.name+' ('+Math.round(bd)+' mi, Bortle '+best.bortle+')';
+  if (document.getElementById('loc-name') && label)
+    document.getElementById('loc-name').textContent = label;
+  if (document.getElementById('loc-bortle') && best)
+    document.getElementById('loc-bortle').textContent = 'Nearest dark sky: '+best.name+' ('+Math.round(bd)+' mi, Bortle '+best.bortle+')';
 
-  // Fetch cloud cover for the detected location
-  fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&hourly=cloudcover,precipitation&timezone=auto&forecast_days=1')
-    .then(function(r){{ return r.json(); }})
-    .then(function(data){{
-      var times  = data.hourly.time;
-      var clouds = data.hourly.cloudcover;
-      var precip = data.hourly.precipitation;
-      var ec=[], ep=[];
-      times.forEach(function(t,i){{
-        var h = parseInt(t.split('T')[1]);
-        if(h>=18 && h<=23){{ ec.push(clouds[i]); ep.push(precip[i]); }}
-      }});
-      if(!ec.length) return;
-      var avgC = Math.round(ec.reduce(function(a,b){{return a+b;}},0)/ec.length);
-      var totP = ep.reduce(function(a,b){{return a+b;}},0);
-      var raining = totP > 0.5;
-      var wEl = document.getElementById('weather-tile');
-      if(!wEl) return;
-      var val, color, detail;
+  // Fetch weather: current + hourly tonight + 7-day daily
+  var url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
+    +'&current=temperature_2m,weathercode,cloudcover'
+    +'&hourly=cloudcover,precipitation'
+    +'&daily=cloudcover_mean,precipitation_sum'
+    +'&temperature_unit=fahrenheit'
+    +'&timezone=auto&forecast_days=7';
+
+  fetch(url).then(function(r){{ return r.json(); }}).then(function(data){{
+
+    // ── Current weather card ───────────────────────────────────────
+    var cur = data.current || {{}};
+    var wxCard = document.getElementById('weather-card');
+    if(wxCard){{
+      wxCard.style.display = 'block';
+      var tempEl = document.getElementById('wx-temp');
+      var condEl = document.getElementById('wx-condition');
+      var cloudEl= document.getElementById('wx-cloud');
+      if(tempEl) tempEl.textContent = cur.temperature_2m ? Math.round(cur.temperature_2m) : '--';
+      if(condEl) condEl.textContent = wxLabel(cur.weathercode || 0);
+      if(cloudEl)cloudEl.textContent = (cur.cloudcover||0)+'% cloud';
+    }}
+
+    // ── Tonight's cloud cover (18-23 local) ───────────────────────
+    var times  = (data.hourly||{{}}).time || [];
+    var hCloud = (data.hourly||{{}}).cloudcover || [];
+    var hPrecip= (data.hourly||{{}}).precipitation || [];
+    var ec=[], ep=[];
+    times.forEach(function(t,i){{
+      var h = parseInt((t.split('T')[1]||'0'));
+      if(h>=18&&h<=23){{ ec.push(hCloud[i]||0); ep.push(hPrecip[i]||0); }}
+    }});
+    var avgC   = ec.length ? Math.round(ec.reduce(function(a,b){{return a+b;}},0)/ec.length) : null;
+    var totP   = ep.reduce(function(a,b){{return a+b;}},0);
+    var raining= totP>0.5;
+
+    // Update weather tile
+    var wEl = document.getElementById('weather-tile');
+    if(wEl && avgC!==null){{
+      var wVal, wColor, wDetail;
       if(raining){{
-        val='Rain'; color='var(--od-verdict-poor)';
-        detail='Precipitation tonight ('+totP.toFixed(1)+'mm). Observing is off the table.';
+        wVal='Rain'; wColor='var(--od-verdict-poor)';
+        wDetail='Precipitation tonight ('+totP.toFixed(1)+'mm). Observing is off the table.';
       }} else if(avgC>=70){{
-        val=avgC+'%'; color='var(--od-verdict-poor)';
-        detail='Heavy cloud cover ('+avgC+'%). The score is academic -- nothing to see through that.';
+        wVal=avgC+'%'; wColor='var(--od-verdict-poor)';
+        wDetail='Heavy cloud cover ('+avgC+'%). The score is academic tonight.';
       }} else if(avgC>=40){{
-        val=avgC+'%'; color='var(--od-verdict-fair)';
-        detail='Partial cloud cover ('+avgC+'%). Gaps possible but unreliable.';
+        wVal=avgC+'%'; wColor='var(--od-verdict-fair)';
+        wDetail='Partial cloud cover ('+avgC+'%). Gaps possible but unreliable.';
       }} else {{
-        val=avgC+'%'; color='var(--od-verdict-good)';
-        detail='Mostly clear ('+avgC+'%). Conditions match the forecast.';
+        wVal=avgC+'%'; wColor='var(--od-verdict-good)';
+        wDetail='Mostly clear ('+avgC+'%). Conditions match the forecast.';
       }}
-      var valEl = wEl.querySelector('div:first-child');
-      var tipEl = wEl.querySelector('.tip');
-      if(valEl) {{ valEl.innerHTML = '<span style="font-size:28px;font-weight:700;line-height:1;letter-spacing:-.02em;color:'+color+';">'+val+'</span>'; }}
-      if(tipEl)  {{ tipEl.textContent = detail; }}
-    }}).catch(function(){{}});
+      var vEl=wEl.querySelector('div:first-child'), tEl=wEl.querySelector('.tip');
+      if(vEl) vEl.innerHTML='<span style="font-size:26px;font-weight:700;color:'+wColor+';">'+wVal+'</span>';
+      if(tEl) tEl.textContent=wDetail;
+    }}
+
+    // ── Local score override ───────────────────────────────────────
+    if(avgC!==null){{
+      var localScore = computeLocalScore(SERVER_MOON_ILLUM, SERVER_KP, avgC, SERVER_DAYS_SHOWER);
+      var localScore1 = Math.round(localScore*10)/10;
+      var sLabel = stampLabel(localScore1);
+      var sColor = bandColor(localScore1);
+      var sEl = document.getElementById('stamp-score');
+      var lEl = document.getElementById('stamp-label');
+      var warnEl = document.getElementById('stamp-warning');
+      var stampEl = sEl ? sEl.closest('.term') : null;
+      if(sEl) sEl.textContent = localScore1.toFixed(1);
+      if(lEl) lEl.textContent = sLabel;
+      if(stampEl){{ stampEl.style.borderColor=sColor; stampEl.style.color=sColor;
+        stampEl.style.background='rgba('+( localScore1>=5?'47,125,62':localScore1>=3?'160,117,8':'176,74,47' )+',.03)'; }}
+      if(warnEl && (raining || avgC>=70)){{ warnEl.style.display='block'; }}
+    }}
+
+    // ── 7-day forecast re-render with local cloud ──────────────────
+    var dDates  = (data.daily||{{}}).time || [];
+    var dClouds = (data.daily||{{}}).cloudcover_mean || [];
+    var dPrecip = (data.daily||{{}}).precipitation_sum || [];
+    var cloudByDate = {{}};
+    dDates.forEach(function(dt,i){{
+      cloudByDate[dt] = {{ cloud: Math.round(dClouds[i]||0), rain: (dPrecip[i]||0)>1 }};
+    }});
+
+    var updated = FORECAST_DATA.map(function(d){{
+      var dateKey = d.date; // e.g. "Jul 6" -- need to match
+      // Find matching daily key (format "2026-07-06")
+      var match = dDates.find(function(dt){{
+        var parts = dt.split('-');
+        var mo = parseInt(parts[1]);
+        var dy = parseInt(parts[2]);
+        var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return d.date === months[mo-1]+' '+dy;
+      }});
+      if(match && cloudByDate[match]){{
+        var wd = cloudByDate[match];
+        var moonIllum = d.illum;
+        var dayKp = SERVER_KP; // use current Kp as best estimate
+        var newScore = computeLocalScore(moonIllum, dayKp, wd.cloud, SERVER_DAYS_SHOWER);
+        return Object.assign({{}}, d, {{ cloud: wd.cloud, rain: wd.rain, score: Math.round(newScore*10)/10 }});
+      }}
+      return d;
+    }});
+
+    document.getElementById('forecast').innerHTML = updated.map(function(d){{
+      var cloudBadge='';
+      if(d.rain){{
+        cloudBadge='<span class="mono" style="color:var(--od-verdict-poor);font-size:11px;letter-spacing:.06em;margin-left:8px;">Rain</span>';
+      }} else if(d.cloud!==null&&d.cloud!==undefined){{
+        var cc=d.cloud;
+        var cColor=cc>=70?'var(--od-verdict-poor)':cc>=40?'var(--od-verdict-fair)':'var(--od-faint-2)';
+        cloudBadge='<span class="mono" style="color:'+cColor+';font-size:11px;letter-spacing:.06em;margin-left:8px;">'+cc+'% cloud</span>';
+      }}
+      function fNote(s){{
+        if(s>=9)   return 'Exceptional. As good as it gets.';
+        if(s>=8.5) return 'Prime window. Clear, dark, and calm.';
+        if(s>=8.0) return 'Excellent conditions. Get out.';
+        if(s>=7.5) return 'Strong night. Worth making the effort.';
+        if(s>=7.0) return 'Good window. Most deep-sky targets accessible.';
+        if(s>=6.5) return 'Solid. Push to a dark site if you can.';
+        if(s>=6.0) return 'Decent. Bright planets and clusters well-placed.';
+        if(s>=5.5) return 'Fair. Wide-field and bright targets.';
+        if(s>=5.0) return 'Usable. Stick to brighter objects.';
+        if(s>=4.5) return 'Marginal. Moon washing out faint targets.';
+        if(s>=4.0) return 'Tough. Planets and the moon itself only.';
+        if(s>=3.5) return 'Poor. Wide-field at best.';
+        if(s>=3.0) return 'Difficult. Low expectations.';
+        if(s>=2.0) return 'Very poor. Better nights ahead.';
+        return 'Skip it.';
+      }}
+      var cx=(50-(1-d.illum)*48).toFixed(1);
+      var bColor=d.score<3?'var(--od-verdict-poor)':d.score<5?'var(--od-verdict-fair)':'var(--od-verdict-good)';
+      var bg=d.score<3?'rgba(176,74,47,.04)':d.score>=5?'rgba(47,125,62,.05)':'transparent';
+      return '<div style="display:grid;grid-template-columns:70px 40px 56px 1fr;align-items:center;gap:16px;padding:13px 4px;border-top:1px solid var(--od-rule-row);background:'+bg+';">'
+        +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
+        +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div></div>'
+        +'<svg viewBox="0 0 100 100" width="30" height="30" style="display:block;"><circle cx="50" cy="50" r="48" fill="var(--od-moon-shadow)"/>'
+        +'<circle cx="'+cx+'" cy="50" r="48" fill="var(--od-moon-lit)" clip-path="url(#moonclip)"/></svg>'
+        +'<div style="font-weight:700;font-size:30px;line-height:1;color:'+bColor+';">'+d.score.toFixed(1)+'</div>'
+        +'<div style="font-size:17px;color:var(--od-ink-2);line-height:1.4;">'+fNote(d.score)
+        +cloudBadge
+        +'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:8px;">'+d.flag+'</span></div></div>';
+    }}).join('');
+
+  }}).catch(function(){{}});
 }}
 
 // auto-detect via browser geolocation first, IP fallback
@@ -1353,7 +1507,7 @@ document.getElementById('contact-form').addEventListener('submit',function(e){{
   var name=document.getElementById('c-name').value;
   var email=document.getElementById('c-email').value;
   var msg=document.getElementById('c-message').value;
-  window.location.href='mailto:acmielczarek@gmail.com?subject='+encodeURIComponent('Message from '+name)+'&body='+encodeURIComponent(msg+'\\n\\nFrom: '+name+' <'+email+'>');
+  window.location.href='mailto:acmielczarek@gmail.com?subject='+encodeURIComponent('Message from '+name)+'&body='+encodeURIComponent(msg+'\n\nFrom: '+name+' <'+email+'>');
   document.getElementById('contact-form').style.display='none';
   document.getElementById('contact-sent').style.display='block';
   setTimeout(function(){{document.getElementById('contact-overlay').style.display='none';document.getElementById('contact-form').style.display='';document.getElementById('contact-sent').style.display='none';document.getElementById('contact-form').reset();}},3000);
@@ -1452,10 +1606,20 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
           <div style="font-size:15px;color:var(--od-muted);font-style:italic;">{moon_pct}% lit</div>
         </div>
         <div class="term" data-tip tabindex="0" style="border:1.5px solid {stamp_color};border-radius:6px;padding:12px 16px 10px;text-align:center;transform:rotate(-4deg);color:{stamp_color};background:{stamp_bg};">
-          <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.2em;">{esc(stamp_label)}</div>
-          <div style="font-weight:700;font-size:38px;line-height:1;margin-top:4px;">{score}</div>
+          <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.2em;" id="stamp-label">{esc(stamp_label)}</div>
+          <div style="font-weight:700;font-size:38px;line-height:1;margin-top:4px;" id="stamp-score">{score}</div>
           <div class="mono" style="font-size:10px;letter-spacing:.12em;margin-top:2px;">SHOOT SCORE / 10 &#9432;</div>
+          <div id="stamp-warning" style="display:none;font-family:var(--od-mono);font-size:10px;letter-spacing:.08em;margin-top:6px;padding-top:6px;border-top:1px solid currentColor;opacity:.8;">CLOUD OVERRIDE</div>
           <span class="tip above">Half of it is moon darkness -- a dark, moonless sky beats everything, and nothing rescues a night when the moon is up. A quarter is how calm the magnetic field is; the rest is whether a meteor shower is near its peak.</span>
+        </div>
+        <div id="weather-card" style="display:none;border:1px solid var(--od-rule-row);border-radius:6px;padding:12px 14px;text-align:left;width:100%;background:var(--od-field);">
+          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Local weather</div>
+          <div style="display:flex;align-items:baseline;gap:8px;">
+            <span id="wx-temp" style="font-weight:700;font-size:28px;letter-spacing:-.02em;color:var(--od-ink);">--</span>
+            <span class="mono" style="font-size:11px;color:var(--od-faint-2);">F</span>
+          </div>
+          <div id="wx-condition" style="font-size:15px;color:var(--od-ink-2);margin-top:4px;">Detecting...</div>
+          <div id="wx-cloud" class="mono" style="font-size:11px;color:var(--od-faint-2);margin-top:4px;">--% cloud</div>
         </div>
       </aside>
     </div>
@@ -1663,7 +1827,7 @@ if __name__ == "__main__":
                             tonight_cloud["cloud_pct"] if tonight_cloud else None)
     sai, sai_status, sai_color = compute_sai(kp, launches, neos, flares)
     seven_day = compute_7day(now, kp, kp_forecast, cloud_week)
-    ed_p1, ed_p2 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos)
+    ed_p1, ed_p2 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud)
     week_sum  = fetch_week_summary(seven_day, launches, showers)
 
     # Morning run (before noon UTC) sends email; afternoon run refreshes only
