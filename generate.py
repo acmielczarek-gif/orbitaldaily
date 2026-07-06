@@ -1676,7 +1676,7 @@ document.getElementById('contact-form').addEventListener('submit',function(e){{
   var name=document.getElementById('c-name').value;
   var email=document.getElementById('c-email').value;
   var msg=document.getElementById('c-message').value;
-  window.location.href='mailto:acmielczarek@gmail.com?subject='+encodeURIComponent('Message from '+name)+'&body='+encodeURIComponent(msg+'\n\nFrom: '+name+' <'+email+'>');
+  window.location.href='mailto:acmielczarek@gmail.com?subject='+encodeURIComponent('Message from '+name)+'&body='+encodeURIComponent(msg+'\\n\\nFrom: '+name+' <'+email+'>');
   document.getElementById('contact-form').style.display='none';
   document.getElementById('contact-sent').style.display='block';
   setTimeout(function(){{document.getElementById('contact-overlay').style.display='none';document.getElementById('contact-form').style.display='';document.getElementById('contact-sent').style.display='none';document.getElementById('contact-form').reset();}},3000);
