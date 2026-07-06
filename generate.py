@@ -361,7 +361,24 @@ def fetch_stocks():
             results.append({"sym": sym, "price": "--", "chg": "--", "color": "var(--od-faint-2)"})
     return results
 
-def compute_visible_planets(now):
+def forecast_note(score, kp=None):
+    if score >= 9.0:   n = "Exceptional. As good as it gets tonight."
+    elif score >= 8.5: n = "Prime window. Clear, dark, and calm."
+    elif score >= 8.0: n = "Excellent conditions. Get out."
+    elif score >= 7.5: n = "Strong night. Worth making the effort."
+    elif score >= 7.0: n = "Good window. Most deep-sky targets accessible."
+    elif score >= 6.5: n = "Solid. Push to a dark site if you can."
+    elif score >= 6.0: n = "Decent. Bright planets and clusters well-placed."
+    elif score >= 5.5: n = "Fair. Wide-field and bright targets."
+    elif score >= 5.0: n = "Usable. Stick to brighter objects."
+    elif score >= 4.5: n = "Marginal. Moon washing out faint targets."
+    elif score >= 4.0: n = "Tough. Planets and the moon itself only."
+    elif score >= 3.5: n = "Poor. Wide-field at best."
+    elif score >= 3.0: n = "Difficult. Low expectations tonight."
+    elif score >= 2.0: n = "Very poor. Better nights ahead."
+    else:              n = "Skip it. Check back later in the week."
+    if kp and kp >= 5: n += " Aurora watch active."
+    return n
     """Approximate planet visibility using simplified orbital elements."""
     J2000 = datetime(2000, 1, 1, 12, tzinfo=timezone.utc)
     d     = (now - J2000).total_seconds() / 86400
@@ -708,7 +725,13 @@ PAGE_CSS = """<style>
   .idot{ display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; border-radius:50%; border:1px solid #cbc6b8; font-size:9px; color:var(--od-faint-2); }
   @keyframes odpulse{ 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.3;transform:scale(.75);} }
   .pulse{ width:8px; height:8px; border-radius:50%; background:var(--od-accent); animation:odpulse 1.6s ease-in-out infinite; display:inline-block; }
-  @media(max-width:640px){ .lede-grid,.activity-grid,.week-head{ grid-template-columns:1fr !important; } .tout{ width:100% !important; } }
+  @media(max-width:640px){
+    .lede-grid,.activity-grid{ grid-template-columns:1fr !important; }
+    .week-head{ grid-template-columns:1fr !important; }
+    .tout{ display:none !important; }
+    #gear{ grid-template-columns:1fr !important; }
+    .activity-grid > div:first-child{ border-right:none !important; padding-right:0 !important; border-bottom:1px solid var(--od-rule-row); padding-bottom:20px; margin-bottom:4px; }
+  }
 </style>
 </head>"""
 
@@ -848,12 +871,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
             "date":  d["dt"].strftime(f"%b {d['dt'].day}"),
             "illum": round(d["illum"], 2),
             "score": d["score"],
-            "note":  (
-                "Prime window. Get out -- imaging and observing both." if d["score"] >= 7 else
-                "Solid night. Most targets accessible, bright planets visible." if d["score"] >= 5 else
-                "Marginal. Moon interference -- bright targets only." if d["score"] >= 3 else
-                "Tough conditions. Good night to plan your next session."
-            ),
+            "note":  forecast_note(d["score"], d.get("kp")),
             "flag":  (
                 next((str(sum(1 for l in launches if l.get("net","").startswith(d["dt"].strftime("%Y-%m-%d")))) + " LAUNCH" +
                       ("" if sum(1 for l in launches if l.get("net","").startswith(d["dt"].strftime("%Y-%m-%d"))) == 1 else "ES")
@@ -1006,15 +1024,13 @@ function band(s){{ return s<3?'var(--od-verdict-poor)':s<5?'var(--od-verdict-fai
 function rowTint(s){{ return s<3?'rgba(176,74,47,.04)':s>=5?'rgba(47,125,62,.05)':'transparent'; }}
 function esc(s){{ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }}
 
-// render tiles
-document.getElementById('tiles').innerHTML = TILES_DATA.map(function(t){{
-  return '<a class="term" data-tip href="'+t.href+'" style="text-decoration:none;padding:2px 20px;'+(t.first?'':'border-left:1px solid var(--od-rule-row);')+'display:block;">'
-    +'<div style="display:flex;align-items:baseline;gap:6px;">'
-    +'<span style="font-weight:700;font-size:40px;line-height:.95;letter-spacing:-.02em;color:'+t.color+';">'+esc(t.value)+'</span>'
-    +'<span class="mono" style="font-size:12px;color:var(--od-faint-2);">'+esc(t.unit)+'</span></div>'
-    +'<div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-family:var(--od-mono);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--od-muted);">'
+// render tiles -- single scrollable row, compact
+document.getElementById('tiles').innerHTML = TILES_DATA.map(function(t,i){{
+  return '<div class="term" data-tip style="flex:1 0 110px;min-width:0;padding:10px 14px;'+(i>0?'border-left:1px solid var(--od-rule-row);':'')+'cursor:default;">'
+    +'<div style="font-size:26px;font-weight:700;line-height:1;letter-spacing:-.02em;color:'+t.color+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(t.value)+'<span style="font-size:11px;color:var(--od-faint-2);margin-left:2px;">'+esc(t.unit)+'</span></div>'
+    +'<div style="margin-top:5px;font-family:var(--od-mono);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--od-muted);display:flex;align-items:center;gap:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
     +esc(t.label)+'<span class="idot">i</span></div>'
-    +'<span class="tip below">'+esc(t.detail)+'</span></a>';
+    +'<span class="tip below">'+esc(t.detail)+'</span></div>';
 }}).join('');
 
 // render forecast
@@ -1029,17 +1045,14 @@ document.getElementById('forecast').innerHTML = FORECAST_DATA.map(function(d){{
     +'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:8px;">'+esc(d.flag)+'</span></div></div>';
 }}).join('');
 
-// render gear
+// render gear -- no image placeholder
 document.getElementById('gear').innerHTML = GEAR_DATA.map(function(g){{
-  return '<a href="'+g.url+'" target="_blank" rel="sponsored noopener" style="display:block;">'
-    +'<div style="height:150px;border-radius:6px;background:repeating-linear-gradient(135deg,#f0ede4,#f0ede4 9px,#eae6db 9px,#eae6db 18px);border:1px solid var(--od-rule-row);display:flex;align-items:center;justify-content:center;">'
-    +'<span class="mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-faint-2);">product shot</span></div>'
-    +'<div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin:14px 0 4px;">'+esc(g.cat)+'</div>'
-    +'<div style="font-weight:600;font-size:20px;line-height:1.2;letter-spacing:-.01em;">'+esc(g.name)+'</div>'
-    +'<div style="font-size:15px;line-height:1.45;color:var(--od-ink-3);margin:7px 0 10px;">'+esc(g.why)+'</div>'
-    +'<div style="display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--od-rule-row);padding-top:9px;">'
-    +'<div style="border-top:1px solid var(--od-rule-row);padding-top:9px;">'
-    +'<span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);">View on Amazon</span></div></a>';
+  return '<a href="'+g.url+'" target="_blank" rel="sponsored noopener" style="display:block;border:1px solid var(--od-rule-row);border-radius:6px;padding:18px;background:var(--od-field);">'
+    +'<div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">'+esc(g.cat)+'</div>'
+    +'<div style="font-weight:600;font-size:19px;line-height:1.25;letter-spacing:-.01em;margin-bottom:8px;">'+esc(g.name)+'</div>'
+    +'<div style="font-size:15px;line-height:1.5;color:var(--od-ink-3);margin-bottom:14px;">'+esc(g.why)+'</div>'
+    +'<div style="border-top:1px solid var(--od-rule-row);padding-top:10px;">'
+    +'<span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);">View on Amazon &rarr;</span></div></a>';
 }}).join('');
 
 // render launches
@@ -1222,6 +1235,16 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
   {hist_html}
   {bulletin_html}
 
+  <div style="background:#f5f3ee;border-bottom:1px solid var(--od-rule);padding:8px 0;">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span class="pulse"></span>
+      <span style="font-family:var(--od-mono);font-size:11px;color:var(--od-faint);">Tonight for</span>
+      <span style="font-family:var(--od-mono);font-size:11px;font-weight:600;color:var(--od-ink);" id="loc-name">detecting location...</span>
+      <span style="font-family:var(--od-mono);font-size:11px;color:var(--od-muted);" id="loc-bortle"></span>
+      <a href="#" id="change-loc" style="font-family:var(--od-mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);border-bottom:1px dotted var(--od-accent);">Change</a>
+    </div>
+  </div>
+
   <section style="padding:40px 0 34px;border-bottom:1px solid var(--od-rule);">
     <div class="eyebrow" style="margin-bottom:14px;">The desk&rsquo;s read for tonight</div>
     <div class="lede-grid" style="display:grid;grid-template-columns:1fr auto;gap:34px;align-items:start;">
@@ -1275,42 +1298,32 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
     </div>
   </section>
 
-  <section style="padding:26px 0 8px;border-bottom:1px solid var(--od-rule);">
-    <div class="eyebrow" style="margin-bottom:18px;">Tonight, at a glance</div>
-    <div id="tiles" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));row-gap:24px;margin-bottom:26px;"></div>
+  <section style="padding:20px 0 16px;border-bottom:1px solid var(--od-rule);">
+    <div class="eyebrow" style="margin-bottom:14px;">Tonight, at a glance</div>
+    <div id="tiles" style="display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:0;padding-bottom:4px;"></div>
   </section>
 
   <section style="padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
     <div class="week-head" style="display:grid;grid-template-columns:1fr auto;gap:26px;align-items:start;margin-bottom:6px;">
       <div>
         <h3 style="font-size:32px;margin:0 0 10px;">The week ahead</h3>
-        <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;">
-          <span style="font-weight:600;font-size:22px;" id="loc-name">your location</span>
-          <span class="mono" style="font-size:12px;letter-spacing:.06em;color:var(--od-muted);" id="loc-bortle">detecting...</span>
-          <a href="#" id="change-loc" style="display:inline-flex;align-items:center;gap:7px;font-family:var(--od-mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);">
-            <span class="pulse"></span> Change location
-          </a>
-        </div>
-        <div style="font-style:italic;font-size:16px;color:var(--od-muted);margin-top:12px;max-width:64ch;">{esc(week_summary) if week_summary else "Seven nights scored. Check Thursday for the best window this week."}</div>
+        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">{esc(week_summary) if week_summary else "Seven nights scored. Check back for the best window this week."}</p>
       </div>
-      <a class="tout" href="https://amzn.to/4v9UNan" target="_blank" rel="sponsored noopener" style="display:block;width:220px;border:1px solid #e2ddd0;border-radius:8px;padding:14px;background:#fdfcf8;">
-        <div class="mono" style="font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:10px;">Sponsored</div>
-        <div style="height:78px;border-radius:4px;background:repeating-linear-gradient(135deg,#f0ede4,#f0ede4 9px,#eae6db 9px,#eae6db 18px);display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
-          <span class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-faint-2);">product slot</span>
-        </div>
-        <div style="font-weight:600;font-size:17px;line-height:1.2;">Celestron StarSense Explorer DX 130AZ</div>
-        <div style="font-size:13px;color:var(--od-muted);line-height:1.4;margin:4px 0 8px;">App-guided 130mm reflector. Best value at this aperture.</div>
+      <a class="tout" href="https://amzn.to/4v9UNan" target="_blank" rel="sponsored noopener" style="display:block;width:200px;border:1px solid #e2ddd0;border-radius:8px;padding:14px;background:#fdfcf8;flex-shrink:0;">
+        <div class="mono" style="font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:8px;">Sponsored</div>
+        <div style="font-weight:600;font-size:16px;line-height:1.25;margin-bottom:6px;">Celestron StarSense Explorer DX 130AZ</div>
+        <div style="font-size:13px;color:var(--od-muted);line-height:1.4;margin-bottom:10px;">App-guided 130mm reflector. Best value at this aperture.</div>
         <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);">View on Amazon</div>
       </a>
     </div>
-    <div id="forecast" style="margin-top:14px;"></div>
+    <div id="forecast" style="margin-top:4px;"></div>
   </section>
 
   <section style="padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
     <h3 style="font-size:32px;margin:0 0 4px;">The desk&rsquo;s kit</h3>
     <div style="font-style:italic;font-size:16px;color:var(--od-muted);margin-bottom:4px;max-width:66ch;">What we would actually point at the sky this week.</div>
     <div class="mono" style="font-size:11px;letter-spacing:.04em;color:var(--od-faint-2);margin-bottom:20px;">Affiliate links -- a purchase may support the desk at no cost to you.</div>
-    <div id="gear" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:26px;"></div>
+    <div id="gear" style="display:grid;grid-template-columns:repeat(3,1fr);gap:26px;"></div>
   </section>
 
   <section style="padding:40px 0;border-bottom:1px solid var(--od-rule);text-align:center;">
