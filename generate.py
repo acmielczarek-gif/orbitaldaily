@@ -426,7 +426,60 @@ def solar_cycle_info(now):
         desc  = "Heading toward solar quiet. Calmer skies, fewer auroras -- but better for imaging."
     return {"number": 25, "pct": pct, "phase": phase, "desc": desc, "months": round(months_elapsed)}
 
-def fetch_week_summary(seven_day, launches, showers):
+def compute_visible_planets(now):
+    """Approximate planet visibility using simplified orbital elements."""
+    J2000   = datetime(2000, 1, 1, 12, tzinfo=timezone.utc)
+    d       = (now - J2000).total_seconds() / 86400
+    L_earth = (280.4665 + 0.98564736 * d) % 360
+    planets = [
+        {"name": "Venus",   "L0": 181.979, "rate": 1.6021302, "inner": True},
+        {"name": "Mars",    "L0": 355.433, "rate": 0.5240208, "inner": False},
+        {"name": "Jupiter", "L0": 34.351,  "rate": 0.0830853, "inner": False},
+        {"name": "Saturn",  "L0": 50.077,  "rate": 0.0334985, "inner": False},
+    ]
+    visible = []
+    for p in planets:
+        L_planet = (p["L0"] + p["rate"] * d) % 360
+        elong    = (L_planet - L_earth + 180) % 360 - 180
+        if p["inner"]:
+            if elong > 15:    visible.append({"name": p["name"], "when": "evening sky"})
+            elif elong < -15: visible.append({"name": p["name"], "when": "morning sky"})
+        else:
+            if elong > 60:    visible.append({"name": p["name"], "when": "evening sky"})
+            elif elong < -60: visible.append({"name": p["name"], "when": "morning sky"})
+    return visible
+
+def fetch_cloud_cover(lat=39.8, lon=-98.6):
+    """Open-Meteo cloud cover and precipitation for tonight's viewing hours."""
+    try:
+        r = get(
+            f"https://api.open-meteo.com/v1/forecast"
+            f"?latitude={lat}&longitude={lon}"
+            f"&hourly=cloudcover,precipitation&timezone=UTC&forecast_days=1",
+            timeout=10
+        )
+        if not r:
+            return None
+        data    = r.json()
+        times   = data.get("hourly", {}).get("time", [])
+        clouds  = data.get("hourly", {}).get("cloudcover", [])
+        precip  = data.get("hourly", {}).get("precipitation", [])
+        eve_c, eve_p = [], []
+        for i, t in enumerate(times):
+            hour = int(t.split("T")[1].split(":")[0])
+            if 18 <= hour <= 23:
+                if i < len(clouds): eve_c.append(clouds[i])
+                if i < len(precip): eve_p.append(precip[i])
+        if not eve_c:
+            return None
+        return {
+            "cloud_pct":  round(sum(eve_c) / len(eve_c)),
+            "precip_mm":  round(sum(eve_p), 1),
+            "raining":    sum(eve_p) > 0.5,
+        }
+    except Exception as e:
+        print(f"  Cloud cover: {e}", file=sys.stderr)
+        return None
     """Short punchy week description for the forecast header."""
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
@@ -730,6 +783,7 @@ PAGE_CSS = """<style>
     .week-head{ grid-template-columns:1fr !important; }
     .tout{ display:none !important; }
     #gear{ grid-template-columns:1fr !important; }
+    #tiles{ grid-template-columns:repeat(2,1fr) !important; }
     .activity-grid > div:first-child{ border-right:none !important; padding-right:0 !important; border-bottom:1px solid var(--od-rule-row); padding-bottom:20px; margin-bottom:4px; }
   }
 </style>
@@ -739,7 +793,7 @@ PAGE_CSS = """<style>
 def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
            neos, flares, history, ed_p1, ed_p2, now, sai_score, sai_status, sai_color,
            score, moon_illum, moon_name, moon_emoji, seven_day,
-           stocks=None, iss_pass=None, week_summary=None):
+           stocks=None, iss_pass=None, week_summary=None, cloud_data=None):
 
     global moon_illum_global
     moon_illum_global = moon_illum
@@ -842,7 +896,31 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
     planet_detail = (f"Visible in the evening sky tonight: {', '.join(p['name'] + ' (' + p['when'] + ')' for p in planets_vis)}."
                      if planets_vis else "No bright planets well-positioned for evening viewing tonight.")
 
-    # TILES JSON — 6 tiles, no left border on first tile
+    # Weather tile data
+    if cloud_data:
+        c = cloud_data["cloud_pct"]
+        if cloud_data["raining"]:
+            cloud_val   = "Rain"
+            cloud_color = "var(--od-verdict-poor)"
+            cloud_detail = f"Precipitation tonight -- {cloud_data['precip_mm']}mm expected. Observing is off the table. Check back tomorrow."
+        elif c >= 70:
+            cloud_val   = f"{c}%"
+            cloud_color = "var(--od-verdict-poor)"
+            cloud_detail = f"Heavy cloud cover tonight ({c}% average, 6pm-midnight). The score is academic -- nothing to see through that."
+        elif c >= 40:
+            cloud_val   = f"{c}%"
+            cloud_color = "var(--od-verdict-fair)"
+            cloud_detail = f"Partial cloud cover ({c}%). Gaps are possible but conditions are unreliable. Worth watching the sky before committing."
+        else:
+            cloud_val   = f"{c}%"
+            cloud_color = "var(--od-verdict-good)"
+            cloud_detail = f"Mostly clear tonight ({c}% cloud cover, 6pm-midnight). Conditions match the forecast."
+    else:
+        cloud_val   = "--"
+        cloud_color = "var(--od-faint-2)"
+        cloud_detail = "Cloud cover data unavailable. Check local forecasts before heading out."
+
+    # TILES JSON -- 7 tiles, 3-col grid
     tiles_json = json.dumps([
         {"value": str(moon_dark_pct), "unit": "% dark", "label": "Moon darkness",
          "color": moon_dark_color, "href": "#moon", "first": True,
@@ -862,6 +940,10 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         {"value": f"Cycle {solar['number']}", "unit": "", "label": f"Solar cycle -- {solar['phase']}",
          "color": "var(--od-ink)", "href": "#solar", "first": False,
          "detail": solar["desc"] + f" We are {solar['pct']}% through Cycle {solar['number']}."},
+        {"value": cloud_val, "unit": "", "label": "Cloud cover tonight",
+         "color": cloud_color, "href": "#clouds", "first": False,
+         "id": "weather-tile",
+         "detail": cloud_detail},
     ])
 
     # FORECAST JSON
@@ -1024,13 +1106,19 @@ function band(s){{ return s<3?'var(--od-verdict-poor)':s<5?'var(--od-verdict-fai
 function rowTint(s){{ return s<3?'rgba(176,74,47,.04)':s>=5?'rgba(47,125,62,.05)':'transparent'; }}
 function esc(s){{ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }}
 
-// render tiles -- single scrollable row, compact
+// render tiles -- 3-col grid
 document.getElementById('tiles').innerHTML = TILES_DATA.map(function(t,i){{
-  return '<div class="term" data-tip style="flex:1 0 110px;min-width:0;padding:10px 14px;'+(i>0?'border-left:1px solid var(--od-rule-row);':'')+'cursor:default;">'
-    +'<div style="font-size:26px;font-weight:700;line-height:1;letter-spacing:-.02em;color:'+t.color+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(t.value)+'<span style="font-size:11px;color:var(--od-faint-2);margin-left:2px;">'+esc(t.unit)+'</span></div>'
-    +'<div style="margin-top:5px;font-family:var(--od-mono);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--od-muted);display:flex;align-items:center;gap:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+  var col = i % 3;
+  var row = Math.floor(i / 3);
+  var borderL = col > 0 ? 'border-left:1px solid var(--od-rule-row);' : '';
+  var borderT = row > 0 ? 'border-top:1px solid var(--od-rule-row);' : '';
+  var id = t.id ? ' id="'+t.id+'"' : '';
+  return '<div class="term" data-tip'+id+' style="padding:16px 18px;cursor:default;'+borderL+borderT+'">'
+    +'<div style="font-size:28px;font-weight:700;line-height:1;letter-spacing:-.02em;color:'+t.color+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(t.value)
+    +(t.unit?'<span style="font-size:11px;color:var(--od-faint-2);margin-left:3px;">'+esc(t.unit)+'</span>':'')+'</div>'
+    +'<div style="margin-top:6px;font-family:var(--od-mono);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--od-muted);display:flex;align-items:center;gap:3px;">'
     +esc(t.label)+'<span class="idot">i</span></div>'
-    +'<span class="tip below">'+esc(t.detail)+'</span></div>';
+    +'<span class="tip '+(row===0?'below':'above')+'">'+esc(t.detail)+'</span></div>';
 }}).join('');
 
 // render forecast
@@ -1121,6 +1209,44 @@ function applyLocation(lat, lon, label){{
   var bortleEl = document.getElementById('loc-bortle');
   if (nameEl && label) nameEl.textContent = label;
   if (bortleEl && best) bortleEl.textContent = 'Nearest dark sky: '+best.name+' ('+Math.round(bd)+' mi, Bortle '+best.bortle+')';
+
+  // Fetch cloud cover for the detected location
+  fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&hourly=cloudcover,precipitation&timezone=auto&forecast_days=1')
+    .then(function(r){{ return r.json(); }})
+    .then(function(data){{
+      var times  = data.hourly.time;
+      var clouds = data.hourly.cloudcover;
+      var precip = data.hourly.precipitation;
+      var ec=[], ep=[];
+      times.forEach(function(t,i){{
+        var h = parseInt(t.split('T')[1]);
+        if(h>=18 && h<=23){{ ec.push(clouds[i]); ep.push(precip[i]); }}
+      }});
+      if(!ec.length) return;
+      var avgC = Math.round(ec.reduce(function(a,b){{return a+b;}},0)/ec.length);
+      var totP = ep.reduce(function(a,b){{return a+b;}},0);
+      var raining = totP > 0.5;
+      var wEl = document.getElementById('weather-tile');
+      if(!wEl) return;
+      var val, color, detail;
+      if(raining){{
+        val='Rain'; color='var(--od-verdict-poor)';
+        detail='Precipitation tonight ('+totP.toFixed(1)+'mm). Observing is off the table.';
+      }} else if(avgC>=70){{
+        val=avgC+'%'; color='var(--od-verdict-poor)';
+        detail='Heavy cloud cover ('+avgC+'%). The score is academic -- nothing to see through that.';
+      }} else if(avgC>=40){{
+        val=avgC+'%'; color='var(--od-verdict-fair)';
+        detail='Partial cloud cover ('+avgC+'%). Gaps possible but unreliable.';
+      }} else {{
+        val=avgC+'%'; color='var(--od-verdict-good)';
+        detail='Mostly clear ('+avgC+'%). Conditions match the forecast.';
+      }}
+      var valEl = wEl.querySelector('div:first-child');
+      var tipEl = wEl.querySelector('.tip');
+      if(valEl) {{ valEl.innerHTML = '<span style="font-size:28px;font-weight:700;line-height:1;letter-spacing:-.02em;color:'+color+';">'+val+'</span>'; }}
+      if(tipEl)  {{ tipEl.textContent = detail; }}
+    }}).catch(function(){{}});
 }}
 
 // auto-detect via browser geolocation first, IP fallback
@@ -1300,7 +1426,7 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
 
   <section style="padding:20px 0 16px;border-bottom:1px solid var(--od-rule);">
     <div class="eyebrow" style="margin-bottom:14px;">Tonight, at a glance</div>
-    <div id="tiles" style="display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:0;padding-bottom:4px;"></div>
+    <div id="tiles" style="display:grid;grid-template-columns:repeat(3,1fr);"></div>
   </section>
 
   <section style="padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
@@ -1429,6 +1555,7 @@ if __name__ == "__main__":
     flares       = fetch_solar_flares(now); print(f"  Flares: {len(flares)}")
     stocks       = fetch_stocks();          print(f"  Stocks: {len(stocks)}")
     iss_pass     = fetch_iss_pass();        print(f"  ISS pass: {iss_pass['time'] if iss_pass else 'none'}")
+    cloud_data   = fetch_cloud_cover();     print(f"  Cloud cover: {cloud_data['cloud_pct']}% ({('rain' if cloud_data['raining'] else 'dry')})") if cloud_data else print("  Cloud cover: unavailable")
 
     _, moon_illum, moon_name, moon_emoji = moon_phase(now)
     moon_illum_global = moon_illum
@@ -1450,7 +1577,8 @@ if __name__ == "__main__":
     html = render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
                   neos, flares, history, ed_p1, ed_p2, now, sai, sai_status, sai_color,
                   score, moon_illum, moon_name, moon_emoji, seven_day,
-                  stocks=stocks, iss_pass=iss_pass, week_summary=week_sum)
+                  stocks=stocks, iss_pass=iss_pass, week_summary=week_sum,
+                  cloud_data=cloud_data)
 
     with open("index.html","w",encoding="utf-8") as f: f.write(html)
     print("  index.html")
