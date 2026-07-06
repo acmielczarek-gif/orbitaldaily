@@ -738,7 +738,40 @@ Read the full dispatch at orbitaldaily.com
     except Exception as e:
         print(f"  Email error: {e}", file=sys.stderr)
 
-
+def fetch_week_summary(seven_day, launches, showers):
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return None
+    best   = max(seven_day, key=lambda d: d["score"])
+    scores = [d["score"] for d in seven_day]
+    avg    = round(sum(scores) / len(scores), 1)
+    ctx    = f"Scores this week: {', '.join(str(s) for s in scores)}"
+    ctx   += f"\nBest night: {best['dt'].strftime('%A')} at {best['score']}/10"
+    ctx   += f"\nWeek average: {avg}/10"
+    ctx   += f"\nLaunches: {len(launches)} on the manifest"
+    if showers:
+        ctx += f"\nNext meteor shower: {showers[0][1]} in {showers[0][0]} days"
+    try:
+        r = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
+                     "content-type": "application/json"},
+            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 80,
+                  "messages": [{"role": "user", "content":
+                      f"Week forecast:\n{ctx}\n\n"
+                      "Write 1-2 punchy sentences for space watchers. "
+                      "Call out the best night and anything notable on the manifest. "
+                      "No em dashes. No filler. Specific and direct."}]},
+            timeout=12
+        )
+        if r.status_code == 200:
+            for block in r.json().get("content", []):
+                if block.get("type") == "text":
+                    return block["text"].strip()
+    except Exception as e:
+        print(f"  Week summary: {e}", file=sys.stderr)
+    return None
+  
 # ── Renderer ───────────────────────────────────────────────────────────────────
 
 PAGE_CSS = """<style>
