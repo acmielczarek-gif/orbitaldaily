@@ -361,7 +361,88 @@ def fetch_stocks():
             results.append({"sym": sym, "price": "--", "chg": "--", "color": "var(--od-faint-2)"})
     return results
 
-def dark_sky_json():
+def compute_visible_planets(now):
+    """Approximate planet visibility using simplified orbital elements."""
+    J2000 = datetime(2000, 1, 1, 12, tzinfo=timezone.utc)
+    d     = (now - J2000).total_seconds() / 86400
+    L_earth = (280.4665 + 0.98564736 * d) % 360
+
+    planets = [
+        {"name": "Venus",   "L0": 181.979, "rate": 1.6021302, "inner": True},
+        {"name": "Mars",    "L0": 355.433, "rate": 0.5240208, "inner": False},
+        {"name": "Jupiter", "L0": 34.351,  "rate": 0.0830853, "inner": False},
+        {"name": "Saturn",  "L0": 50.077,  "rate": 0.0334985, "inner": False},
+    ]
+    visible = []
+    for p in planets:
+        L_planet = (p["L0"] + p["rate"] * d) % 360
+        elong    = (L_planet - L_earth + 180) % 360 - 180
+        if p["inner"]:
+            if elong > 15:
+                visible.append({"name": p["name"], "when": "evening sky"})
+            elif elong < -15:
+                visible.append({"name": p["name"], "when": "morning sky"})
+        else:
+            if elong > 60:
+                visible.append({"name": p["name"], "when": "evening sky"})
+            elif elong < -60:
+                visible.append({"name": p["name"], "when": "morning sky"})
+    return visible
+
+def solar_cycle_info(now):
+    """Solar Cycle 25 position and phase."""
+    cycle_start = datetime(2019, 12, 1, tzinfo=timezone.utc)
+    cycle_months = 132  # ~11 years
+    months_elapsed = (now - cycle_start).total_seconds() / (30.44 * 86400)
+    pct = min(100, round(months_elapsed / cycle_months * 100))
+    if pct < 30:
+        phase = "Ascending"
+        desc  = "Rising toward solar max. Activity increasing -- more aurora opportunities ahead."
+    elif pct < 58:
+        phase = "Near Maximum"
+        desc  = "At or near solar maximum. Elevated aurora and storm activity expected through 2026."
+    elif pct < 80:
+        phase = "Descending"
+        desc  = "Past maximum. Activity gradually declining toward the next quiet period."
+    else:
+        phase = "Approaching Minimum"
+        desc  = "Heading toward solar quiet. Calmer skies, fewer auroras -- but better for imaging."
+    return {"number": 25, "pct": pct, "phase": phase, "desc": desc, "months": round(months_elapsed)}
+
+def fetch_week_summary(seven_day, launches, showers):
+    """Short punchy week description for the forecast header."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return None
+    best   = max(seven_day, key=lambda d: d["score"])
+    scores = [d["score"] for d in seven_day]
+    avg    = round(sum(scores) / len(scores), 1)
+    ctx    = f"Scores this week: {', '.join(str(s) for s in scores)}"
+    ctx   += f"\nBest night: {best['dt'].strftime('%A')} at {best['score']}/10"
+    ctx   += f"\nWeek average: {avg}/10"
+    ctx   += f"\nLaunches: {len(launches)} on the manifest"
+    if showers:
+        ctx += f"\nNext meteor shower: {showers[0][1]} in {showers[0][0]} days"
+    try:
+        r = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
+                     "content-type": "application/json"},
+            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 80,
+                  "messages": [{"role": "user", "content":
+                      f"Week forecast:\n{ctx}\n\n"
+                      "Write 1-2 punchy sentences for space watchers (mix of astrophotographers and space fans). "
+                      "Call out the best night and anything notable on the launch manifest. "
+                      "No em dashes. No filler. Specific and direct."}]},
+            timeout=12
+        )
+        if r.status_code == 200:
+            for block in r.json().get("content", []):
+                if block.get("type") == "text":
+                    return block["text"].strip()
+    except Exception as e:
+        print(f"  Week summary: {e}", file=sys.stderr)
+    return None
     return json.dumps([{"name":p["name"],"lat":p["lat"],"lon":p["lon"],"bortle":p["bortle"]} for p in DARK_SKY_PARKS])
 
 
@@ -453,8 +534,11 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
                       f"Tonight's conditions:\n{chr(10).join(ctx)}\n\n"
                       f"Write exactly 2 paragraphs of editorial prose for a space intelligence dispatch. "
                       f"Directive: {directive}. "
-                      "Paragraph 1: sky conditions tonight -- moon, Kp, what it means. "
-                      "Paragraph 2: what to do, what is coming. "
+                      "Lead with whatever is MOST interesting tonight -- sometimes that's the astrophotography score, "
+                      "sometimes it's a solar flare, an incoming CME, an asteroid, or a launch. "
+                      "Write for both astrophotographers and space-curious readers. "
+                      "Paragraph 1: what is most notable tonight in space. "
+                      "Paragraph 2: what to do about it, what is coming. "
                       "Voice: dry, informed, seasoned correspondent. "
                       "No em dashes anywhere. No generic openings. "
                       "Return only the two paragraphs separated by a blank line. No labels."}]},
@@ -631,7 +715,8 @@ PAGE_CSS = """<style>
 
 def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
            neos, flares, history, ed_p1, ed_p2, now, sai_score, sai_status, sai_color,
-           score, moon_illum, moon_name, moon_emoji, seven_day, stocks=None, iss_pass=None):
+           score, moon_illum, moon_name, moon_emoji, seven_day,
+           stocks=None, iss_pass=None, week_summary=None):
 
     global moon_illum_global
     moon_illum_global = moon_illum
@@ -702,51 +787,58 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         best_day = max(seven_day, key=lambda d: d["score"])
         ai_blurb = esc(f"Conditions improve through the week -- {best_day['dt'].strftime('%A')} looks like the best window at {best_day['score']}/10.")
 
-    # SAI description
+    # SAI description — actionable, balanced
     if sai_score >= 75:
-        sai_desc = "The space world is extremely active tonight -- busy launch pads, charged skies, and something worth watching in every direction."
+        sai_desc = "Something significant is happening overhead. A launch is imminent, the sun is active, or both. Check the bulletin and don't miss tonight."
     elif sai_score >= 50:
-        sai_desc = "A busy week overhead. Several launches on the manifest, and the sun has been active."
+        sai_desc = "An active week. Worth checking the wires and keeping an eye on conditions -- something is likely to develop."
     elif sai_score >= 25:
-        sai_desc = "Moderate activity. A handful of launches scheduled and conditions are holding steady."
+        sai_desc = "A few things on the manifest and conditions are holding. A good week to follow along."
     else:
-        sai_desc = "A quiet period in space. Good conditions for observation, less so for drama."
+        sai_desc = "Quiet across the board. Good conditions to focus on the sky itself -- nothing competing for your attention."
 
-    # TILES JSON
-    aurora_val = "Watch" if kp and kp >= 5 else ("Possible" if kp and kp >= 3 else "Low")
+    # Aurora, moon darkness, NEO values (used in tiles and subscribe)
+    aurora_val   = "Watch" if kp and kp >= 5 else ("Possible" if kp and kp >= 3 else "Low")
     aurora_color = "var(--od-alert)" if kp and kp >= 5 else ("var(--od-verdict-fair)" if kp and kp >= 3 else "var(--od-faint-2)")
     aurora_detail = ("Kp is high enough to post a watch. Scan the northern horizon after dark." if kp and kp >= 5
                      else f"Kp at {kp_display}. Aurora possible at high latitudes only." if kp and kp >= 3
                      else f"Kp at {kp_display}. Geomagnetic field quiet tonight.")
-
     moon_dark_pct = int(round((1 - moon_illum) * 100))
     moon_dark_color = band_color(10 * (1 - moon_illum))
-
     neo_val    = f"{neos[0]['ld']:.1f}" if neos else "None"
     neo_unit   = "LD" if neos else ""
-    neo_detail = (f"{neos[0]['name']}, est. {neos[0]['diam']}m across, at {neos[0]['ld']:.1f} lunar distances and {neos[0]['vel']} km/s. Routine and safe."
+    neo_detail = (f"{neos[0]['name']}, about {round(neos[0]['ld'])}x the Moon-Earth distance, passing at {neos[0]['vel']} km/s. No impact risk."
                   if neos else "No notable close approaches this week.")
 
-    d = showers[0][0] if showers else None
-    shower_s = round(10 if d and d<=1 else 10-d if d and d<=7 else max(0,5-(d-7)*0.5) if d and d<=14 else 0, 1)
-    dark_hrs  = round(max(0, 8 - moon_illum * 6), 1)
+    # Planets and solar cycle
+    planets_vis   = compute_visible_planets(now)
+    solar         = solar_cycle_info(now)
 
+    planet_names  = [p["name"] for p in planets_vis if p["when"] == "evening sky"]
+    planet_text   = ", ".join(planet_names) if planet_names else "None visible"
+    planet_detail = (f"Visible in the evening sky tonight: {', '.join(p['name'] + ' (' + p['when'] + ')' for p in planets_vis)}."
+                     if planets_vis else "No bright planets well-positioned for evening viewing tonight.")
+
+    # TILES JSON — 6 tiles, no left border on first tile
     tiles_json = json.dumps([
         {"value": str(moon_dark_pct), "unit": "% dark", "label": "Moon darkness",
-         "color": moon_dark_color, "href": "#moon",
-         "detail": f"Moon is {moon_pct}% illuminated -- {100-moon_dark_pct}% of tonight is washed out. Moon darkness is the single biggest factor in the shoot score."},
-        {"value": aurora_val, "unit": "", "label": "Aurora",
-         "color": aurora_color, "href": "#aurora",
+         "color": moon_dark_color, "href": "#moon", "first": True,
+         "detail": f"Moon is {moon_pct}% illuminated tonight. Moon darkness is the single biggest factor in the shoot score -- a dark sky beats everything else."},
+        {"value": aurora_val, "unit": "", "label": "Aurora chance",
+         "color": aurora_color, "href": "#aurora", "first": False,
          "detail": aurora_detail},
-        {"value": kp_display, "unit": "Kp", "label": "Geomagnetic storm" if kp and kp >= 5 else "Space weather",
-         "color": "var(--od-verdict-poor)" if kp and kp >= 5 else "var(--od-ink)", "href": "#kp",
-         "detail": f"Planetary Kp index from NOAA SWPC. Values above 5 indicate a storm; GPS may drift and aurora becomes visible at lower latitudes."},
+        {"value": kp_display, "unit": "Kp", "label": "Geomagnetic field",
+         "color": "var(--od-verdict-poor)" if kp and kp >= 5 else "var(--od-ink)", "href": "#kp", "first": False,
+         "detail": f"Kp index from NOAA SWPC. Above 5 means a geomagnetic storm -- GPS may drift and aurora becomes visible at lower latitudes. Below 2 is ideal for imaging."},
         {"value": neo_val, "unit": neo_unit, "label": "Closest asteroid",
-         "color": "var(--od-ink)", "href": "#neo",
+         "color": "var(--od-ink)", "href": "#neo", "first": False,
          "detail": neo_detail},
-        {"value": str(dark_hrs), "unit": "hrs", "label": "True-dark window",
-         "color": "var(--od-ink)", "href": "#dark",
-         "detail": f"Approximate hours of genuine astronomical dark tonight, accounting for moon phase. Best window is usually after {moon_pct < 50 and 'moonset' or 'midnight'}."},
+        {"value": planet_text, "unit": "", "label": "Planets up tonight",
+         "color": "var(--od-ink)", "href": "#planets", "first": False,
+         "detail": planet_detail},
+        {"value": f"Cycle {solar['number']}", "unit": "", "label": f"Solar cycle -- {solar['phase']}",
+         "color": "var(--od-ink)", "href": "#solar", "first": False,
+         "detail": solar["desc"] + f" We are {solar['pct']}% through Cycle {solar['number']}."},
     ])
 
     # FORECAST JSON
@@ -757,10 +849,10 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
             "illum": round(d["illum"], 2),
             "score": d["score"],
             "note":  (
-                "Dark and quiet -- go." if d["score"] >= 7 else
-                "Good window. Worth the drive." if d["score"] >= 5 else
-                "Fair. Wide-field only." if d["score"] >= 3 else
-                "Heavy moon or active sky. Skip it."
+                "Prime window. Get out -- imaging and observing both." if d["score"] >= 7 else
+                "Solid night. Most targets accessible, bright planets visible." if d["score"] >= 5 else
+                "Marginal. Moon interference -- bright targets only." if d["score"] >= 3 else
+                "Tough conditions. Good night to plan your next session."
             ),
             "flag":  (
                 next((str(sum(1 for l in launches if l.get("net","").startswith(d["dt"].strftime("%Y-%m-%d")))) + " LAUNCH" +
@@ -835,7 +927,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
              "~$329", "https://amzn.to/4p4UFrb"),
         ]
     gear_json = json.dumps([
-        {"cat": g[0], "name": g[1], "why": g[2], "price": g[3], "url": g[4]}
+        {"cat": g[0], "name": g[1], "why": g[2], "url": g[4]}
         for g in gear_items
     ])
 
@@ -916,7 +1008,7 @@ function esc(s){{ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 
 // render tiles
 document.getElementById('tiles').innerHTML = TILES_DATA.map(function(t){{
-  return '<a class="term" data-tip href="'+t.href+'" style="text-decoration:none;padding:2px 20px;border-left:1px solid var(--od-rule-row);display:block;">'
+  return '<a class="term" data-tip href="'+t.href+'" style="text-decoration:none;padding:2px 20px;'+(t.first?'':'border-left:1px solid var(--od-rule-row);')+'display:block;">'
     +'<div style="display:flex;align-items:baseline;gap:6px;">'
     +'<span style="font-weight:700;font-size:40px;line-height:.95;letter-spacing:-.02em;color:'+t.color+';">'+esc(t.value)+'</span>'
     +'<span class="mono" style="font-size:12px;color:var(--od-faint-2);">'+esc(t.unit)+'</span></div>'
@@ -946,7 +1038,7 @@ document.getElementById('gear').innerHTML = GEAR_DATA.map(function(g){{
     +'<div style="font-weight:600;font-size:20px;line-height:1.2;letter-spacing:-.01em;">'+esc(g.name)+'</div>'
     +'<div style="font-size:15px;line-height:1.45;color:var(--od-ink-3);margin:7px 0 10px;">'+esc(g.why)+'</div>'
     +'<div style="display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--od-rule-row);padding-top:9px;">'
-    +'<span class="mono" style="font-size:12px;color:var(--od-muted);">'+esc(g.price)+'</span>'
+    +'<div style="border-top:1px solid var(--od-rule-row);padding-top:9px;">'
     +'<span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);">View on Amazon</span></div></a>';
 }}).join('');
 
@@ -998,7 +1090,59 @@ document.getElementById('subscribe').addEventListener('submit', function(e){{
     .catch(function(){{ window.open('https://buttondown.com/{BUTTONDOWN_USERNAME}?email='+encodeURIComponent(email),'_blank'); }});
 }});
 
-// change location
+// location helpers
+function applyLocation(lat, lon, label){{
+  var oval = 67 - (SERVER_KP * 2.5);
+  var gap  = lat - oval;
+  var aLevel = gap<=0?'High tonight':gap<=5?'Possible tonight':'Low tonight';
+  var aColor = gap<=0?'var(--od-verdict-poor)':gap<=5?'var(--od-verdict-fair)':'var(--od-faint-2)';
+  var aEl = document.getElementById('aurora-tip-text');
+  if (aEl) {{ aEl.textContent = aLevel; aEl.style.color = aColor; }}
+  var best=null, bd=Infinity;
+  DARK_PARKS.forEach(function(p){{
+    var R=3958.8,pi=Math.PI/180;
+    var d=2*R*Math.asin(Math.sqrt(Math.sin((p.lat-lat)*pi/2)**2+Math.cos(lat*pi)*Math.cos(p.lat*pi)*Math.sin((p.lon-lon)*pi/2)**2));
+    if(d<bd){{bd=d;best=p;}}
+  }});
+  var nameEl = document.getElementById('loc-name');
+  var bortleEl = document.getElementById('loc-bortle');
+  if (nameEl && label) nameEl.textContent = label;
+  if (bortleEl && best) bortleEl.textContent = 'Nearest dark sky: '+best.name+' ('+Math.round(bd)+' mi, Bortle '+best.bortle+')';
+}}
+
+// auto-detect via browser geolocation first, IP fallback
+function initLocation(){{
+  if (navigator.geolocation) {{
+    navigator.geolocation.getCurrentPosition(
+      function(pos){{
+        var lat = pos.coords.latitude;
+        var lon = pos.coords.longitude;
+        // reverse geocode for city name
+        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lon, {{headers:{{'Accept-Language':'en'}}}})
+          .then(function(r){{ return r.json(); }})
+          .then(function(d){{
+            var city = (d.address && (d.address.city || d.address.town || d.address.village)) || 'your location';
+            applyLocation(lat, lon, city);
+          }}).catch(function(){{ applyLocation(lat, lon, 'your location'); }});
+      }},
+      function(){{
+        // geolocation denied -- fall back to IP
+        fetch('https://ipapi.co/json/')
+          .then(function(r){{ return r.json(); }})
+          .then(function(d){{ applyLocation(parseFloat(d.latitude)||40, parseFloat(d.longitude)||-74, d.city||'your location'); }})
+          .catch(function(){{}});
+      }},
+      {{timeout: 8000}}
+    );
+  }} else {{
+    fetch('https://ipapi.co/json/')
+      .then(function(r){{ return r.json(); }})
+      .then(function(d){{ applyLocation(parseFloat(d.latitude)||40, parseFloat(d.longitude)||-74, d.city||'your location'); }})
+      .catch(function(){{}});
+  }}
+}}
+
+// change location -- manual input
 document.getElementById('change-loc').addEventListener('click', function(e){{
   e.preventDefault();
   var loc = prompt('Enter your city or zip code:');
@@ -1007,37 +1151,48 @@ document.getElementById('change-loc').addEventListener('click', function(e){{
     .then(function(r){{ return r.json(); }})
     .then(function(data){{
       if (data && data[0]){{
-        var city  = data[0].display_name.split(',')[0];
-        var lat   = parseFloat(data[0].lat);
-        var lon   = parseFloat(data[0].lon);
-        var oval  = 67 - (SERVER_KP * 2.5);
-        var gap   = lat - oval;
-        var alevel = gap<=0?'High':gap<=5?'Moderate':'Low';
-        document.getElementById('loc-name').textContent = city;
-        // find nearest dark sky
-        var best=null, bd=Infinity;
-        DARK_PARKS.forEach(function(p){{
-          var R=3958.8,pi=Math.PI/180;
-          var d=2*R*Math.asin(Math.sqrt(Math.sin((p.lat-lat)*pi/2)**2+Math.cos(lat*pi)*Math.cos(p.lat*pi)*Math.sin((p.lon-lon)*pi/2)**2));
-          if(d<bd){{bd=d;best=p;}}
-        }});
-        if(best){{ document.getElementById('loc-bortle').textContent = 'Bortle '+best.bortle+' nearby ('+Math.round(bd)+' mi)'; }}
+        var city = data[0].display_name.split(',')[0];
+        applyLocation(parseFloat(data[0].lat), parseFloat(data[0].lon), city);
       }}
     }}).catch(function(){{}});
 }});
+
+// run on load
+document.readyState==='loading'?document.addEventListener('DOMContentLoaded',initLocation):initLocation();
 """
+
+    # Meta tags
+    og_title    = "Orbital Daily: Space Intelligence"
+    og_desc     = "Tonight's astrophotography score, aurora forecast, ISS pass times, and rocket launches."
+    keywords    = ("space activity index, astrophotography conditions tonight, shoot score, "
+                   "aurora forecast tonight, ISS pass tonight, rocket launch schedule, "
+                   "Kp index tonight, space weather tonight, near earth asteroid, "
+                   "best night for astrophotography, dark sky finder, space news daily")
 
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Orbital Daily -- Independent space intelligence</title>
-<meta name="description" content="Daily space intelligence: astrophotography score, aurora alerts, rocket launches, asteroid tracker, and space news.">
-<meta property="og:title" content="Orbital Daily">
-<meta property="og:description" content="Independent daily space intelligence -- tonight's verdict, what is flying overhead, and what to do about it.">
+<title>Orbital Daily: Space Intelligence -- Aurora, Launches &amp; Astrophotography Forecast</title>
+<meta name="description" content="Daily space intelligence: astrophotography shoot score, aurora alerts, ISS pass times, rocket launches, and near-Earth asteroid tracker. Updated every morning.">
+<meta name="keywords" content="{keywords}">
+<meta name="author" content="Orbital Daily">
+<meta name="robots" content="index, follow">
+<meta name="format-detection" content="telephone=no">
+<meta property="og:title" content="{og_title}">
+<meta property="og:description" content="{og_desc}">
 <meta property="og:url" content="{SITE_URL}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Orbital Daily">
+<meta property="og:image" content="{SITE_URL}/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{og_title}">
+<meta name="twitter:description" content="{og_desc}">
+<meta name="twitter:image" content="{SITE_URL}/og-image.jpg">
 <link rel="canonical" href="{SITE_URL}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='none' stroke='%231b3a6b' stroke-width='8'/><circle cx='50' cy='50' r='12' fill='%231b3a6b'/></svg>">
+<link rel="alternate" type="application/rss+xml" title="Orbital Daily" href="{SITE_URL}/feed.xml">
 <script type="application/ld+json">{schema}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1136,31 +1291,25 @@ document.getElementById('change-loc').addEventListener('click', function(e){{
             <span class="pulse"></span> Change location
           </a>
         </div>
-        <div style="font-style:italic;font-size:16px;color:var(--od-muted);margin-top:12px;max-width:52ch;">Seven nights, scored for your sky. The number climbs as the moon thins and conditions settle.</div>
+        <div style="font-style:italic;font-size:16px;color:var(--od-muted);margin-top:12px;max-width:64ch;">{esc(week_summary) if week_summary else "Seven nights scored. Check Thursday for the best window this week."}</div>
       </div>
-      <a class="tout" href="https://www.amazon.com/s?k=telescope+beginner&tag={amazon_tag}" target="_blank" rel="sponsored noopener" style="display:block;width:220px;border:1px solid #e2ddd0;border-radius:8px;padding:14px;background:#fdfcf8;">
+      <a class="tout" href="https://amzn.to/4v9UNan" target="_blank" rel="sponsored noopener" style="display:block;width:220px;border:1px solid #e2ddd0;border-radius:8px;padding:14px;background:#fdfcf8;">
         <div class="mono" style="font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:10px;">Sponsored</div>
         <div style="height:78px;border-radius:4px;background:repeating-linear-gradient(135deg,#f0ede4,#f0ede4 9px,#eae6db 9px,#eae6db 18px);display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
           <span class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-faint-2);">product slot</span>
         </div>
-        <div style="font-weight:600;font-size:17px;line-height:1.2;">Celestron NexStar 5SE</div>
-        <div style="font-size:13px;color:var(--od-muted);line-height:1.4;margin:4px 0 8px;">Go-to mount, solid optics -- a serious first scope.</div>
+        <div style="font-weight:600;font-size:17px;line-height:1.2;">Celestron StarSense Explorer DX 130AZ</div>
+        <div style="font-size:13px;color:var(--od-muted);line-height:1.4;margin:4px 0 8px;">App-guided 130mm reflector. Best value at this aperture.</div>
         <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);">View on Amazon</div>
       </a>
     </div>
     <div id="forecast" style="margin-top:14px;"></div>
-    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--od-rule-row);display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;">
-      <span class="mono" style="font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--od-faint);white-space:nowrap;padding-top:5px;">The week, in a sentence</span>
-      <div>
-        <p style="font-family:var(--od-serif);font-style:italic;font-size:19px;line-height:1.5;color:var(--od-ink-2);margin:0;max-width:64ch;">{ai_blurb}</p>
-        <div class="mono" style="font-size:10px;letter-spacing:.08em;color:var(--od-faint-2);margin-top:8px;">Generated by Claude &middot; Anthropic</div>
-      </div>
-    </div>
   </section>
 
   <section style="padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
     <h3 style="font-size:32px;margin:0 0 4px;">The desk&rsquo;s kit</h3>
-    <div style="font-style:italic;font-size:16px;color:var(--od-muted);margin-bottom:20px;max-width:66ch;">What we would actually point at the sky this week. <span class="mono" style="font-style:normal;font-size:11px;letter-spacing:.04em;color:var(--od-faint-2);">Affiliate links -- a purchase may support the desk at no cost to you.</span></div>
+    <div style="font-style:italic;font-size:16px;color:var(--od-muted);margin-bottom:4px;max-width:66ch;">What we would actually point at the sky this week.</div>
+    <div class="mono" style="font-size:11px;letter-spacing:.04em;color:var(--od-faint-2);margin-bottom:20px;">Affiliate links -- a purchase may support the desk at no cost to you.</div>
     <div id="gear" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:26px;"></div>
   </section>
 
@@ -1274,23 +1423,32 @@ if __name__ == "__main__":
     sai, sai_status, sai_color = compute_sai(kp, launches, neos, flares)
     seven_day = compute_7day(now, kp, kp_forecast)
     ed_p1, ed_p2 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos)
+    week_sum  = fetch_week_summary(seven_day, launches, showers)
+
+    # Morning run (before noon UTC) sends email; afternoon run refreshes only
+    is_morning = now.hour < 12
 
     print(f"  Score: {score}/10  SAI: {sai} ({sai_status})")
     print(f"  Moon: {moon_name} ({int(moon_illum*100)}%)")
     print(f"  Editorial: {'done' if ed_p1 else 'no API key'}")
+    print(f"  Week summary: {'done' if week_sum else 'none'}")
+    print(f"  Run type: {'morning (newsletter)' if is_morning else 'afternoon (refresh only)'}")
 
     html = render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
                   neos, flares, history, ed_p1, ed_p2, now, sai, sai_status, sai_color,
                   score, moon_illum, moon_name, moon_emoji, seven_day,
-                  stocks=stocks, iss_pass=iss_pass)
+                  stocks=stocks, iss_pass=iss_pass, week_summary=week_sum)
 
     with open("index.html","w",encoding="utf-8") as f: f.write(html)
     print("  index.html")
     write_sitemap(now)
     write_llms(now)
 
-    send_daily_email(kp, score, sai, launches, news, neos, flares,
-                     moon_name, moon_illum, ed_p1, ed_p2, now)
+    if is_morning:
+        send_daily_email(kp, score, sai, launches, news, neos, flares,
+                         moon_name, moon_illum, ed_p1, ed_p2, now)
+    else:
+        print("  Afternoon run -- skipping email")
     print("Done.")
     if not os.environ.get("ANTHROPIC_API_KEY"):
         print("  Tip: Add ANTHROPIC_API_KEY as a GitHub secret for the daily editorial.")
