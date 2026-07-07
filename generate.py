@@ -721,7 +721,7 @@ def fetch_week_summary(seven_day, launches, showers):
             "https://api.anthropic.com/v1/messages",
             headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
                      "content-type": "application/json"},
-            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 150,
+            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 450,
                   "messages": [{"role": "user", "content":
                       f"Week forecast:\n{ctx}\n\n"
                       "Write 1-2 punchy sentences for space watchers. "
