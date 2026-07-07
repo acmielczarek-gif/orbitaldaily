@@ -110,6 +110,21 @@ def fetch_kp_forecast():
         except: continue
     return {k: round(sum(v)/len(v), 1) for k, v in by_day.items()}
 
+def fetch_storm_scale():
+    """Official NOAA G-scale (geomagnetic storm) watch level for today, 0-5.
+    This is the actual issued Watch/Warning scale, distinct from the raw Kp
+    reading -- sourced from the same structured product NOAA derives its
+    G1-G5 bulletins from."""
+    r = get("https://services.swpc.noaa.gov/products/noaa-scales.json")
+    if not r:
+        return None
+    try:
+        scale = r.json()["0"]["G"]["Scale"]
+        return int(scale) if scale is not None else 0
+    except Exception as e:
+        print(f"  Storm scale: {e}", file=sys.stderr)
+        return None
+
 def kp_label(kp):
     if kp is None:  return "UNKNOWN",       "#64748b"
     if kp >= 7:     return "EXTREME STORM", "#f87171"
@@ -198,6 +213,22 @@ def fetch_solar_flares(now):
     data = r.json()
     return sorted(data, key=lambda x: x.get("beginTime",""), reverse=True) if isinstance(data, list) else []
 
+def fetch_exoplanet_discoveries(now):
+    """Confirmed exoplanets published this calendar month (NASA Exoplanet Archive).
+    disc_pubdate is month-precision only -- there's no day-level 'confirmed on X
+    date' field, so 'this calendar month' is the finest resolution available."""
+    month = now.strftime("%Y-%m")
+    query = f"select count(*) as n from pscomppars where disc_pubdate='{month}'"
+    r = get("https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query="
+            + requests.utils.quote(query) + "&format=json")
+    if not r:
+        return None
+    try:
+        return r.json()[0]["n"]
+    except Exception as e:
+        print(f"  Exoplanets: {e}", file=sys.stderr)
+        return None
+
 SHOWERS = [
     (1,3,"Quadrantids",120),(4,22,"Lyrids",20),(5,6,"Eta Aquariids",50),
     (8,12,"Perseids",100),(10,21,"Orionids",20),(11,17,"Leonids",15),
@@ -240,8 +271,63 @@ def launch_timing(net):
 
 # ── Space Activity Index ───────────────────────────────────────────────────────
 
-def compute_sai(kp, launches, neos, flares):
-    launch_score = min(100, (len(launches) / 6) * 100)
+# Per-launch significance by mission.type (Launch Library 2 taxonomy), 0-100.
+# Crewed missions (Human Exploration, Tourism -- the two types real crewed
+# flights actually show up under) get an additional bonus below.
+LAUNCH_MISSION_TIER = {
+    "Human Exploration":           90,
+    "Lunar Exploration":           85,
+    "Planetary Science":           80,
+    "Astrophysics":                70,
+    "Robotic Exploration":         70,
+    "Heliophysics":                60,
+    "Tourism":                     60,
+    "Government/Top Secret":       55,
+    "Earth Science":               55,
+    "Space Situational Awareness": 50,
+    "Resupply":                    45,
+    "Technology":                  45,
+    "Mission Extension":           40,
+    "Materials Science":           40,
+    "Biology":                     40,
+    "Test Flight":                 35,
+    "Navigation":                  30,
+    "Suborbital":                  30,
+    "Test Target":                 25,
+    "Communications":              25,
+    "Dedicated Rideshare":         25,
+    "Unknown":                     20,
+}
+LAUNCH_CREWED_TYPES = {"Human Exploration", "Tourism"}
+LAUNCH_CREWED_BONUS = 15
+
+def launch_significance(l):
+    mtype = (l.get("mission") or {}).get("type") or "Unknown"
+    sig   = LAUNCH_MISSION_TIER.get(mtype, 20)
+    if mtype in LAUNCH_CREWED_TYPES:
+        sig = min(100, sig + LAUNCH_CREWED_BONUS)
+    return sig
+
+# Confirmed exoplanets this calendar month -> 0-100. disc_pubdate is month-
+# precision only, so this measures deviation from a typical month (~10-30
+# confirmations) rather than a true rolling 7-day window.
+def exoplanet_score(count):
+    if not count:      return 0
+    if count < 10:     return 15
+    if count <= 30:    return 30
+    if count <= 75:    return 60
+    return 100
+
+# Official NOAA G-scale (geomagnetic storm watch level), 0-5 -> 0-100.
+def storm_watch_score(g_scale):
+    return {0: 0, 1: 30, 2: 50, 3: 70, 4: 90, 5: 100}.get(g_scale, 0)
+
+def compute_sai(kp, launches, neos, flares, exoplanet_count=None, storm_scale=None):
+    # Same /6 divisor as the old count-based version, so a week of 6 max-
+    # significance launches still saturates the component at 100 -- but now
+    # a week of routine rideshare/comms launches needs far more volume to
+    # reach the same score a single crewed or lunar mission would.
+    launch_score = min(100, sum(launch_significance(l) for l in launches) / 6)
     kp_score     = min(100, ((kp if kp else 2.0) / 9) * 100 * 1.5)
     solar_score  = 0
     if flares:
@@ -260,7 +346,12 @@ def compute_sai(kp, launches, neos, flares):
         if ld < 1:    neo_score = 100
         elif ld < 5:  neo_score = max(0, 100 - (ld/5)*60)
         elif ld < 20: neo_score = max(0, 40 - ld*2)
-    sai = max(0, min(100, round(launch_score*.35 + kp_score*.30 + solar_score*.25 + neo_score*.10)))
+    exo_score   = exoplanet_score(exoplanet_count)
+    storm_score = storm_watch_score(storm_scale)
+    sai = max(0, min(100, round(
+        launch_score*.28 + kp_score*.24 + solar_score*.20 + neo_score*.08 +
+        exo_score*.10 + storm_score*.10
+    )))
     if sai >= 75: status, color = "EXTREME", "#f87171"
     elif sai >= 50: status, color = "HIGH",    "#fbbf24"
     elif sai >= 25: status, color = "MODERATE","#60a5fa"
@@ -313,6 +404,24 @@ def fetch_iss_pass(lat=39.8, lon=-98.6):
         "end_az":   end_az,
         "duration": duration,
     }
+
+def fetch_ovation_aurora(lat=39.8, lon=-98.6):
+    """NOAA SWPC Ovation aurora probability nowcast (0-100%) at the nearest 1-degree grid cell."""
+    r = get("https://services.swpc.noaa.gov/json/ovation_aurora_latest.json")
+    if not r:
+        return None
+    try:
+        coords = r.json().get("coordinates", [])
+        target_lon = lon % 360
+        best, best_dist = None, None
+        for clon, clat, prob in coords:
+            dist = (clon - target_lon) ** 2 + (clat - lat) ** 2
+            if best_dist is None or dist < best_dist:
+                best_dist, best = dist, prob
+        return best
+    except Exception as e:
+        print(f"  Ovation: {e}", file=sys.stderr)
+        return None
 
 def fetch_stocks():
     """Finnhub delayed quotes for space economy tickers."""
@@ -496,9 +605,9 @@ def band_color_hex(s):
     return "#b04a2f"
 
 def row_tint(s):
-    if s >= 5.0: return "rgba(47,125,62,.05)"
-    if s < 3.0:  return "rgba(176,74,47,.04)"
-    return "transparent"
+    if s >= 5.0: return "rgba(47,125,62,.03)"
+    if s >= 3.0: return "rgba(160,117,8,.03)"
+    return "rgba(176,74,47,.03)"
 
 def lede_headline(score):
     if score >= 7.0: return "Get outside tonight."
@@ -529,7 +638,7 @@ def launch_when_color(timing):
 
 # ── fetch_editorial — 2 paragraphs, returns (p1, p2) ──────────────────────────
 
-def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=None):
+def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=None, ovation_pct=None):
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key: return None, None
     kp_text, _ = kp_label(kp)
@@ -542,6 +651,7 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
             ctx.append(f"Weather: Rain tonight -- observing is off the table")
         else:
             ctx.append(f"Weather: {cloud_data.get('cloud_pct', 0)}% cloud cover tonight")
+    if ovation_pct is not None: ctx.append(f"Aurora probability (NOAA Ovation): {ovation_pct}% tonight")
     if flares:   ctx.append(f"Solar: {flares[0].get('classType', '')} flare recently")
     if neos:     ctx.append(f"NEO: {neos[0]['name']} at {neos[0]['ld']:.1f} lunar distances")
     if launches: ctx.append(f"Next launch: {launches[0].get('name', '')} ({launch_timing(launches[0].get('net', ''))})")
@@ -713,7 +823,19 @@ def fetch_week_summary(seven_day, launches, showers):
     ctx    = f"Scores this week: {', '.join(str(s) for s in scores)}"
     ctx   += f"\nBest night: {best['dt'].strftime('%A')} at {best['score']}/10"
     ctx   += f"\nWeek average: {avg}/10"
-    ctx   += f"\nLaunches: {len(launches)} on the manifest"
+    kp_by_day = ", ".join(
+        f"{d['dt'].strftime('%a')} {d['kp']:.0f}" if d['kp'] is not None else f"{d['dt'].strftime('%a')} n/a"
+        for d in seven_day
+    )
+    ctx   += f"\nKp by day: {kp_by_day}"
+    if launches:
+        next_launches = "; ".join(
+            f"{l.get('name','')} ({launch_timing(l.get('net',''))})"
+            for l in launches[:2]
+        )
+        ctx += f"\nUpcoming launches: {next_launches}"
+    else:
+        ctx += "\nLaunches: none on the manifest"
     if showers:
         ctx += f"\nNext meteor shower: {showers[0][1]} in {showers[0][0]} days"
     try:
@@ -725,7 +847,8 @@ def fetch_week_summary(seven_day, launches, showers):
                   "messages": [{"role": "user", "content":
                       f"Week forecast:\n{ctx}\n\n"
                       "Write 1-2 punchy sentences for space watchers. "
-                      "Name the best night specifically. Call out any launches. "
+                      "Name the best night and the next launch specifically. "
+                      "If a day this week has Kp 6 or higher, call it out by name as a geomagnetic storm / aurora risk day, in plain language. "
                       "No em dashes. No markdown. No bold. No filler. Max 40 words."}]},
             timeout=12
         )
@@ -798,7 +921,7 @@ PAGE_CSS = """<style>
 def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
            neos, flares, history, ed_p1, ed_p2, now, sai_score, sai_status, sai_color,
            score, moon_illum, moon_name, moon_emoji, seven_day,
-           stocks=None, iss_pass=None, week_summary=None, cloud_data=None):
+           stocks=None, iss_pass=None, week_summary=None, cloud_data=None, ovation_pct=None):
 
     global moon_illum_global
     moon_illum_global = moon_illum
@@ -880,11 +1003,22 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         sai_desc = "Quiet across the board. Good conditions to focus on the sky itself -- nothing competing for your attention."
 
     # Aurora, moon darkness, NEO values (used in tiles and subscribe)
-    aurora_val   = "Watch" if kp and kp >= 5 else ("Possible" if kp and kp >= 3 else "Low")
-    aurora_color = "var(--od-alert)" if kp and kp >= 5 else ("var(--od-verdict-fair)" if kp and kp >= 3 else "var(--od-faint-2)")
-    aurora_detail = ("Kp is high enough to post a watch. Scan the northern horizon after dark." if kp and kp >= 5
-                     else f"Kp at {kp_display}. Aurora possible at high latitudes only." if kp and kp >= 3
-                     else f"Kp at {kp_display}. Geomagnetic field quiet tonight.")
+    if ovation_pct is not None:
+        aurora_val   = f"{round(ovation_pct)}%"
+        aurora_color = ("var(--od-alert)" if ovation_pct >= 50
+                         else "var(--od-verdict-fair)" if ovation_pct >= 20
+                         else "var(--od-faint-2)")
+        aurora_detail = (f"NOAA Ovation model puts aurora probability at {round(ovation_pct)}% here tonight. "
+                         + ("Scan the northern horizon after dark." if ovation_pct >= 50
+                            else "Possible at high latitudes only." if ovation_pct >= 20
+                            else "Unlikely to be visible tonight."))
+    else:
+        # Fallback: Ovation unavailable, approximate from Kp alone
+        aurora_val   = "Watch" if kp and kp >= 5 else ("Possible" if kp and kp >= 3 else "Low")
+        aurora_color = "var(--od-alert)" if kp and kp >= 5 else ("var(--od-verdict-fair)" if kp and kp >= 3 else "var(--od-faint-2)")
+        aurora_detail = ("Kp is high enough to post a watch. Scan the northern horizon after dark." if kp and kp >= 5
+                         else f"Kp at {kp_display}. Aurora possible at high latitudes only." if kp and kp >= 3
+                         else f"Kp at {kp_display}. Geomagnetic field quiet tonight.")
     moon_dark_pct = int(round((1 - moon_illum) * 100))
     moon_dark_color = band_color(10 * (1 - moon_illum))
     neo_val    = f"{neos[0]['ld']:.1f}" if neos else "None"
@@ -1150,7 +1284,7 @@ var SERVER_SCORE       = {server_score_js};
 // helpers (same as Claude Design)
 function moonCx(i){{ return (50-(1-i)*48).toFixed(1); }}
 function band(s){{ return s<3?'var(--od-verdict-poor)':s<5?'var(--od-verdict-fair)':'var(--od-verdict-good)'; }}
-function rowTint(s){{ return s<3?'rgba(176,74,47,.04)':s>=5?'rgba(47,125,62,.05)':'transparent'; }}
+function rowTint(s){{ return s>=5?'rgba(47,125,62,.03)':s>=3?'rgba(160,117,8,.03)':'rgba(176,74,47,.03)'; }}
 function esc(s){{ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }}
 
 // render tiles -- 4x2 grid, background border trick
@@ -1454,16 +1588,16 @@ function applyLocation(lat, lon, label){{
       cloudByDate[dt] = {{ cloud: Math.round(dClouds[i]||0), rain: (dPrecip[i]||0)>1 }};
     }});
 
-    var updated = FORECAST_DATA.map(function(d){{
-      var dateKey = d.date; // e.g. "Jul 6" -- need to match
-      // Find matching daily key (format "2026-07-06")
-      var match = dDates.find(function(dt){{
-        var parts = dt.split('-');
-        var mo = parseInt(parts[1]);
-        var dy = parseInt(parts[2]);
-        var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return d.date === months[mo-1]+' '+dy;
-      }});
+    var updated = FORECAST_DATA.map(function(d, i){{
+      // Match by position ("day i from today" in both arrays) rather than
+      // reconstructing and string-comparing calendar dates -- FORECAST_DATA's
+      // labels are UTC calendar days, but dDates comes from this fetch's
+      // timezone=auto request, so local day boundaries can shift by up to a
+      // day for visitors west of UTC. Date-string matching would then fail
+      // to match the edge day(s), silently leaving those rows on the
+      // server's default-location score while the rest got the visitor's
+      // real one -- a visible, inconsistent mix of colors row to row.
+      var match = dDates[i];
       if(match && cloudByDate[match]){{
         var wd = cloudByDate[match];
         var moonIllum = d.illum;
@@ -1517,7 +1651,7 @@ function applyLocation(lat, lon, label){{
       }}
       var cx=(50-(1-d.illum)*48).toFixed(1);
       var bColor=d.score<3?'var(--od-verdict-poor)':d.score<5?'var(--od-verdict-fair)':'var(--od-verdict-good)';
-      var bg=d.score<3?'rgba(176,74,47,.04)':d.score>=5?'rgba(47,125,62,.05)':'transparent';
+      var bg=d.score>=5?'rgba(47,125,62,.03)':d.score>=3?'rgba(160,117,8,.03)':'rgba(176,74,47,.03)';
       return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 4px;border-top:1px solid var(--od-rule-row);background:'+bg+';">'
         +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
         +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div>'
@@ -1996,6 +2130,9 @@ if __name__ == "__main__":
     flares       = fetch_solar_flares(now); print(f"  Flares: {len(flares)}")
     stocks       = fetch_stocks();          print(f"  Stocks: {len(stocks)}")
     iss_pass     = fetch_iss_pass();        print(f"  ISS pass: {iss_pass['time'] if iss_pass else 'none'}")
+    ovation_pct  = fetch_ovation_aurora();  print(f"  Ovation aurora: {ovation_pct}%" if ovation_pct is not None else "  Ovation aurora: unavailable")
+    exoplanet_ct = fetch_exoplanet_discoveries(now); print(f"  Exoplanets this month: {exoplanet_ct}" if exoplanet_ct is not None else "  Exoplanets: unavailable")
+    storm_scale  = fetch_storm_scale();     print(f"  Storm scale: G{storm_scale}" if storm_scale is not None else "  Storm scale: unavailable")
     cloud_data   = fetch_cloud_cover()
     if cloud_data:
         tonight_cloud = cloud_data.get("tonight")
@@ -2011,9 +2148,10 @@ if __name__ == "__main__":
     moon_illum_global = moon_illum
     score     = astro_score(kp, moon_illum, showers[0][0] if showers else None,
                             tonight_cloud["cloud_pct"] if tonight_cloud else None)
-    sai, sai_status, sai_color = compute_sai(kp, launches, neos, flares)
+    sai, sai_status, sai_color = compute_sai(kp, launches, neos, flares,
+                                              exoplanet_count=exoplanet_ct, storm_scale=storm_scale)
     seven_day = compute_7day(now, kp, kp_forecast, cloud_week)
-    ed_p1, ed_p2 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud)
+    ed_p1, ed_p2 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct)
     week_sum  = fetch_week_summary(seven_day, launches, showers)
 
     # Morning run (before noon UTC) sends email; afternoon run refreshes only
@@ -2029,7 +2167,7 @@ if __name__ == "__main__":
                   neos, flares, history, ed_p1, ed_p2, now, sai, sai_status, sai_color,
                   score, moon_illum, moon_name, moon_emoji, seven_day,
                   stocks=stocks, iss_pass=iss_pass, week_summary=week_sum,
-                  cloud_data=tonight_cloud)
+                  cloud_data=tonight_cloud, ovation_pct=ovation_pct)
 
     with open("index.html","w",encoding="utf-8") as f: f.write(html)
     print("  index.html")
