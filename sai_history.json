@@ -1,16 +1,16 @@
 [
   {
     "date": "2026-07-08",
-    "sai": 34,
+    "sai": 44,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 35.8,
-        "reason": "Long March 10B | Demo Flight (Test Flight)"
+        "score": 48.3,
+        "reason": "Crewed mission on manifest: Soyuz 2.1a | Soyuz MS-29"
       },
       "geomagnetic": {
-        "score": 22.2,
-        "reason": "Kp 2.7, quiet geomagnetic field"
+        "score": 27.8,
+        "reason": "Kp 3.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 72.0,
@@ -25,8 +25,8 @@
         "reason": "0 confirmed this month vs 41 avg"
       },
       "stock_volatility": {
-        "score": 0,
-        "reason": "No market data available"
+        "score": 100,
+        "reason": "RKLB moved 10.4% today"
       }
     }
   }
