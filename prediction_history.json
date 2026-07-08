@@ -3,35 +3,35 @@
     "predicted_on": "2026-07-08",
     "predicted_for": "2026-07-08",
     "days_ahead": 0,
-    "score": 5.4,
+    "score": 6.2,
     "estimated": false
   },
   {
     "predicted_on": "2026-07-08",
     "predicted_for": "2026-07-09",
     "days_ahead": 1,
-    "score": 5.4,
+    "score": 5.9,
     "estimated": true
   },
   {
     "predicted_on": "2026-07-08",
     "predicted_for": "2026-07-10",
     "days_ahead": 2,
-    "score": 6.5,
+    "score": 5.8,
     "estimated": true
   },
   {
     "predicted_on": "2026-07-08",
     "predicted_for": "2026-07-11",
     "days_ahead": 3,
-    "score": 6.9,
+    "score": 7.1,
     "estimated": true
   },
   {
     "predicted_on": "2026-07-08",
     "predicted_for": "2026-07-12",
     "days_ahead": 4,
-    "score": 8.2,
+    "score": 8.3,
     "estimated": true
   },
   {
@@ -45,7 +45,7 @@
     "predicted_on": "2026-07-08",
     "predicted_for": "2026-07-14",
     "days_ahead": 6,
-    "score": 8.3,
+    "score": 8.4,
     "estimated": true
   }
 ]

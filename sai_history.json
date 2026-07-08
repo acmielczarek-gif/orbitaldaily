@@ -1,7 +1,7 @@
 [
   {
     "date": "2026-07-08",
-    "sai": 44,
+    "sai": 35,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -9,12 +9,12 @@
         "reason": "Crewed mission on manifest: Soyuz 2.1a | Soyuz MS-29"
       },
       "geomagnetic": {
-        "score": 27.8,
-        "reason": "Kp 3.3, quiet geomagnetic field"
+        "score": 22.2,
+        "reason": "Kp 2.7, quiet geomagnetic field"
       },
       "solar": {
-        "score": 72.0,
-        "reason": "M4.0 flare detected"
+        "score": 52.0,
+        "reason": "M1.5 flare detected"
       },
       "neo": {
         "score": 4.5,
@@ -25,8 +25,8 @@
         "reason": "0 confirmed this month vs 41 avg"
       },
       "stock_volatility": {
-        "score": 100,
-        "reason": "RKLB moved 10.4% today"
+        "score": 30,
+        "reason": "LUNR moved 4.6% today"
       }
     }
   }
