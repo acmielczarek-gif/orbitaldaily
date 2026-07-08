@@ -2114,13 +2114,13 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
         <div style="font-style:italic;font-size:16px;color:var(--od-muted);">the Orbital Daily desk</div>
       </div>
 
-      <aside style="display:flex;flex-direction:column;gap:12px;padding-top:4px;">
+      <aside style="display:flex;flex-direction:column;gap:8px;padding-top:4px;">
 
         <!-- SAI card -->
-        <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:16px;background:var(--od-field);">
+        <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:12px;background:var(--od-field);">
           <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:12px;">Space Activity Index &#9432;</div>
           <div style="display:flex;align-items:baseline;gap:6px;">
-            <span style="font-weight:700;font-size:42px;line-height:1;letter-spacing:-.02em;">{sai_score}</span>
+            <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;">{sai_score}</span>
             <span class="mono" style="font-size:13px;color:var(--od-faint-2);">/100</span>
           </div>
           <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--od-accent);margin-top:4px;">{esc(sai_status.title())} skies</div>
@@ -2128,22 +2128,11 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
           <span class="tip below">How awake the space world is tonight -- mostly how busy the launch pads are, plus the Sun&rsquo;s mood, how charged the sky is, and whether any asteroid is swinging close.</span>
         </div>
 
-        <!-- Inline subscribe card, tied to SAI -->
-        <div id="inline-subscribe" style="border:1px solid var(--od-rule-row);border-radius:6px;padding:16px;background:var(--od-field);">
-          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Get the alert</div>
-          <p style="font-size:14px;line-height:1.45;color:var(--od-ink-2);margin:0 0 12px;">Space Activity Index: {sai_score}/100 right now. Want to know when it spikes?</p>
-          <form class="subscribe-form" id="subscribe-inline" style="display:flex;flex-direction:column;gap:8px;">
-            <input type="email" required placeholder="you@email.com" class="mono" style="font-size:13px;padding:10px 12px;background:var(--od-paper);border:1px solid var(--od-field-border);border-radius:4px;color:var(--od-ink);outline:none;width:100%;box-sizing:border-box;">
-            <button type="submit" class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--od-paper);background:var(--od-accent);padding:10px 16px;border-radius:4px;border:none;cursor:pointer;">Subscribe</button>
-          </form>
-          <div id="sub-done-inline" style="display:none;font-style:italic;font-size:13px;color:var(--od-verdict-good);margin-top:8px;">You&rsquo;re on the list.</div>
-        </div>
-
         <!-- Shoot score card -->
-        <div style="border:1px solid var(--od-rule-row);border-radius:6px;padding:16px;background:var(--od-field);">
+        <div style="border:1px solid var(--od-rule-row);border-radius:6px;padding:12px;background:var(--od-field);">
           <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Shoot Score &middot; <span id="rail-score-label" style="color:var(--od-faint-2);letter-spacing:.04em;font-size:10px;text-transform:none;font-weight:400;">global forecast</span></div>
           <div style="display:flex;align-items:baseline;gap:6px;">
-            <span style="font-weight:700;font-size:42px;line-height:1;letter-spacing:-.02em;color:{stamp_color};" id="rail-score">{score}</span>
+            <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;color:{stamp_color};" id="rail-score">{score}</span>
             <span class="mono" style="font-size:13px;color:var(--od-faint-2);">/10</span>
           </div>
           <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:{stamp_color};" id="rail-stamp">{esc(stamp_label)}</div>
@@ -2151,7 +2140,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
         </div>
 
         <!-- Cloud / weather card -->
-        <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:16px;background:var(--od-field);">
+        <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:12px;background:var(--od-field);">
           <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Your sky tonight &#9432;</div>
           <div style="font-family:var(--od-mono);font-size:11px;color:var(--od-muted);margin-bottom:8px;" id="rail-city">detecting location...</div>
           <div style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;" id="rail-cloud-val" style="color:{cloud_color};">{cloud_val}</div>
@@ -2165,6 +2154,19 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
         </div>
 
       </aside>
+    </div>
+
+    <!-- Inline subscribe strip, tied to SAI -->
+    <div id="inline-subscribe" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--od-rule-row);border-radius:6px;padding:14px 18px;background:var(--od-field);margin-top:20px;">
+      <div style="flex:1;min-width:220px;">
+        <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:4px;">Get the alert</div>
+        <p style="font-size:14px;line-height:1.4;color:var(--od-ink-2);margin:0;">Space Activity Index: {sai_score}/100 right now. Want to know when it spikes?</p>
+      </div>
+      <form class="subscribe-form" id="subscribe-inline" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="email" required placeholder="you@email.com" class="mono" style="font-size:13px;padding:10px 12px;background:var(--od-paper);border:1px solid var(--od-field-border);border-radius:4px;color:var(--od-ink);outline:none;width:220px;">
+        <button type="submit" class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--od-paper);background:var(--od-accent);padding:10px 16px;border-radius:4px;border:none;cursor:pointer;white-space:nowrap;">Subscribe</button>
+      </form>
+      <div id="sub-done-inline" style="display:none;font-style:italic;font-size:13px;color:var(--od-verdict-good);">You&rsquo;re on the list.</div>
     </div>
   </section>
 

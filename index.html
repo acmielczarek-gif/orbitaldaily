@@ -61,6 +61,14 @@
   .term .tip.below{ top:calc(100% + 9px); left:0; }
   .term .tip.above{ bottom:calc(100% + 9px); left:50%; margin-left:-125px; }
   .term:hover .tip, .term.open .tip{ opacity:1; visibility:visible; transform:translateY(0); pointer-events:auto; }
+  /* #tiles no longer clips overflow (that clipped tooltips too) -- round
+     the corner tiles individually instead. 8 tiles fills both the 4-col
+     desktop grid (2 full rows) and the 2-col mobile grid (4 full rows)
+     exactly, so all four corners always land on a real tile in both. */
+  #tiles .term:nth-child(1){ border-top-left-radius:4px; }
+  #tiles .term:nth-child(4){ border-top-right-radius:4px; }
+  #tiles .term:nth-child(5){ border-bottom-left-radius:4px; }
+  #tiles .term:nth-child(8){ border-bottom-right-radius:4px; }
   .idot{ display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; border-radius:50%; border:1px solid #cbc6b8; font-size:9px; color:var(--od-faint-2); }
   @keyframes odpulse{ 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.3;transform:scale(.75);} }
   .pulse{ width:8px; height:8px; border-radius:50%; background:var(--od-accent); animation:odpulse 1.6s ease-in-out infinite; display:inline-block; }
@@ -73,9 +81,17 @@
     .tout{ display:none !important; }
     #gear{ grid-template-columns:1fr !important; }
     #tiles{ grid-template-columns:repeat(2,1fr) !important; }
+    /* 2-col mobile grid (4 full rows of 2): top-right corner shifts from
+       tile 4 to tile 2, and tile 5 (now mid-grid, not bottom row) loses its
+       desktop bottom-left rounding to tile 7. Tile 8 (bottom-right) needs
+       no override -- it's the real bottom-right corner in both layouts. */
+    #tiles .term:nth-child(4){ border-top-right-radius:0; }
+    #tiles .term:nth-child(5){ border-bottom-left-radius:0; }
+    #tiles .term:nth-child(2){ border-top-right-radius:4px; }
+    #tiles .term:nth-child(7){ border-bottom-left-radius:4px; }
     .activity-grid > div:first-child{ border-right:none !important; padding-right:0 !important; border-bottom:1px solid var(--od-rule-row); padding-bottom:20px; margin-bottom:4px; }
     .mob-br{ display:inline !important; }
-    #loc-bortle{ display:block; margin-top:2px; }
+    #loc-bortle{ display:block; margin-top:6px; margin-left:0; }
   }
 </style>
 </head>
@@ -90,7 +106,7 @@
     <h1 style="font-family:var(--od-serif);font-weight:600;font-size:clamp(32px,8vw,64px);line-height:1;letter-spacing:-.02em;margin:0 0 8px;">Orbital Daily</h1>
     <div style="display:flex;align-items:center;justify-content:center;gap:14px;font-family:var(--od-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-muted);padding-top:6px;">
       <span style="flex:1;height:1px;background:var(--od-rule-mast);max-width:120px;"></span>
-      <span>Tuesday · July 7, 2026 · 22:20 UTC</span>
+      <span>Wednesday · July 8, 2026 · 03:15 UTC</span>
       <span style="flex:1;height:1px;background:var(--od-rule-mast);max-width:120px;"></span>
     </div>
     <div style="font-family:var(--od-serif);font-style:italic;font-size:15px;color:var(--od-muted);margin-top:10px;">Independent space intelligence, read over each morning before it goes out.</div>
@@ -99,11 +115,11 @@
   <div style="height:2px;background:var(--od-ink);margin:22px 0 0;"></div>
   <div style="height:1px;background:var(--od-ink);margin:3px 0 0;"></div>
 
-  <div style="background:#f5f3ee;border-bottom:1px solid var(--od-rule);padding:8px 26px;font-family:var(--od-mono);font-size:11px;letter-spacing:.06em;color:var(--od-faint-2);text-align:center;"><strong style="color:var(--od-ink);">2003</strong> NASA Opportunity rover, MER-B or Mars Exploration Rover–B, was launched into space aboard a Delta II rocket. <a href="https://en.wikipedia.org/wiki/NASA" style="color:var(--od-accent);">Read more</a></div>
+  <div style="background:#f5f3ee;border-bottom:1px solid var(--od-rule);padding:8px 26px;font-family:var(--od-mono);font-size:11px;letter-spacing:.06em;color:var(--od-faint-2);text-align:center;"><strong style="color:var(--od-ink);">2011</strong> Space Shuttle Atlantis is launched in the final mission of the U.S. Space Shuttle program. <a href="https://en.wikipedia.org/wiki/Space_Shuttle_Atlantis" style="color:var(--od-accent);">Read more</a></div>
   
 
-  <div style="background:#f5f3ee;border-bottom:1px solid var(--od-rule);padding:8px 0;">
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+  <div style="background:#f5f3ee;border-bottom:1px solid var(--od-rule);padding:8px 16px;">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;row-gap:8px;">
       <span class="pulse"></span>
       <span style="font-family:var(--od-mono);font-size:11px;color:var(--od-faint);">Tonight for</span>
       <span style="font-family:var(--od-mono);font-size:11px;font-weight:600;color:var(--od-ink);" id="loc-name">detecting location...</span>
@@ -117,26 +133,26 @@
     <!-- Mobile metrics strip (hidden on desktop, shows above lede) -->
     <div class="mobile-metrics" style="display:none;flex-direction:column;gap:0;border:1px solid var(--od-rule-row);border-radius:6px;overflow:hidden;margin-bottom:28px;">
       <div style="padding:14px 16px;border-bottom:1px solid var(--od-rule-row);">
-        <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:6px;">Space Activity Index</div>
+        <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:10px;">Space Activity Index</div>
         <div style="display:flex;align-items:baseline;gap:6px;">
-          <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;">30</span>
+          <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;">34</span>
           <span class="mono" style="font-size:12px;color:var(--od-faint-2);">/100</span>
           <span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);margin-left:4px;">Moderate skies</span>
         </div>
-        <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:8px;max-width:200px;"><div style="width:30%;height:100%;background:var(--od-accent);"></div></div>
+        <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:8px;max-width:200px;"><div style="width:34%;height:100%;background:var(--od-accent);"></div></div>
       </div>
       <div style="padding:14px 16px;border-bottom:1px solid var(--od-rule-row);">
         <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:6px;">Shoot Score <span id="rail-score-label-mobile" style="color:var(--od-faint-2);letter-spacing:.06em;text-transform:none;font-size:10px;">global forecast</span></div>
         <div style="display:flex;align-items:baseline;gap:6px;">
-          <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;color:var(--od-verdict-good);" id="rail-score-mobile">5.9</span>
+          <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;color:var(--od-verdict-good);" id="rail-score-mobile">5.1</span>
           <span class="mono" style="font-size:12px;color:var(--od-faint-2);">/10</span>
           <span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;" id="rail-stamp-mobile" style="color:var(--od-verdict-good);">GOOD</span>
         </div>
       </div>
       <div style="padding:14px 16px;">
         <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:6px;">Your sky tonight &middot; <span id="rail-city-mobile" style="letter-spacing:.04em;font-size:10px;text-transform:none;">detecting...</span></div>
-        <div style="font-weight:700;font-size:28px;line-height:1;letter-spacing:-.02em;" id="rail-cloud-val-mobile" style="color:var(--od-verdict-good);">32%</div>
-        <div class="mono" style="font-size:11px;color:var(--od-faint-2);margin-top:4px;" id="rail-cloud-label-mobile">Mostly clear -- conditions good</div>
+        <div style="font-weight:700;font-size:28px;line-height:1;letter-spacing:-.02em;" id="rail-cloud-val-mobile" style="color:var(--od-verdict-fair);">49%</div>
+        <div class="mono" style="font-size:11px;color:var(--od-faint-2);margin-top:4px;" id="rail-cloud-label-mobile">Partial cloud -- gaps possible</div>
       </div>
     </div>
 
@@ -146,30 +162,30 @@
     <div class="lede-grid" style="display:grid;grid-template-columns:1fr 220px;gap:34px;align-items:start;">
       <div>
         <h2 style="font-size:52px;line-height:1.02;letter-spacing:-.025em;margin:0 0 18px;">Worth a look tonight.</h2>
-        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 14px;max-width:60ch;"><span style="float:left;font-weight:600;font-size:70px;line-height:.72;padding:8px 12px 0 0;">A</span>n M4.0 solar flare lit up today, though tonight&#x27;s 0% aurora probability means the northern lights won&#x27;t materialize despite the activity. Head outside anyway: the last quarter moon at 44% illumination offers decent viewing without washing out fainter stars, and with only 32% cloud cover, conditions favor deep-sky observation or wide-field imaging. The Perseids arrive in 35 days, so tonight is a good chance to scout dark-sky locations and test your setup before one of the year&#x27;s most reliable meteor showers.</p>
-        
+        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 14px;max-width:60ch;"><span style="float:left;font-weight:600;font-size:70px;line-height:.72;padding:8px 12px 0 0;">S</span>olid conditions tonight. Kp is holding at 2.7 and the moon is giving enough of the sky back to make it worth going out.</p>
+        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">Set up before midnight. Most targets will be well-placed by then.</p>
         <div style="font-style:italic;font-size:16px;color:var(--od-muted);">the Orbital Daily desk</div>
       </div>
 
-      <aside style="display:flex;flex-direction:column;gap:12px;padding-top:4px;">
+      <aside style="display:flex;flex-direction:column;gap:8px;padding-top:4px;">
 
         <!-- SAI card -->
-        <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:16px;background:var(--od-field);">
-          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Space Activity Index &#9432;</div>
+        <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:12px;background:var(--od-field);">
+          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:12px;">Space Activity Index &#9432;</div>
           <div style="display:flex;align-items:baseline;gap:6px;">
-            <span style="font-weight:700;font-size:42px;line-height:1;letter-spacing:-.02em;">30</span>
+            <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;">34</span>
             <span class="mono" style="font-size:13px;color:var(--od-faint-2);">/100</span>
           </div>
           <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--od-accent);margin-top:4px;">Moderate skies</div>
-          <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:10px;"><div style="width:30%;height:100%;background:var(--od-accent);"></div></div>
+          <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:10px;"><div style="width:34%;height:100%;background:var(--od-accent);"></div></div>
           <span class="tip below">How awake the space world is tonight -- mostly how busy the launch pads are, plus the Sun&rsquo;s mood, how charged the sky is, and whether any asteroid is swinging close.</span>
         </div>
 
         <!-- Shoot score card -->
-        <div style="border:1px solid var(--od-rule-row);border-radius:6px;padding:16px;background:var(--od-field);">
+        <div style="border:1px solid var(--od-rule-row);border-radius:6px;padding:12px;background:var(--od-field);">
           <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Shoot Score &middot; <span id="rail-score-label" style="color:var(--od-faint-2);letter-spacing:.04em;font-size:10px;text-transform:none;font-weight:400;">global forecast</span></div>
           <div style="display:flex;align-items:baseline;gap:6px;">
-            <span style="font-weight:700;font-size:42px;line-height:1;letter-spacing:-.02em;color:var(--od-verdict-good);" id="rail-score">5.9</span>
+            <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;color:var(--od-verdict-good);" id="rail-score">5.1</span>
             <span class="mono" style="font-size:13px;color:var(--od-faint-2);">/10</span>
           </div>
           <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--od-verdict-good);" id="rail-stamp">GOOD</div>
@@ -177,11 +193,11 @@
         </div>
 
         <!-- Cloud / weather card -->
-        <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:16px;background:var(--od-field);">
+        <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:12px;background:var(--od-field);">
           <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Your sky tonight &#9432;</div>
           <div style="font-family:var(--od-mono);font-size:11px;color:var(--od-muted);margin-bottom:8px;" id="rail-city">detecting location...</div>
-          <div style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;" id="rail-cloud-val" style="color:var(--od-verdict-good);">32%</div>
-          <div class="mono" style="font-size:11px;color:var(--od-faint-2);margin-top:6px;" id="rail-cloud-label">Mostly clear -- conditions good</div>
+          <div style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;" id="rail-cloud-val" style="color:var(--od-verdict-fair);">49%</div>
+          <div class="mono" style="font-size:11px;color:var(--od-faint-2);margin-top:6px;" id="rail-cloud-label">Partial cloud -- gaps possible</div>
           <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--od-rule-row);display:flex;align-items:baseline;gap:6px;" id="rail-temp-row" style="display:none;">
             <span style="font-weight:600;font-size:22px;" id="rail-temp">--</span>
             <span class="mono" style="font-size:11px;color:var(--od-faint-2);">F</span>
@@ -192,27 +208,42 @@
 
       </aside>
     </div>
+
+    <!-- Inline subscribe strip, tied to SAI -->
+    <div id="inline-subscribe" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--od-rule-row);border-radius:6px;padding:14px 18px;background:var(--od-field);margin-top:20px;">
+      <div style="flex:1;min-width:220px;">
+        <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:4px;">Get the alert</div>
+        <p style="font-size:14px;line-height:1.4;color:var(--od-ink-2);margin:0;">Space Activity Index: 34/100 right now. Want to know when it spikes?</p>
+      </div>
+      <form class="subscribe-form" id="subscribe-inline" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="email" required placeholder="you@email.com" class="mono" style="font-size:13px;padding:10px 12px;background:var(--od-paper);border:1px solid var(--od-field-border);border-radius:4px;color:var(--od-ink);outline:none;width:220px;">
+        <button type="submit" class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--od-paper);background:var(--od-accent);padding:10px 16px;border-radius:4px;border:none;cursor:pointer;white-space:nowrap;">Subscribe</button>
+      </form>
+      <div id="sub-done-inline" style="display:none;font-style:italic;font-size:13px;color:var(--od-verdict-good);">You&rsquo;re on the list.</div>
+    </div>
   </section>
 
   <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
     <div class="activity-grid" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center;">
       <div class="term" data-tip tabindex="0" style="text-align:center;padding-right:32px;border-right:1px solid var(--od-rule-row);">
         <div class="mono" style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--od-faint);">Space Activity Index &#9432;</div>
-        <div style="display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-top:6px;">
-          <span style="font-weight:700;font-size:72px;line-height:.85;letter-spacing:-.03em;">30</span>
+        <div style="display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-top:12px;">
+          <span style="font-weight:700;font-size:72px;line-height:.85;letter-spacing:-.03em;">34</span>
           <span style="font-weight:600;font-size:22px;color:var(--od-faint-2);padding-bottom:10px;">/100</span>
         </div>
         <div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--od-accent);margin-top:4px;">Moderate skies</div>
+        
         <span class="tip below" style="left:50%;margin-left:-125px;">How awake the space world is tonight -- mostly how busy the launch pads are, plus the Sun&rsquo;s mood, how charged the sky is, and whether any asteroid is swinging close.</span>
       </div>
       <div>
         <p style="font-size:20px;line-height:1.5;color:var(--od-ink-2);margin:0 0 16px;max-width:54ch;">A few things on the manifest and conditions are holding. A good week to follow along.</p>
         <div style="height:6px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;max-width:420px;">
-          <div style="width:30%;height:100%;background:var(--od-accent);"></div>
+          <div style="width:34%;height:100%;background:var(--od-accent);"></div>
         </div>
-        <div style="display:flex;align-items:baseline;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--od-rule-row);flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:12px;row-gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--od-rule-row);flex-wrap:wrap;">
+          <span class="pulse" id="iss-pulse" style="display:none;"></span>
           <span class="mono" style="font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);">Overhead tonight</span>
-          <span style="font-size:17px;" id="iss-pass">ISS passes <strong>02:15 AM UTC</strong> -- rises SSW, peaks <strong>22&deg;</strong>, visible 600s.</span>
+          <span style="font-family:var(--od-serif);font-size:17px;line-height:1.5;" id="iss-pass">Check <a href="https://spotthestation.nasa.gov" style="color:var(--od-accent);border-bottom:1px solid #b7c3d3;">spotthestation.nasa.gov</a> for ISS pass times at your location.</span>
         </div>
       </div>
     </div>
@@ -220,14 +251,14 @@
 
   <section style="padding:20px 0 16px;border-bottom:1px solid var(--od-rule);">
     <div class="eyebrow" style="margin-bottom:14px;">Tonight, at a glance</div>
-    <div id="tiles" style="display:grid;grid-template-columns:repeat(4,1fr);background:var(--od-rule-row);gap:1px;padding:1px;border-radius:4px;overflow:hidden;"></div>
+    <div id="tiles" style="display:grid;grid-template-columns:repeat(4,1fr);background:var(--od-rule-row);gap:1px;padding:1px;border-radius:4px;"></div>
   </section>
 
   <section style="padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
     <div class="week-head" style="display:grid;grid-template-columns:1fr auto;gap:26px;align-items:start;margin-bottom:6px;">
       <div>
         <h3 style="font-size:32px;margin:0 0 10px;">The week ahead</h3>
-        <p id="week-sub" style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">Sunday delivered the week&#x27;s best show at 8.2/10. Catch Starlink Group 10-42 launching tomorrow on Falcon 9, then mark your calendar for the Perseids in 35 days.</p>
+        <p id="week-sub" style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">Seven nights scored. Check back for the best window this week.</p>
       </div>
       <a class="tout" href="https://amzn.to/4v9UNan" target="_blank" rel="sponsored noopener" style="display:block;width:200px;border:1px solid #e2ddd0;border-radius:8px;padding:14px;background:#fdfcf8;flex-shrink:0;">
         <div class="mono" style="font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:8px;">Sponsored</div>
@@ -248,18 +279,6 @@
     <div id="gear" style="display:grid;grid-template-columns:repeat(3,1fr);gap:26px;"></div>
   </section>
 
-  <section style="padding:40px 0;border-bottom:1px solid var(--od-rule);text-align:center;">
-    
-    <h3 style="font-size:30px;margin:0 0 8px;">The dispatch, in your inbox.</h3>
-    <p style="font-size:17px;color:var(--od-ink-3);margin:0 auto 6px;max-width:52ch;line-height:1.5;">A short note each morning -- the night&#x27;s verdict, what is flying overhead, and a nudge when the sky opens up.</p>
-    <form id="subscribe" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
-      <input type="email" required placeholder="you@email.com" class="mono" style="font-size:14px;padding:13px 16px;width:270px;max-width:78vw;background:var(--od-field);border:1px solid var(--od-field-border);border-radius:4px;color:var(--od-ink);outline:none;">
-      <button type="submit" class="mono" style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--od-paper);background:var(--od-accent);padding:13px 28px;border-radius:4px;border:none;cursor:pointer;">Subscribe</button>
-    </form>
-    <div id="sub-done" style="display:none;font-style:italic;font-size:19px;color:var(--od-verdict-good);margin-top:20px;">You are on the list -- watch your inbox at dawn.</div>
-    <div class="mono" style="font-size:11px;letter-spacing:.04em;color:var(--od-faint-2);margin-top:12px;">Free &middot; one email a day &middot; unsubscribe anytime</div>
-  </section>
-
   <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:44px;padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
     <div>
       <h3 style="font-size:32px;margin:0 0 16px;">Launch manifest</h3>
@@ -267,7 +286,7 @@
     </div>
     <div>
       <h3 style="font-size:32px;margin:0 0 16px;">From the wires</h3>
-      <a href="https://europeanspaceflight.com/rfa-one-launch-from-saxavord-set-for-no-earlier-than-10-august/" style="display:block;padding-bottom:16px;margin-bottom:4px;border-bottom:1px solid var(--od-rule-row);"><div style="font-weight:600;font-size:23px;line-height:1.24;letter-spacing:-.01em;">RFA ONE Launch from SaxaVord Set for No Earlier Than 10 August</div><div class="mono" style="font-size:11px;letter-spacing:.06em;color:var(--od-faint);margin-top:6px;">European Spaceflight</div></a>
+      <a href="https://spacenews.com/skyroot-prepares-for-first-orbital-launch-attempt/" style="display:block;padding-bottom:16px;margin-bottom:4px;border-bottom:1px solid var(--od-rule-row);"><div style="font-weight:600;font-size:23px;line-height:1.24;letter-spacing:-.01em;">Skyroot prepares for first orbital launch attempt</div><div class="mono" style="font-size:11px;letter-spacing:.06em;color:var(--od-faint);margin-top:6px;">SpaceNews</div></a>
       <div id="wires"></div>
     </div>
   </section>
@@ -294,6 +313,18 @@
 
 </div>
 
+<!-- Sticky subscribe bar -->
+<div id="sticky-subscribe" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:150;background:var(--od-ink);border-top:1px solid var(--od-rule-mast);padding:12px 20px;">
+  <div style="max-width:var(--od-max);margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <span style="font-family:var(--od-serif);font-size:16px;color:var(--od-paper);flex:1;min-width:180px;">SAI at 34 &mdash; get notified when it climbs.</span>
+    <form class="subscribe-form" id="subscribe-sticky" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <input type="email" required placeholder="you@email.com" class="mono" style="font-size:12px;padding:9px 12px;background:var(--od-paper);border:1px solid var(--od-field-border);border-radius:4px;color:var(--od-ink);outline:none;width:200px;max-width:60vw;">
+      <button type="submit" class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-ink);background:var(--od-paper);padding:9px 18px;border-radius:4px;border:none;cursor:pointer;">Subscribe</button>
+    </form>
+    <div id="sub-done-sticky" style="display:none;font-family:var(--od-mono);font-size:12px;color:var(--od-verdict-good);">You&rsquo;re on the list.</div>
+    <button id="sticky-dismiss" aria-label="Dismiss" style="font-family:var(--od-mono);font-size:16px;color:var(--od-faint-2);background:none;border:none;cursor:pointer;line-height:1;padding:4px;">&times;</button>
+  </div>
+</div>
 
 <!-- Contact modal -->
 <div class="modal-overlay" id="contact-overlay" style="display:none;position:fixed;inset:0;background:rgba(20,24,29,.6);z-index:200;align-items:center;justify-content:center;padding:20px;">
@@ -325,17 +356,17 @@
 </div>
 <script>
 
-var TILES_DATA    = [{"value": "56", "unit": "% dark", "label": "Moon darkness", "color": "var(--od-verdict-good)", "href": "#moon", "first": true, "detail": "Moon is 44% illuminated tonight. Moon darkness is the single biggest factor in the shoot score -- a dark sky beats everything else."}, {"value": "0%", "unit": "", "label": "Aurora chance", "color": "var(--od-faint-2)", "href": "#aurora", "first": false, "detail": "NOAA Ovation model puts aurora probability at 0% here tonight. Unlikely to be visible tonight."}, {"value": "1.3", "unit": "Kp", "label": "Geomagnetic field", "color": "var(--od-ink)", "href": "#kp", "first": false, "detail": "Kp index from NOAA SWPC. Above 5 means a geomagnetic storm -- GPS may drift and aurora becomes visible at lower latitudes. Below 2 is ideal for imaging."}, {"value": "17.8", "unit": "LD", "label": "Closest asteroid", "color": "var(--od-ink)", "href": "#neo", "first": false, "detail": "2007 AA2, about 18x the Moon-Earth distance, passing at 7.2 km/s. No impact risk."}, {"value": "Venus", "unit": "", "label": "Planets up tonight", "color": "var(--od-ink)", "href": "#planets", "first": false, "detail": "Visible in the evening sky tonight: Venus (evening sky), Mars (morning sky), Saturn (morning sky)."}, {"value": "Cycle 25", "unit": "", "label": "Solar cycle -- Descending", "color": "var(--od-ink)", "href": "#solar", "first": false, "detail": "Past maximum. Activity gradually declining toward the next quiet period. We are 60% through Cycle 25."}, {"value": "32%", "unit": "", "label": "Cloud cover tonight", "color": "var(--od-verdict-good)", "href": "#clouds", "first": false, "id": "weather-tile", "detail": "Mostly clear tonight (32% cloud cover, 6pm-midnight). Conditions match the forecast."}];
-var FORECAST_DATA = [{"day": "TUE", "date": "Jul 7", "illum": 0.44, "score": 6.7, "note": "Solid. Push to a dark site if you can.", "cloud": 4, "rain": false, "flag": "1 LAUNCH"}, {"day": "WED", "date": "Jul 8", "illum": 0.34, "score": 5.2, "note": "Usable. Stick to brighter objects.", "cloud": 64, "rain": false, "flag": "est."}, {"day": "THU", "date": "Jul 9", "illum": 0.24, "score": 6.1, "note": "Decent. Bright planets and clusters well-placed.", "cloud": 47, "rain": true, "flag": "1 LAUNCH"}, {"day": "FRI", "date": "Jul 10", "illum": 0.16, "score": 6.2, "note": "Decent. Bright planets and clusters well-placed.", "cloud": 55, "rain": true, "flag": "1 LAUNCH"}, {"day": "SAT", "date": "Jul 11", "illum": 0.09, "score": 5.4, "note": "Usable. Stick to brighter objects.", "cloud": 89, "rain": true, "flag": "1 LAUNCH"}, {"day": "SUN", "date": "Jul 12", "illum": 0.04, "score": 8.2, "note": "Excellent conditions. Get out.", "cloud": 4, "rain": false, "flag": "2 LAUNCHES"}, {"day": "MON", "date": "Jul 13", "illum": 0.01, "score": 7.2, "note": "Good window. Most deep-sky targets accessible.", "cloud": 39, "rain": false, "flag": "1 LAUNCH"}];
+var TILES_DATA    = [{"value": "58", "unit": "% dark", "label": "Moon darkness", "color": "var(--od-verdict-good)", "href": "#moon", "first": true, "detail": "Moon is 42% illuminated tonight. Moon darkness is the single biggest factor in the shoot score -- a dark sky beats everything else."}, {"value": "0%", "unit": "", "label": "Aurora chance", "color": "var(--od-faint-2)", "href": "#aurora", "first": false, "detail": "NOAA Ovation model puts aurora probability at 0% here tonight. Unlikely to be visible tonight."}, {"value": "2.7", "unit": "Kp", "label": "Geomagnetic field", "color": "var(--od-ink)", "href": "#kp", "first": false, "detail": "Kp index from NOAA SWPC. Above 5 means a geomagnetic storm -- GPS may drift and aurora becomes visible at lower latitudes. Below 2 is ideal for imaging."}, {"value": "17.8", "unit": "LD", "label": "Closest asteroid", "color": "var(--od-ink)", "href": "#neo", "first": false, "detail": "2007 AA2, about 18x the Moon-Earth distance, passing at 7.2 km/s. No impact risk."}, {"value": "Venus", "unit": "", "label": "Planets up tonight", "color": "var(--od-ink)", "href": "#planets", "first": false, "detail": "Visible in the evening sky tonight: Venus (evening sky), Mars (morning sky), Saturn (morning sky)."}, {"value": "Cycle 25", "unit": "", "label": "Solar cycle -- Descending", "color": "var(--od-ink)", "href": "#solar", "first": false, "detail": "Past maximum. Activity gradually declining toward the next quiet period. We are 60% through Cycle 25."}, {"value": "49%", "unit": "", "label": "Cloud cover tonight", "color": "var(--od-verdict-fair)", "href": "#clouds", "first": false, "id": "weather-tile", "detail": "Partial cloud cover (49%). Gaps are possible but conditions are unreliable. Worth watching the sky before committing."}, {"value": "12", "unit": "in orbit", "label": "Humans in space", "color": "var(--od-ink)", "href": "#humans", "first": false, "detail": "9 aboard ISS: Oleg Kononenko, Nikolai Chub, Tracy Caldwell Dyson, Matthew Dominick, Michael Barratt, Jeanette Epps, Alexander Grebenkin, Butch Wilmore, Sunita Williams; 3 aboard Tiangong: Li Guangsu, Li Cong, Ye Guangfu."}];
+var FORECAST_DATA = [{"day": "WED", "date": "Jul 8", "illum": 0.42, "score": 4.5, "note": "Marginal. Moon washing out faint targets.", "cloud": 70, "rain": false, "flag": ""}, {"day": "THU", "date": "Jul 9", "illum": 0.32, "score": 5.3, "note": "Usable. Stick to brighter objects.", "cloud": 62, "rain": true, "flag": "1 LAUNCH"}, {"day": "FRI", "date": "Jul 10", "illum": 0.23, "score": 6.1, "note": "Decent. Bright planets and clusters well-placed.", "cloud": 48, "rain": true, "flag": "1 LAUNCH"}, {"day": "SAT", "date": "Jul 11", "illum": 0.14, "score": 5.8, "note": "Fair. Wide-field and bright targets.", "cloud": 70, "rain": true, "flag": "1 LAUNCH"}, {"day": "SUN", "date": "Jul 12", "illum": 0.08, "score": 6.4, "note": "Decent. Bright planets and clusters well-placed.", "cloud": 57, "rain": true, "flag": "2 LAUNCHES"}, {"day": "MON", "date": "Jul 13", "illum": 0.03, "score": 8.0, "note": "Excellent conditions. Get out.", "cloud": 12, "rain": false, "flag": "est."}, {"day": "TUE", "date": "Jul 14", "illum": 0.0, "score": 8.3, "note": "Excellent conditions. Get out.", "cloud": 3, "rain": false, "flag": "2 LAUNCHES"}];
 var GEAR_DATA     = [{"cat": "A capable starter", "name": "Celestron StarSense Explorer LT 114AZ", "why": "App-enabled 114mm reflector. The phone does the star-finding, you do the looking.", "url": "https://amzn.to/4gFMlML"}, {"cat": "More aperture", "name": "Celestron StarSense Explorer DX 5-inch", "why": "Five inches of light-gathering on an app-guided mount. Solid upgrade from the LT.", "url": "https://amzn.to/4wovMJz"}, {"cat": "Keep your gear safe", "name": "Telescope Storage Bag", "why": "40.8\" padded bag fits tube and tripod. Protect the investment between sessions.", "url": "https://amzn.to/4f19si6"}];
 var LAUNCHES_DATA = [{"when": "LAUNCHED", "color": "var(--od-faint-2)", "title": "Falcon 9 Block 5 | Transporter 17 (Dedicated SSO Rideshare)", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-transporter-17-dedicated-sso-ride"}, {"when": "TOMORROW", "color": "var(--od-ink-2)", "title": "Falcon 9 Block 5 | Starlink Group 10-42", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-10-42"}, {"when": "JUL 10", "color": "var(--od-ink-2)", "title": "Long March 10B | Demo Flight", "url": "https://www.rocketlaunch.live/launch/long-march-10b-demo-flight"}, {"when": "JUL 11", "color": "var(--od-ink-2)", "title": "Falcon 9 Block 5 | Starlink Group 17-48", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-17-48"}, {"when": "JUL 12", "color": "var(--od-ink-2)", "title": "Gravity-1 | Unknown Payload", "url": "https://www.rocketlaunch.live/launch/gravity-1-unknown-payload"}, {"when": "JUL 12", "color": "var(--od-ink-2)", "title": "Vikram-I | Demo Flight", "url": "https://www.rocketlaunch.live/launch/vikram-i-demo-flight"}];
-var WIRES_DATA    = [{"title": "RFA ONE Launch from SaxaVord Set for No Earlier Than 10 August", "source": "European Spaceflight", "url": "https://europeanspaceflight.com/rfa-one-launch-from-saxavord-set-for-no-earlier-than-10-august/"}, {"title": "Spirit Electronics Announces Managed Access to U.S.-Based Advanced Semiconductor Manufacturing for Aerospace and Defense Programs", "source": "SpaceNews", "url": "https://spacenews.com/spirit-electronics-announces-managed-access-to-u-s-based-advanced-semiconductor-manufacturing-for-aerospace-and-defense-programs/"}, {"title": "Apolink makes contact with first relay satellite", "source": "SpaceNews", "url": "https://spacenews.com/apolink-makes-contact-with-first-relay-satellite/"}, {"title": "NASA Transfers \u2018Hundred Acre Wood\u2019 to Patuxent Research Refuge", "source": "NASA", "url": "https://www.nasa.gov/centers-and-facilities/goddard/nasa-transfers-hundred-acre-wood-to-patuxent-research-refuge/"}, {"title": "Arianespace opens door to GEO rideshare opportunities from 2029", "source": "SpaceNews", "url": "https://spacenews.com/arianespace-opens-door-to-geo-rideshare-opportunities-from-2029/"}, {"title": "NASA\u2019s New Horizons Spacecraft Wakes from Hibernation in Good Health", "source": "NASA", "url": "https://science.nasa.gov/missions/new-horizons/nasas-new-horizons-spacecraft-wakes-from-hibernation-in-good-health/"}];
-var STOCKS_DATA   = [{"sym": "RKLB", "price": "$83.41", "chg": "-10.4%", "color": "var(--od-verdict-poor)"}, {"sym": "ASTS", "price": "$74.21", "chg": "-8.0%", "color": "var(--od-verdict-poor)"}, {"sym": "LUNR", "price": "$17.85", "chg": "-5.5%", "color": "var(--od-verdict-poor)"}, {"sym": "SPCE", "price": "$2.57", "chg": "-4.5%", "color": "var(--od-verdict-poor)"}, {"sym": "LMT", "price": "$535.38", "chg": "-0.5%", "color": "var(--od-verdict-poor)"}, {"sym": "BA", "price": "$231.68", "chg": "-1.2%", "color": "var(--od-verdict-poor)"}];
+var WIRES_DATA    = [{"title": "Skyroot prepares for first orbital launch attempt", "source": "SpaceNews", "url": "https://spacenews.com/skyroot-prepares-for-first-orbital-launch-attempt/"}, {"title": "D-Orbit signs launch-services contract with ArkEdge Space", "source": "SpaceNews", "url": "https://spacenews.com/d-orbit-signs-launch-services-contract-with-arkedge-space/"}, {"title": "Orbit Fab hires new CEO and raises funding to support satellite refueling business", "source": "SpaceNews", "url": "https://spacenews.com/orbit-fab-hires-new-ceo-and-raises-funding-to-support-satellite-refueling-business/"}, {"title": "RFA ONE Launch from SaxaVord Set for No Earlier Than 10 August", "source": "European Spaceflight", "url": "https://europeanspaceflight.com/rfa-one-launch-from-saxavord-set-for-no-earlier-than-10-august/"}, {"title": "Spirit Electronics Announces Managed Access to U.S.-Based Advanced Semiconductor Manufacturing for Aerospace and Defense Programs", "source": "SpaceNews", "url": "https://spacenews.com/spirit-electronics-announces-managed-access-to-u-s-based-advanced-semiconductor-manufacturing-for-aerospace-and-defense-programs/"}, {"title": "Apolink makes contact with first relay satellite", "source": "SpaceNews", "url": "https://spacenews.com/apolink-makes-contact-with-first-relay-satellite/"}];
+var STOCKS_DATA   = [{"sym": "RKLB", "price": "--", "chg": "--", "color": "var(--od-faint-2)", "pct": null}, {"sym": "ASTS", "price": "--", "chg": "--", "color": "var(--od-faint-2)", "pct": null}, {"sym": "LUNR", "price": "--", "chg": "--", "color": "var(--od-faint-2)", "pct": null}, {"sym": "SPCE", "price": "--", "chg": "--", "color": "var(--od-faint-2)", "pct": null}, {"sym": "LMT", "price": "--", "chg": "--", "color": "var(--od-faint-2)", "pct": null}, {"sym": "BA", "price": "--", "chg": "--", "color": "var(--od-faint-2)", "pct": null}, {"sym": "SPCX", "price": "--", "chg": "--", "color": "var(--od-faint-2)", "pct": null}];
 var DARK_PARKS    = [{"name": "Cherry Springs State Park", "lat": 41.66, "lon": -77.82, "bortle": 2}, {"name": "Headlands Dark Sky Park", "lat": 45.75, "lon": -84.63, "bortle": 3}, {"name": "Big Bend National Park", "lat": 29.25, "lon": -103.25, "bortle": 2}, {"name": "Death Valley National Park", "lat": 36.46, "lon": -117.02, "bortle": 2}, {"name": "Natural Bridges NM", "lat": 37.6, "lon": -109.99, "bortle": 2}, {"name": "Harriman State Park", "lat": 41.26, "lon": -74.14, "bortle": 4}, {"name": "Assateague Island", "lat": 38.05, "lon": -75.2, "bortle": 4}, {"name": "Anza-Borrego Desert", "lat": 33.22, "lon": -116.41, "bortle": 2}, {"name": "Canyonlands National Park", "lat": 38.2, "lon": -109.93, "bortle": 2}, {"name": "Glacier National Park", "lat": 48.5, "lon": -113.8, "bortle": 2}, {"name": "Great Basin National Park", "lat": 38.98, "lon": -114.26, "bortle": 2}, {"name": "Acadia National Park", "lat": 44.35, "lon": -68.21, "bortle": 4}, {"name": "Shenandoah National Park", "lat": 38.53, "lon": -78.35, "bortle": 4}, {"name": "Grand Canyon National Park", "lat": 36.1, "lon": -112.11, "bortle": 2}, {"name": "Joshua Tree National Park", "lat": 33.88, "lon": -115.9, "bortle": 3}, {"name": "Craters of the Moon NM", "lat": 43.42, "lon": -113.52, "bortle": 2}, {"name": "Black Canyon of the Gunnison", "lat": 38.57, "lon": -107.72, "bortle": 2}, {"name": "Dry Tortugas National Park", "lat": 24.63, "lon": -82.87, "bortle": 3}];
-var SERVER_KP          = 1.3;
-var SERVER_MOON_ILLUM  = 0.445;
-var SERVER_DAYS_SHOWER = 35;
-var SERVER_SCORE       = 5.9;
+var SERVER_KP          = 2.7;
+var SERVER_MOON_ILLUM  = 0.423;
+var SERVER_DAYS_SHOWER = 34;
+var SERVER_SCORE       = 5.1;
 
 // helpers (same as Claude Design)
 function moonCx(i){ return (50-(1-i)*48).toFixed(1); }
@@ -368,7 +399,7 @@ document.getElementById('forecast').innerHTML = FORECAST_DATA.map(function(d){
   var bColor1=band(d.score);
   var bg1=rowTint(d.score);
   var cx1=moonCx(d.illum);
-  return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 4px;border-top:1px solid var(--od-rule-row);background:'+bg1+';">'
+  return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 12px;border-top:1px solid var(--od-rule-row);background:'+bg1+';">'
     +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
     +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div>'
     +'<div style="font-weight:700;font-size:24px;line-height:1;color:'+bColor1+';margin-top:4px;">'+d.score.toFixed(1)+'</div></div>'
@@ -429,14 +460,51 @@ document.addEventListener('click', function(){
   document.querySelectorAll('.term.open').forEach(function(o){ o.classList.remove('open'); });
 });
 
-// subscribe form
-document.getElementById('subscribe').addEventListener('submit', function(e){
-  e.preventDefault();
-  var email = this.querySelector('input[type=email]').value;
-  var form = new FormData(); form.append('email', email);
-  fetch('https://buttondown.com/api/emails/embed-subscribe/orbitaldaily', {method:'POST', body:form})
-    .then(function(){ document.getElementById('subscribe').style.display='none'; document.getElementById('sub-done').style.display='block'; })
-    .catch(function(){ window.open('https://buttondown.com/orbitaldaily?email='+encodeURIComponent(email),'_blank'); });
+// subscribe forms (inline SAI card + sticky bar)
+var SUB_DONE_IDS = { 'subscribe-inline': 'sub-done-inline', 'subscribe-sticky': 'sub-done-sticky' };
+document.querySelectorAll('.subscribe-form').forEach(function(f){
+  f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var email = f.querySelector('input[type=email]').value;
+    var form = new FormData(); form.append('email', email);
+    fetch('https://buttondown.com/api/emails/embed-subscribe/orbitaldaily', {method:'POST', body:form})
+      .then(function(){
+        f.style.display = 'none';
+        var doneId = SUB_DONE_IDS[f.id];
+        if(doneId){ var doneEl = document.getElementById(doneId); if(doneEl) doneEl.style.display='block'; }
+        try{ localStorage.setItem('od_subscribed', '1'); }catch(err){}
+        if(f.id === 'subscribe-sticky'){
+          setTimeout(function(){ var bar = document.getElementById('sticky-subscribe'); if(bar) bar.style.display='none'; }, 2500);
+        }
+      })
+      .catch(function(){ window.open('https://buttondown.com/orbitaldaily?email='+encodeURIComponent(email),'_blank'); });
+  });
+});
+
+// sticky subscribe bar -- appears once the inline SAI card scrolls out of view
+(function(){
+  var inlineCard = document.getElementById('inline-subscribe');
+  var stickyBar  = document.getElementById('sticky-subscribe');
+  if(!inlineCard || !stickyBar) return;
+  var dismissed, subscribed;
+  try{ dismissed = localStorage.getItem('od_sub_dismissed') === '1'; subscribed = localStorage.getItem('od_subscribed') === '1'; }catch(e){ dismissed = false; subscribed = false; }
+  if(dismissed || subscribed) return;
+  if('IntersectionObserver' in window){
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(!entry.isIntersecting && entry.boundingClientRect.top < 0){
+          stickyBar.style.display = 'block';
+        } else if(entry.isIntersecting){
+          stickyBar.style.display = 'none';
+        }
+      });
+    }, {threshold: 0});
+    observer.observe(inlineCard);
+  }
+})();
+document.getElementById('sticky-dismiss').addEventListener('click', function(){
+  document.getElementById('sticky-subscribe').style.display = 'none';
+  try{ localStorage.setItem('od_sub_dismissed', '1'); }catch(e){}
 });
 
 // location helpers
@@ -669,12 +737,13 @@ function applyLocation(lat, lon, label){
     if(loadEl) loadEl.style.display='none';
 
     // Personalized best night phrasing in week-ahead header
+    var DAY_NAMES = {SUN:'Sunday',MON:'Monday',TUE:'Tuesday',WED:'Wednesday',THU:'Thursday',FRI:'Friday',SAT:'Saturday'};
     var bestDay = updated.reduce(function(a,b){ return b.score>a.score?b:a; });
     var weekSubEl = document.getElementById('week-sub');
     if(weekSubEl && bestDay){
       var socked = updated[0].rain || updated[0].cloud >= 70;
       var prefix = socked ? 'Tonight is socked in. ' : '';
-      weekSubEl.textContent = prefix + bestDay.day.charAt(0)+bestDay.day.slice(1).toLowerCase()
+      weekSubEl.textContent = prefix + (DAY_NAMES[bestDay.day] || bestDay.day)
         + ' looks like your best night at ' + bestDay.score.toFixed(1) + '/10 from '
         + (document.getElementById('loc-name')||{}).textContent.split(' (')[0] + '.';
     }
@@ -708,7 +777,7 @@ function applyLocation(lat, lon, label){
       var cx=(50-(1-d.illum)*48).toFixed(1);
       var bColor=d.score<3?'var(--od-verdict-poor)':d.score<5?'var(--od-verdict-fair)':'var(--od-verdict-good)';
       var bg=d.score>=5?'rgba(47,125,62,.03)':d.score>=3?'rgba(160,117,8,.03)':'rgba(176,74,47,.03)';
-      return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 4px;border-top:1px solid var(--od-rule-row);background:'+bg+';">'
+      return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 12px;border-top:1px solid var(--od-rule-row);background:'+bg+';">'
         +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
         +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div>'
         +'<div style="font-weight:700;font-size:24px;line-height:1;color:'+bColor+';margin-top:4px;">'+d.score.toFixed(1)+'</div></div>'
@@ -727,7 +796,7 @@ function applyLocation(lat, lon, label){
 // auto-detect via browser geolocation first, IP fallback
 // ISS pass client-side via N2YO
 function fetchISSPass(lat, lon){
-  var key = 'QY7H88-VM284V-CL76R7-5SII';
+  var key = '';
   if(!key) return;
   fetch('https://api.n2yo.com/rest/v1/satellite/visualpasses/25544/'+lat+'/'+lon+'/0/1/40&apiKey='+key)
     .then(function(r){ return r.json(); })
@@ -743,6 +812,8 @@ function fetchISSPass(lat, lon){
       var timeStr = h12+':'+min+' '+ampm+' UTC';
       var el = document.getElementById('iss-pass');
       if(el) el.innerHTML = 'ISS passes <strong>'+timeStr+'</strong> -- rises '+p.startAzCompass+', peaks <strong>'+Math.round(p.maxEl)+'&deg;</strong>, visible '+p.duration+'s.';
+      var pulseEl = document.getElementById('iss-pulse');
+      if(pulseEl) pulseEl.style.display = '';
     }).catch(function(){});
 }
 
@@ -782,7 +853,8 @@ function initLocation(){
         fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lon, {headers:{'Accept-Language':'en'}})
           .then(function(r){ return r.json(); })
           .then(function(d){
-            var city = (d.address && (d.address.city || d.address.town || d.address.village)) || 'your location';
+            var a = d.address || {};
+            var city = a.city || a.town || a.village || a.municipality || a.hamlet || a.suburb || 'your location';
             try{ localStorage.setItem('od_location', JSON.stringify({lat:lat,lon:lon,city:city})); }catch(e){}
             applyLocation(lat, lon, city);
           }).catch(function(){ applyLocation(lat, lon, 'your location'); });
@@ -814,11 +886,12 @@ document.getElementById('change-loc').addEventListener('click', function(e){
   e.preventDefault();
   var loc = prompt('Enter your city or zip code:');
   if (!loc) return;
-  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(loc), {headers:{'Accept-Language':'en'}})
+  fetch('https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q='+encodeURIComponent(loc), {headers:{'Accept-Language':'en'}})
     .then(function(r){ return r.json(); })
     .then(function(data){
       if (data && data[0]){
-        var city = data[0].display_name.split(',')[0];
+        var a    = data[0].address || {};
+        var city = a.city || a.town || a.village || a.municipality || a.hamlet || a.suburb || data[0].display_name.split(',')[0];
         var lat  = parseFloat(data[0].lat);
         var lon  = parseFloat(data[0].lon);
         try{ localStorage.setItem('od_location', JSON.stringify({lat:lat,lon:lon,city:city})); }catch(e){}

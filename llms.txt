@@ -1,6 +1,6 @@
 # Orbital Daily
 > Independent daily space intelligence
-URL: https://orbitaldaily.com -- Updated daily ~06:00 UTC -- Last: 2026-07-07
+URL: https://orbitaldaily.com -- Updated daily ~06:00 UTC -- Last: 2026-07-08
 
 ## Metrics
 - Astrophotography Score (0-10): moon darkness 55%, Kp 25%, shower proximity 20%

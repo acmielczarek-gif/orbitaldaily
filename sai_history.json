@@ -1,7 +1,7 @@
 [
   {
     "date": "2026-07-08",
-    "sai": 33,
+    "sai": 34,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -9,8 +9,8 @@
         "reason": "Long March 10B | Demo Flight (Test Flight)"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 22.2,
+        "reason": "Kp 2.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 72.0,
