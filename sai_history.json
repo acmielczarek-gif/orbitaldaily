@@ -1,0 +1,33 @@
+[
+  {
+    "date": "2026-07-08",
+    "sai": 33,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 35.8,
+        "reason": "Long March 10B | Demo Flight (Test Flight)"
+      },
+      "geomagnetic": {
+        "score": 16.7,
+        "reason": "Kp 2.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 72.0,
+        "reason": "M4.0 flare detected"
+      },
+      "neo": {
+        "score": 4.5,
+        "reason": "2007 AA2 passing at 17.8 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "0 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 0,
+        "reason": "No market data available"
+      }
+    }
+  }
+]

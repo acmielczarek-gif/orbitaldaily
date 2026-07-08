@@ -214,20 +214,33 @@ def fetch_solar_flares(now):
     return sorted(data, key=lambda x: x.get("beginTime",""), reverse=True) if isinstance(data, list) else []
 
 def fetch_exoplanet_discoveries(now):
-    """Confirmed exoplanets published this calendar month (NASA Exoplanet Archive).
-    disc_pubdate is month-precision only -- there's no day-level 'confirmed on X
-    date' field, so 'this calendar month' is the finest resolution available."""
+    """Confirmed exoplanets: current month's count plus trailing-6-month counts
+    (NASA Exoplanet Archive), for a rolling baseline instead of a fixed threshold
+    -- see exoplanet_score(). disc_pubdate is month-precision only -- there's no
+    day-level 'confirmed on X date' field, so 'this calendar month' is the finest
+    resolution available."""
     month = now.strftime("%Y-%m")
-    query = f"select count(*) as n from pscomppars where disc_pubdate='{month}'"
+    trailing_months = []
+    y, m = now.year, now.month
+    for _ in range(6):
+        m -= 1
+        if m == 0: m, y = 12, y - 1
+        trailing_months.append(f"{y}-{m:02d}")
+    all_months = [month] + trailing_months
+    in_clause = ",".join(f"'{mo}'" for mo in all_months)
+    query = f"select disc_pubdate, count(*) as n from pscomppars where disc_pubdate in ({in_clause}) group by disc_pubdate"
     r = get("https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query="
             + requests.utils.quote(query) + "&format=json")
     if not r:
-        return None
+        return None, None
     try:
-        return r.json()[0]["n"]
+        counts = {row["disc_pubdate"]: row["n"] for row in r.json()}
+        current_count = counts.get(month, 0)
+        trailing_avg  = sum(counts.get(mo, 0) for mo in trailing_months) / len(trailing_months)
+        return current_count, trailing_avg
     except Exception as e:
         print(f"  Exoplanets: {e}", file=sys.stderr)
-        return None
+        return None, None
 
 SHOWERS = [
     (1,3,"Quadrantids",120),(4,22,"Lyrids",20),(5,6,"Eta Aquariids",50),
@@ -308,28 +321,67 @@ def launch_significance(l):
         sig = min(100, sig + LAUNCH_CREWED_BONUS)
     return sig
 
-# Confirmed exoplanets this calendar month -> 0-100. disc_pubdate is month-
-# precision only, so this measures deviation from a typical month (~10-30
-# confirmations) rather than a true rolling 7-day window.
-def exoplanet_score(count):
-    if not count:      return 0
-    if count < 10:     return 15
-    if count <= 30:    return 30
-    if count <= 75:    return 60
+# Score by how far this month's count deviates from the trailing 6-month
+# average, rather than a fixed threshold -- so a single big catalog-release
+# month (e.g. 148 in one month) doesn't peg the score at max for the entire
+# month regardless of context, and stops mattering once it ages out of the
+# trailing window.
+def exoplanet_score(current_count, trailing_avg):
+    if current_count is None or trailing_avg is None:
+        return 0
+    if trailing_avg <= 0:
+        return 0 if not current_count else min(100, 20 + current_count * 2)
+    ratio = current_count / trailing_avg
+    if ratio <= 0.5:  return 10
+    if ratio <= 1.0:  return 25
+    if ratio <= 1.5:  return 40
+    if ratio <= 2.5:  return 65
     return 100
 
 # Official NOAA G-scale (geomagnetic storm watch level), 0-5 -> 0-100.
 def storm_watch_score(g_scale):
     return {0: 0, 1: 30, 2: 50, 3: 70, 4: 90, 5: 100}.get(g_scale, 0)
 
-def compute_sai(kp, launches, neos, flares, exoplanet_count=None, storm_scale=None):
+# Largest single-day |% move| among tracked space-economy tickers, plus which
+# ticker drove it. (None, None) when FINNHUB_KEY isn't set (placeholder "--"
+# rows carry pct=None) -- distinct from 0, since "no data" isn't the same
+# claim as "confirmed calm markets".
+def stock_volatility(stocks_data):
+    candidates = [(abs(s["pct"]), s["sym"]) for s in (stocks_data or []) if s.get("pct") is not None]
+    if not candidates:
+        return None, None
+    return max(candidates, key=lambda c: c[0])
+
+def stock_volatility_score(max_move_pct):
+    if max_move_pct is None: return 0
+    if max_move_pct < 2:  return 0
+    if max_move_pct < 5:  return 30
+    if max_move_pct < 8:  return 60
+    return 100
+
+def compute_sai(kp, launches, neos, flares, exoplanet_count=None, exoplanet_avg=None,
+                 storm_scale=None, stock_volatility_pct=None, stock_volatility_sym=None):
     # Same /6 divisor as the old count-based version, so a week of 6 max-
     # significance launches still saturates the component at 100 -- but now
     # a week of routine rideshare/comms launches needs far more volume to
     # reach the same score a single crewed or lunar mission would.
     launch_score = min(100, sum(launch_significance(l) for l in launches) / 6)
-    kp_score     = min(100, ((kp if kp else 2.0) / 9) * 100 * 1.5)
-    solar_score  = 0
+    if launches:
+        top = max(launches, key=launch_significance)
+        top_mtype = (top.get("mission") or {}).get("type") or "Unknown"
+        top_name  = top.get("name", "").strip()
+        if top_mtype in LAUNCH_CREWED_TYPES:
+            launch_reason = f"Crewed mission on manifest: {top_name}" if top_name else "Crewed mission on manifest"
+        elif top_name:
+            launch_reason = f"{top_name} ({top_mtype})"
+        else:
+            launch_reason = "Routine launch activity"
+    else:
+        launch_reason = "No launches on the manifest"
+
+    kp_score = min(100, ((kp if kp else 2.0) / 9) * 100 * 1.5)
+
+    solar_score, solar_reason = 0, "No significant flare activity"
     if flares:
         cls = flares[0].get("classType","")
         if cls.startswith("X"):
@@ -340,23 +392,115 @@ def compute_sai(kp, launches, neos, flares, exoplanet_count=None, storm_scale=No
             solar_score = min(100, 40 + mag*8)
         elif cls.startswith("C"):
             solar_score = 20
-    neo_score = 0
+        if cls:
+            solar_reason = f"{cls} flare detected"
+
+    neo_score, neo_reason = 0, "No notable close approaches"
     if neos:
         ld = neos[0]["ld"]
         if ld < 1:    neo_score = 100
         elif ld < 5:  neo_score = max(0, 100 - (ld/5)*60)
         elif ld < 20: neo_score = max(0, 40 - ld*2)
-    exo_score   = exoplanet_score(exoplanet_count)
-    storm_score = storm_watch_score(storm_scale)
+        neo_reason = f"{neos[0]['name']} passing at {ld:.1f} lunar distances"
+
+    exo_score = exoplanet_score(exoplanet_count, exoplanet_avg)
+    exo_reason = ("No exoplanet data available" if exoplanet_count is None or exoplanet_avg is None
+                  else f"{exoplanet_count} confirmed this month vs {exoplanet_avg:.0f} avg")
+
+    storm_score  = storm_watch_score(storm_scale)
+    geomag_score = kp_score * 0.5 + storm_score * 0.5
+    kp_text = f"Kp {kp:.1f}" if kp is not None else "Kp unknown"
+    geomag_reason = f"{kp_text}, G{storm_scale} storm watch" if storm_scale else f"{kp_text}, quiet geomagnetic field"
+
+    stock_score = stock_volatility_score(stock_volatility_pct)
+    stock_reason = ("No market data available" if stock_volatility_pct is None or stock_volatility_sym is None
+                     else f"{stock_volatility_sym} moved {stock_volatility_pct:.1f}% today")
+
     sai = max(0, min(100, round(
-        launch_score*.28 + kp_score*.24 + solar_score*.20 + neo_score*.08 +
-        exo_score*.10 + storm_score*.10
+        launch_score*.33 + solar_score*.23 + geomag_score*.19 + exo_score*.12 +
+        neo_score*.08 + stock_score*.05
     )))
     if sai >= 75: status, color = "EXTREME", "#f87171"
     elif sai >= 50: status, color = "HIGH",    "#fbbf24"
     elif sai >= 25: status, color = "MODERATE","#60a5fa"
     else:           status, color = "LOW",     "#4ade80"
-    return sai, status, color
+
+    components = {
+        "launches":         {"score": round(launch_score, 1), "reason": launch_reason},
+        "geomagnetic":      {"score": round(geomag_score, 1), "reason": geomag_reason},
+        "solar":            {"score": round(solar_score, 1),  "reason": solar_reason},
+        "neo":              {"score": round(neo_score, 1),    "reason": neo_reason},
+        "exoplanets":       {"score": exo_score,               "reason": exo_reason},
+        "stock_volatility": {"score": stock_score,             "reason": stock_reason},
+    }
+    return sai, status, color, components
+
+
+# ── History logging (SAI / editorial / predictions) ────────────────────────────
+
+SAI_HISTORY_FILE        = "sai_history.json"
+EDITORIAL_HISTORY_FILE  = "editorial_history.json"
+PREDICTION_HISTORY_FILE = "prediction_history.json"
+
+def _load_json_history(path):
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+def _save_json_history(path, history):
+    with open(path, "w") as f:
+        json.dump(history, f, indent=2)
+
+def log_sai_history(today_date, sai, status, components):
+    history = [r for r in _load_json_history(SAI_HISTORY_FILE) if r["date"] != today_date]
+    history.append({"date": today_date, "sai": sai, "status": status, "components": components})
+    history.sort(key=lambda r: r["date"])
+    _save_json_history(SAI_HISTORY_FILE, history)
+
+def log_editorial_history(today_date, editorial):
+    history = [r for r in _load_json_history(EDITORIAL_HISTORY_FILE) if r["date"] != today_date]
+    history.append({"date": today_date, "editorial": editorial})
+    history.sort(key=lambda r: r["date"])
+    _save_json_history(EDITORIAL_HISTORY_FILE, history)
+
+def log_prediction_history(predicted_on, seven_day):
+    history = [r for r in _load_json_history(PREDICTION_HISTORY_FILE) if r["predicted_on"] != predicted_on]
+    for i, d in enumerate(seven_day):
+        history.append({
+            "predicted_on":  predicted_on,
+            "predicted_for": d["dt"].strftime("%Y-%m-%d"),
+            "days_ahead":    i,
+            "score":         d["score"],
+            "estimated":     d["estimated"],
+        })
+    history.sort(key=lambda r: (r["predicted_on"], r["predicted_for"]))
+    _save_json_history(PREDICTION_HISTORY_FILE, history)
+
+def sai_trend_callout(history, today_sai, today_date):
+    """history = prior days only (today not yet logged). Returns a short
+    callout string, or None if there's not enough data or nothing notable."""
+    if len(history) < 7:
+        return None
+    today_dt = datetime.strptime(today_date, "%Y-%m-%d")
+    window = [r for r in history if (today_dt - datetime.strptime(r["date"], "%Y-%m-%d")).days <= 30]
+    if not window:
+        return None
+    oldest = min(datetime.strptime(r["date"], "%Y-%m-%d") for r in window)
+    window_days = min(30, (today_dt - oldest).days)
+    values = [r["sai"] for r in window]
+
+    if today_sai > max(values):
+        return f"Highest SAI in {window_days} days"
+    if today_sai < min(values):
+        lower_or_equal = [r for r in window if r["sai"] <= today_sai]
+        if lower_or_equal:
+            since = max(lower_or_equal, key=lambda r: r["date"])
+            d = datetime.strptime(since["date"], "%Y-%m-%d")
+            return f"Quietest since {d.strftime('%b')} {d.day}"
+        return f"Quietest in {window_days} days"
+    return None
 
 
 # ── 7-day forecast ─────────────────────────────────────────────────────────────
@@ -425,10 +569,10 @@ def fetch_ovation_aurora(lat=39.8, lon=-98.6):
 
 def fetch_stocks():
     """Finnhub delayed quotes for space economy tickers."""
-    tickers = ["RKLB", "ASTS", "LUNR", "SPCE", "LMT", "BA"]
+    tickers = ["RKLB", "ASTS", "LUNR", "SPCE", "LMT", "BA", "SPCX"]
     results = []
     if not FINNHUB_KEY:
-        return [{"sym": s, "price": "--", "chg": "--", "color": "var(--od-faint-2)"} for s in tickers]
+        return [{"sym": s, "price": "--", "chg": "--", "color": "var(--od-faint-2)", "pct": None} for s in tickers]
     for sym in tickers:
         r = get(f"https://finnhub.io/api/v1/quote?symbol={sym}&token={FINNHUB_KEY}", timeout=8)
         if r:
@@ -441,9 +585,10 @@ def fetch_stocks():
                 "price": f"${price:.2f}" if price else "--",
                 "chg":   f"{'+' if pct >= 0 else ''}{pct:.1f}%",
                 "color": "var(--od-verdict-good)" if pct >= 0 else "var(--od-verdict-poor)",
+                "pct":   pct if price else None,
             })
         else:
-            results.append({"sym": sym, "price": "--", "chg": "--", "color": "var(--od-faint-2)"})
+            results.append({"sym": sym, "price": "--", "chg": "--", "color": "var(--od-faint-2)", "pct": None})
     return results
 
 def forecast_note(score, kp=None):
@@ -640,7 +785,7 @@ def launch_when_color(timing):
 
 def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=None, ovation_pct=None):
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if not api_key: return None, None
+    if not api_key: return None
     kp_text, _ = kp_label(kp)
     ctx = []
     if kp is not None: ctx.append(f"Kp: {kp:.1f} ({kp_text.lower()})")
@@ -678,11 +823,16 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
             json={"model": "claude-haiku-4-5-20251001", "max_tokens": 450,
                   "messages": [{"role": "user", "content":
                       f"Tonight's conditions:\n{chr(10).join(ctx)}\n\n"
-                      f"Write a short editorial for a space intelligence dispatch. 3-4 sentences total. "
+                      f"Write a short editorial for a space intelligence dispatch. 3-5 sentences total. "
                       f"Directive: {directive}. "
                       "Sentence 1: Lead with the single most notable thing tonight -- a flare, launch, the moon, a NEO, or weather. Be specific with numbers. "
                       "Sentence 2-3: What does it mean for someone who wants to go outside tonight or follow space news. Practical and direct. "
                       "Sentence 4 (optional): What is coming in the next few days worth knowing. "
+                      "Closing sentence (required): These are national/aggregate conditions, not the reader's exact location. "
+                      "Explicitly hand off to the Shoot Score and Your Sky Tonight cards by name for the reader's real local forecast -- "
+                      "e.g. 'check your Shoot Score and Your Sky Tonight for how this plays out where you are.' "
+                      "Do not use positional words like 'above', 'below', 'to the right', or 'to the left' -- these cards render in different positions on different devices. "
+                      "Do not use generic disclaimers like 'check local conditions' or 'conditions may vary by location' -- name the two cards specifically. "
                       "Voice: dry, informed, like a field correspondent. No em dashes. No generic openings like 'Tonight is'. No padding. "
                       "Return only the sentences separated by a single space. No line breaks."}]},
             timeout=18
@@ -690,11 +840,10 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
         if r.status_code == 200:
             for block in r.json().get("content", []):
                 if block.get("type") == "text":
-                    parts = [p.strip() for p in block["text"].strip().split("\n\n") if p.strip()]
-                    return (parts[0] if parts else ""), (parts[1] if len(parts) > 1 else "")
+                    return block["text"].strip()
     except Exception as e:
         print(f"  Editorial: {e}", file=sys.stderr)
-    return None, None
+    return None
 
 
 # ── Dark sky parks ─────────────────────────────────────────────────────────────
@@ -724,7 +873,7 @@ DARK_SKY_PARKS = [
 # ── Buttondown email ───────────────────────────────────────────────────────────
 
 def send_daily_email(kp, score, sai_score, launches, news, neos, flares,
-                     moon_name, moon_illum, ed_p1, ed_p2, now):
+                     moon_name, moon_illum, ed_p1, now):
     api_key = os.environ.get("BUTTONDOWN_API_KEY", "")
     if not api_key:
         print("  Email: no BUTTONDOWN_API_KEY -- skipping")
@@ -736,7 +885,7 @@ def send_daily_email(kp, score, sai_score, launches, news, neos, flares,
     date_str    = now.strftime(f"%B {now.day}, %Y")
     divider     = "-" * 48
     gps_status  = "Degraded" if kp and kp >= 4 else "Normal"
-    editorial   = ((ed_p1 or "") + " " + (ed_p2 or "")).strip()
+    editorial   = (ed_p1 or "").strip()
 
     if kp and kp >= 5:
         subject = f"Orbital Daily: {now.strftime('%b')} {now.day} -- Aurora alert active, Kp {kp_display}"
@@ -838,6 +987,15 @@ def fetch_week_summary(seven_day, launches, showers):
         ctx += "\nLaunches: none on the manifest"
     if showers:
         ctx += f"\nNext meteor shower: {showers[0][1]} in {showers[0][0]} days"
+
+    band = score_band(best["score"])
+    directive = {
+        "poor":      "be measured and dry -- nothing this week stands out, say so plainly",
+        "fair":      "be even-keeled -- a workable week but nothing to get excited about",
+        "good":      "sound genuinely pleased -- this week is worth planning around",
+        "excellent": "be excited -- this is a standout week, say why",
+    }[band]
+
     try:
         r = requests.post(
             "https://api.anthropic.com/v1/messages",
@@ -846,10 +1004,13 @@ def fetch_week_summary(seven_day, launches, showers):
             json={"model": "claude-haiku-4-5-20251001", "max_tokens": 450,
                   "messages": [{"role": "user", "content":
                       f"Week forecast:\n{ctx}\n\n"
-                      "Write 1-2 punchy sentences for space watchers. "
-                      "Name the best night and the next launch specifically. "
-                      "If a day this week has Kp 6 or higher, call it out by name as a geomagnetic storm / aurora risk day, in plain language. "
-                      "No em dashes. No markdown. No bold. No filler. Max 40 words."}]},
+                      "Write 2-3 punchy sentences for space watchers. "
+                      f"Directive: {directive}. "
+                      "You must name the best night specifically. "
+                      "If there is at least one upcoming launch, name at least one specifically -- do not just say launches are happening. "
+                      "If any day this week has Kp 6 or higher, call it out by name as a geomagnetic storm / aurora risk day, in plain language. "
+                      "Voice: dry, informed, like a field correspondent. "
+                      "No em dashes. No markdown. No bold. No filler. Max 65 words."}]},
             timeout=12
         )
         if r.status_code == 200:
@@ -898,6 +1059,14 @@ PAGE_CSS = """<style>
   .term .tip.below{ top:calc(100% + 9px); left:0; }
   .term .tip.above{ bottom:calc(100% + 9px); left:50%; margin-left:-125px; }
   .term:hover .tip, .term.open .tip{ opacity:1; visibility:visible; transform:translateY(0); pointer-events:auto; }
+  /* #tiles no longer clips overflow (that clipped tooltips too) -- round
+     the corner tiles individually instead. 8 tiles fills both the 4-col
+     desktop grid (2 full rows) and the 2-col mobile grid (4 full rows)
+     exactly, so all four corners always land on a real tile in both. */
+  #tiles .term:nth-child(1){ border-top-left-radius:4px; }
+  #tiles .term:nth-child(4){ border-top-right-radius:4px; }
+  #tiles .term:nth-child(5){ border-bottom-left-radius:4px; }
+  #tiles .term:nth-child(8){ border-bottom-right-radius:4px; }
   .idot{ display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; border-radius:50%; border:1px solid #cbc6b8; font-size:9px; color:var(--od-faint-2); }
   @keyframes odpulse{ 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.3;transform:scale(.75);} }
   .pulse{ width:8px; height:8px; border-radius:50%; background:var(--od-accent); animation:odpulse 1.6s ease-in-out infinite; display:inline-block; }
@@ -910,18 +1079,26 @@ PAGE_CSS = """<style>
     .tout{ display:none !important; }
     #gear{ grid-template-columns:1fr !important; }
     #tiles{ grid-template-columns:repeat(2,1fr) !important; }
+    /* 2-col mobile grid (4 full rows of 2): top-right corner shifts from
+       tile 4 to tile 2, and tile 5 (now mid-grid, not bottom row) loses its
+       desktop bottom-left rounding to tile 7. Tile 8 (bottom-right) needs
+       no override -- it's the real bottom-right corner in both layouts. */
+    #tiles .term:nth-child(4){ border-top-right-radius:0; }
+    #tiles .term:nth-child(5){ border-bottom-left-radius:0; }
+    #tiles .term:nth-child(2){ border-top-right-radius:4px; }
+    #tiles .term:nth-child(7){ border-bottom-left-radius:4px; }
     .activity-grid > div:first-child{ border-right:none !important; padding-right:0 !important; border-bottom:1px solid var(--od-rule-row); padding-bottom:20px; margin-bottom:4px; }
     .mob-br{ display:inline !important; }
-    #loc-bortle{ display:block; margin-top:2px; }
+    #loc-bortle{ display:block; margin-top:6px; margin-left:0; }
   }
 </style>
 </head>"""
 
 
 def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
-           neos, flares, history, ed_p1, ed_p2, now, sai_score, sai_status, sai_color,
+           neos, flares, history, ed_p1, now, sai_score, sai_status, sai_color,
            score, moon_illum, moon_name, moon_emoji, seven_day,
-           stocks=None, iss_pass=None, week_summary=None, cloud_data=None, ovation_pct=None):
+           stocks=None, iss_pass=None, week_summary=None, cloud_data=None, ovation_pct=None, sai_trend=None):
 
     global moon_illum_global
     moon_illum_global = moon_illum
@@ -950,7 +1127,8 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
 
     # Bulletin
     if kp and kp >= 5:
-        bulletin_html = (f'<div style="display:flex;align-items:baseline;gap:14px;padding:12px 2px;border-bottom:1px solid var(--od-ink);">'
+        bulletin_html = (f'<div style="display:flex;align-items:center;gap:14px;padding:12px 2px;border-bottom:1px solid var(--od-ink);">'
+                         f'<span class="pulse"></span>'
                          f'<span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.16em;color:var(--od-alert);white-space:nowrap;">&#9670; BULLETIN</span>'
                          f'<span style="font-size:16px;color:var(--od-ink-2);line-height:1.4;">Geomagnetic storm active, Kp <strong>{kp_display}</strong>. '
                          f'A faint aurora is possible on the northern horizon tonight; GPS may drift. '
@@ -965,7 +1143,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         p1_html = (f'<p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 14px;max-width:60ch;">'
                    f'<span style="float:left;font-weight:600;font-size:70px;line-height:.72;padding:8px 12px 0 0;">{drop}</span>'
                    f'{rest1}</p>')
-        p2_html = f'<p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">{esc(ed_p2)}</p>' if ed_p2 else ""
+        p2_html = ""
     else:
         # Fallback defaults
         fallback = {
@@ -984,13 +1162,6 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
                    f'<span style="float:left;font-weight:600;font-size:70px;line-height:.72;padding:8px 12px 0 0;">{drop}</span>'
                    f'{rest1}</p>')
         p2_html = f'<p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">{esc(fallback[1])}</p>'
-
-    # AI blurb (use ed_p2 condensed, or a week summary)
-    if ed_p2:
-        ai_blurb = esc(ed_p2)
-    else:
-        best_day = max(seven_day, key=lambda d: d["score"])
-        ai_blurb = esc(f"Conditions improve through the week -- {best_day['dt'].strftime('%A')} looks like the best window at {best_day['score']}/10.")
 
     # SAI description — actionable, balanced
     if sai_score >= 75:
@@ -1064,7 +1235,19 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         cloud_label = "Detecting your location..."
         cloud_detail = "Cloud cover data unavailable. Check local forecasts before heading out."
 
-    # TILES JSON -- 7 tiles, 3-col grid
+    # Humans in space -- group by craft for the tile tooltip
+    if humans_list:
+        by_craft = {}
+        for p in humans_list:
+            by_craft.setdefault(p.get("craft", "Unknown"), []).append(p.get("name", ""))
+        humans_detail = "; ".join(
+            f"{len(names)} aboard {craft}: {', '.join(names)}"
+            for craft, names in by_craft.items()
+        ) + "."
+    else:
+        humans_detail = "Crew roster unavailable right now."
+
+    # TILES JSON -- 8 tiles, 4-col grid
     tiles_json = json.dumps([
         {"value": str(moon_dark_pct), "unit": "% dark", "label": "Moon darkness",
          "color": moon_dark_color, "href": "#moon", "first": True,
@@ -1088,6 +1271,9 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
          "color": cloud_color, "href": "#clouds", "first": False,
          "id": "weather-tile",
          "detail": cloud_detail},
+        {"value": str(humans_n), "unit": "in orbit", "label": "Humans in space",
+         "color": "var(--od-ink)", "href": "#humans", "first": False,
+         "detail": humans_detail},
     ])
 
     # Strip markdown from week_summary (Haiku sometimes returns **bold**)
@@ -1229,20 +1415,6 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
     stocks_data  = stocks if stocks else [{"sym": s, "price": "--", "chg": "--", "color": "var(--od-faint-2)"} for s in ["RKLB","ASTS","LUNR","SPCE","LMT","BA"]]
     stocks_json  = json.dumps(stocks_data)
 
-    # Subscribe section context
-    if kp and kp >= 5:
-        sub_eyebrow  = "&#9670; Aurora alert &middot; active tonight"
-        sub_heading  = "The storm's live tonight. Don't miss the next one."
-        sub_body     = "Join the dispatch -- a short read each morning, and a nudge the moment the aurora odds turn in your favour."
-    elif score >= 7.5:
-        sub_eyebrow  = f"&#9670; {score}/10 tonight -- exceptional conditions"
-        sub_heading  = "A rare window is open. Be the first to know the next one."
-        sub_body     = "The dispatch lands each morning before dawn. One email, the night's verdict, and what to do about it."
-    else:
-        sub_eyebrow  = ""
-        sub_heading  = "The dispatch, in your inbox."
-        sub_body     = "A short note each morning -- the night's verdict, what is flying overhead, and a nudge when the sky opens up."
-
     # History bar
     hist_html = ""
     if history:
@@ -1312,7 +1484,7 @@ document.getElementById('forecast').innerHTML = FORECAST_DATA.map(function(d){{
   var bColor1=band(d.score);
   var bg1=rowTint(d.score);
   var cx1=moonCx(d.illum);
-  return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 4px;border-top:1px solid var(--od-rule-row);background:'+bg1+';">'
+  return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 12px;border-top:1px solid var(--od-rule-row);background:'+bg1+';">'
     +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
     +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div>'
     +'<div style="font-weight:700;font-size:24px;line-height:1;color:'+bColor1+';margin-top:4px;">'+d.score.toFixed(1)+'</div></div>'
@@ -1373,14 +1545,51 @@ document.addEventListener('click', function(){{
   document.querySelectorAll('.term.open').forEach(function(o){{ o.classList.remove('open'); }});
 }});
 
-// subscribe form
-document.getElementById('subscribe').addEventListener('submit', function(e){{
-  e.preventDefault();
-  var email = this.querySelector('input[type=email]').value;
-  var form = new FormData(); form.append('email', email);
-  fetch('https://buttondown.com/api/emails/embed-subscribe/{BUTTONDOWN_USERNAME}', {{method:'POST', body:form}})
-    .then(function(){{ document.getElementById('subscribe').style.display='none'; document.getElementById('sub-done').style.display='block'; }})
-    .catch(function(){{ window.open('https://buttondown.com/{BUTTONDOWN_USERNAME}?email='+encodeURIComponent(email),'_blank'); }});
+// subscribe forms (inline SAI card + sticky bar)
+var SUB_DONE_IDS = {{ 'subscribe-inline': 'sub-done-inline', 'subscribe-sticky': 'sub-done-sticky' }};
+document.querySelectorAll('.subscribe-form').forEach(function(f){{
+  f.addEventListener('submit', function(e){{
+    e.preventDefault();
+    var email = f.querySelector('input[type=email]').value;
+    var form = new FormData(); form.append('email', email);
+    fetch('https://buttondown.com/api/emails/embed-subscribe/{BUTTONDOWN_USERNAME}', {{method:'POST', body:form}})
+      .then(function(){{
+        f.style.display = 'none';
+        var doneId = SUB_DONE_IDS[f.id];
+        if(doneId){{ var doneEl = document.getElementById(doneId); if(doneEl) doneEl.style.display='block'; }}
+        try{{ localStorage.setItem('od_subscribed', '1'); }}catch(err){{}}
+        if(f.id === 'subscribe-sticky'){{
+          setTimeout(function(){{ var bar = document.getElementById('sticky-subscribe'); if(bar) bar.style.display='none'; }}, 2500);
+        }}
+      }})
+      .catch(function(){{ window.open('https://buttondown.com/{BUTTONDOWN_USERNAME}?email='+encodeURIComponent(email),'_blank'); }});
+  }});
+}});
+
+// sticky subscribe bar -- appears once the inline SAI card scrolls out of view
+(function(){{
+  var inlineCard = document.getElementById('inline-subscribe');
+  var stickyBar  = document.getElementById('sticky-subscribe');
+  if(!inlineCard || !stickyBar) return;
+  var dismissed, subscribed;
+  try{{ dismissed = localStorage.getItem('od_sub_dismissed') === '1'; subscribed = localStorage.getItem('od_subscribed') === '1'; }}catch(e){{ dismissed = false; subscribed = false; }}
+  if(dismissed || subscribed) return;
+  if('IntersectionObserver' in window){{
+    var observer = new IntersectionObserver(function(entries){{
+      entries.forEach(function(entry){{
+        if(!entry.isIntersecting && entry.boundingClientRect.top < 0){{
+          stickyBar.style.display = 'block';
+        }} else if(entry.isIntersecting){{
+          stickyBar.style.display = 'none';
+        }}
+      }});
+    }}, {{threshold: 0}});
+    observer.observe(inlineCard);
+  }}
+}})();
+document.getElementById('sticky-dismiss').addEventListener('click', function(){{
+  document.getElementById('sticky-subscribe').style.display = 'none';
+  try{{ localStorage.setItem('od_sub_dismissed', '1'); }}catch(e){{}}
 }});
 
 // location helpers
@@ -1613,12 +1822,13 @@ function applyLocation(lat, lon, label){{
     if(loadEl) loadEl.style.display='none';
 
     // Personalized best night phrasing in week-ahead header
+    var DAY_NAMES = {{SUN:'Sunday',MON:'Monday',TUE:'Tuesday',WED:'Wednesday',THU:'Thursday',FRI:'Friday',SAT:'Saturday'}};
     var bestDay = updated.reduce(function(a,b){{ return b.score>a.score?b:a; }});
     var weekSubEl = document.getElementById('week-sub');
     if(weekSubEl && bestDay){{
       var socked = updated[0].rain || updated[0].cloud >= 70;
       var prefix = socked ? 'Tonight is socked in. ' : '';
-      weekSubEl.textContent = prefix + bestDay.day.charAt(0)+bestDay.day.slice(1).toLowerCase()
+      weekSubEl.textContent = prefix + (DAY_NAMES[bestDay.day] || bestDay.day)
         + ' looks like your best night at ' + bestDay.score.toFixed(1) + '/10 from '
         + (document.getElementById('loc-name')||{{}}).textContent.split(' (')[0] + '.';
     }}
@@ -1652,7 +1862,7 @@ function applyLocation(lat, lon, label){{
       var cx=(50-(1-d.illum)*48).toFixed(1);
       var bColor=d.score<3?'var(--od-verdict-poor)':d.score<5?'var(--od-verdict-fair)':'var(--od-verdict-good)';
       var bg=d.score>=5?'rgba(47,125,62,.03)':d.score>=3?'rgba(160,117,8,.03)':'rgba(176,74,47,.03)';
-      return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 4px;border-top:1px solid var(--od-rule-row);background:'+bg+';">'
+      return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 12px;border-top:1px solid var(--od-rule-row);background:'+bg+';">'
         +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
         +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div>'
         +'<div style="font-weight:700;font-size:24px;line-height:1;color:'+bColor+';margin-top:4px;">'+d.score.toFixed(1)+'</div></div>'
@@ -1687,6 +1897,8 @@ function fetchISSPass(lat, lon){{
       var timeStr = h12+':'+min+' '+ampm+' UTC';
       var el = document.getElementById('iss-pass');
       if(el) el.innerHTML = 'ISS passes <strong>'+timeStr+'</strong> -- rises '+p.startAzCompass+', peaks <strong>'+Math.round(p.maxEl)+'&deg;</strong>, visible '+p.duration+'s.';
+      var pulseEl = document.getElementById('iss-pulse');
+      if(pulseEl) pulseEl.style.display = '';
     }}).catch(function(){{}});
 }}
 
@@ -1726,7 +1938,8 @@ function initLocation(){{
         fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lon, {{headers:{{'Accept-Language':'en'}}}})
           .then(function(r){{ return r.json(); }})
           .then(function(d){{
-            var city = (d.address && (d.address.city || d.address.town || d.address.village)) || 'your location';
+            var a = d.address || {{}};
+            var city = a.city || a.town || a.village || a.municipality || a.hamlet || a.suburb || 'your location';
             try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city}})); }}catch(e){{}}
             applyLocation(lat, lon, city);
           }}).catch(function(){{ applyLocation(lat, lon, 'your location'); }});
@@ -1758,11 +1971,12 @@ document.getElementById('change-loc').addEventListener('click', function(e){{
   e.preventDefault();
   var loc = prompt('Enter your city or zip code:');
   if (!loc) return;
-  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(loc), {{headers:{{'Accept-Language':'en'}}}})
+  fetch('https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q='+encodeURIComponent(loc), {{headers:{{'Accept-Language':'en'}}}})
     .then(function(r){{ return r.json(); }})
     .then(function(data){{
       if (data && data[0]){{
-        var city = data[0].display_name.split(',')[0];
+        var a    = data[0].address || {{}};
+        var city = a.city || a.town || a.village || a.municipality || a.hamlet || a.suburb || data[0].display_name.split(',')[0];
         var lat  = parseFloat(data[0].lat);
         var lon  = parseFloat(data[0].lon);
         try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city}})); }}catch(e){{}}
@@ -1851,8 +2065,8 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
   {hist_html}
   {bulletin_html}
 
-  <div style="background:#f5f3ee;border-bottom:1px solid var(--od-rule);padding:8px 0;">
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+  <div style="background:#f5f3ee;border-bottom:1px solid var(--od-rule);padding:8px 16px;">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;row-gap:8px;">
       <span class="pulse"></span>
       <span style="font-family:var(--od-mono);font-size:11px;color:var(--od-faint);">Tonight for</span>
       <span style="font-family:var(--od-mono);font-size:11px;font-weight:600;color:var(--od-ink);" id="loc-name">detecting location...</span>
@@ -1866,7 +2080,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
     <!-- Mobile metrics strip (hidden on desktop, shows above lede) -->
     <div class="mobile-metrics" style="display:none;flex-direction:column;gap:0;border:1px solid var(--od-rule-row);border-radius:6px;overflow:hidden;margin-bottom:28px;">
       <div style="padding:14px 16px;border-bottom:1px solid var(--od-rule-row);">
-        <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:6px;">Space Activity Index</div>
+        <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:10px;">Space Activity Index</div>
         <div style="display:flex;align-items:baseline;gap:6px;">
           <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;">{sai_score}</span>
           <span class="mono" style="font-size:12px;color:var(--od-faint-2);">/100</span>
@@ -1904,7 +2118,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
 
         <!-- SAI card -->
         <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:16px;background:var(--od-field);">
-          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Space Activity Index &#9432;</div>
+          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:12px;">Space Activity Index &#9432;</div>
           <div style="display:flex;align-items:baseline;gap:6px;">
             <span style="font-weight:700;font-size:42px;line-height:1;letter-spacing:-.02em;">{sai_score}</span>
             <span class="mono" style="font-size:13px;color:var(--od-faint-2);">/100</span>
@@ -1912,6 +2126,17 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
           <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--od-accent);margin-top:4px;">{esc(sai_status.title())} skies</div>
           <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:10px;"><div style="width:{sai_score}%;height:100%;background:var(--od-accent);"></div></div>
           <span class="tip below">How awake the space world is tonight -- mostly how busy the launch pads are, plus the Sun&rsquo;s mood, how charged the sky is, and whether any asteroid is swinging close.</span>
+        </div>
+
+        <!-- Inline subscribe card, tied to SAI -->
+        <div id="inline-subscribe" style="border:1px solid var(--od-rule-row);border-radius:6px;padding:16px;background:var(--od-field);">
+          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Get the alert</div>
+          <p style="font-size:14px;line-height:1.45;color:var(--od-ink-2);margin:0 0 12px;">Space Activity Index: {sai_score}/100 right now. Want to know when it spikes?</p>
+          <form class="subscribe-form" id="subscribe-inline" style="display:flex;flex-direction:column;gap:8px;">
+            <input type="email" required placeholder="you@email.com" class="mono" style="font-size:13px;padding:10px 12px;background:var(--od-paper);border:1px solid var(--od-field-border);border-radius:4px;color:var(--od-ink);outline:none;width:100%;box-sizing:border-box;">
+            <button type="submit" class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--od-paper);background:var(--od-accent);padding:10px 16px;border-radius:4px;border:none;cursor:pointer;">Subscribe</button>
+          </form>
+          <div id="sub-done-inline" style="display:none;font-style:italic;font-size:13px;color:var(--od-verdict-good);margin-top:8px;">You&rsquo;re on the list.</div>
         </div>
 
         <!-- Shoot score card -->
@@ -1947,11 +2172,12 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
     <div class="activity-grid" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center;">
       <div class="term" data-tip tabindex="0" style="text-align:center;padding-right:32px;border-right:1px solid var(--od-rule-row);">
         <div class="mono" style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--od-faint);">Space Activity Index &#9432;</div>
-        <div style="display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-top:6px;">
+        <div style="display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-top:12px;">
           <span style="font-weight:700;font-size:72px;line-height:.85;letter-spacing:-.03em;">{sai_score}</span>
           <span style="font-weight:600;font-size:22px;color:var(--od-faint-2);padding-bottom:10px;">/100</span>
         </div>
         <div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--od-accent);margin-top:4px;">{esc(sai_status.title())} skies</div>
+        {f'<div class="mono" style="font-size:10px;letter-spacing:.06em;color:var(--od-faint-2);margin-top:6px;">{esc(sai_trend)}</div>' if sai_trend else ""}
         <span class="tip below" style="left:50%;margin-left:-125px;">How awake the space world is tonight -- mostly how busy the launch pads are, plus the Sun&rsquo;s mood, how charged the sky is, and whether any asteroid is swinging close.</span>
       </div>
       <div>
@@ -1959,9 +2185,10 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
         <div style="height:6px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;max-width:420px;">
           <div style="width:{sai_score}%;height:100%;background:var(--od-accent);"></div>
         </div>
-        <div style="display:flex;align-items:baseline;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--od-rule-row);flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:12px;row-gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--od-rule-row);flex-wrap:wrap;">
+          <span class="pulse" id="iss-pulse" style="{'' if iss_pass else 'display:none;'}"></span>
           <span class="mono" style="font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);">Overhead tonight</span>
-          <span style="font-size:17px;" id="iss-pass">{f'ISS passes <strong>{iss_pass["time"]}</strong> -- rises {iss_pass["start_az"]}, peaks <strong>{iss_pass["max_el"]}&deg;</strong>, visible {iss_pass["duration"]}s.' if iss_pass else 'Check <a href="https://spotthestation.nasa.gov" style="color:var(--od-accent);border-bottom:1px solid #b7c3d3;">spotthestation.nasa.gov</a> for ISS pass times at your location.'}</span>
+          <span style="font-family:var(--od-serif);font-size:17px;line-height:1.5;" id="iss-pass">{f'ISS passes <strong>{iss_pass["time"]}</strong> -- rises {iss_pass["start_az"]}, peaks <strong>{iss_pass["max_el"]}&deg;</strong>, visible {iss_pass["duration"]}s.' if iss_pass else 'Check <a href="https://spotthestation.nasa.gov" style="color:var(--od-accent);border-bottom:1px solid #b7c3d3;">spotthestation.nasa.gov</a> for ISS pass times at your location.'}</span>
         </div>
       </div>
     </div>
@@ -1969,7 +2196,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
 
   <section style="padding:20px 0 16px;border-bottom:1px solid var(--od-rule);">
     <div class="eyebrow" style="margin-bottom:14px;">Tonight, at a glance</div>
-    <div id="tiles" style="display:grid;grid-template-columns:repeat(4,1fr);background:var(--od-rule-row);gap:1px;padding:1px;border-radius:4px;overflow:hidden;"></div>
+    <div id="tiles" style="display:grid;grid-template-columns:repeat(4,1fr);background:var(--od-rule-row);gap:1px;padding:1px;border-radius:4px;"></div>
   </section>
 
   <section style="padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
@@ -1995,18 +2222,6 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
     <div style="font-style:italic;font-size:16px;color:var(--od-muted);margin-bottom:4px;max-width:66ch;">What we would actually point at the sky this week.</div>
     <div class="mono" style="font-size:11px;letter-spacing:.04em;color:var(--od-faint-2);margin-bottom:20px;">Affiliate links -- a purchase may support the desk at no cost to you.</div>
     <div id="gear" style="display:grid;grid-template-columns:repeat(3,1fr);gap:26px;"></div>
-  </section>
-
-  <section style="padding:40px 0;border-bottom:1px solid var(--od-rule);text-align:center;">
-    {'<div class="mono" style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--od-alert);margin-bottom:12px;">'+sub_eyebrow+'</div>' if sub_eyebrow else ""}
-    <h3 style="font-size:30px;margin:0 0 8px;">{esc(sub_heading)}</h3>
-    <p style="font-size:17px;color:var(--od-ink-3);margin:0 auto 6px;max-width:52ch;line-height:1.5;">{esc(sub_body)}</p>
-    <form id="subscribe" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
-      <input type="email" required placeholder="you@email.com" class="mono" style="font-size:14px;padding:13px 16px;width:270px;max-width:78vw;background:var(--od-field);border:1px solid var(--od-field-border);border-radius:4px;color:var(--od-ink);outline:none;">
-      <button type="submit" class="mono" style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--od-paper);background:var(--od-accent);padding:13px 28px;border-radius:4px;border:none;cursor:pointer;">Subscribe</button>
-    </form>
-    <div id="sub-done" style="display:none;font-style:italic;font-size:19px;color:var(--od-verdict-good);margin-top:20px;">You are on the list -- watch your inbox at dawn.</div>
-    <div class="mono" style="font-size:11px;letter-spacing:.04em;color:var(--od-faint-2);margin-top:12px;">Free &middot; one email a day &middot; unsubscribe anytime</div>
   </section>
 
   <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:44px;padding:34px 0 30px;border-bottom:1px solid var(--od-rule);">
@@ -2043,6 +2258,18 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
 
 </div>
 
+<!-- Sticky subscribe bar -->
+<div id="sticky-subscribe" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:150;background:var(--od-ink);border-top:1px solid var(--od-rule-mast);padding:12px 20px;">
+  <div style="max-width:var(--od-max);margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <span style="font-family:var(--od-serif);font-size:16px;color:var(--od-paper);flex:1;min-width:180px;">SAI at {sai_score} &mdash; get notified when it climbs.</span>
+    <form class="subscribe-form" id="subscribe-sticky" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <input type="email" required placeholder="you@email.com" class="mono" style="font-size:12px;padding:9px 12px;background:var(--od-paper);border:1px solid var(--od-field-border);border-radius:4px;color:var(--od-ink);outline:none;width:200px;max-width:60vw;">
+      <button type="submit" class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-ink);background:var(--od-paper);padding:9px 18px;border-radius:4px;border:none;cursor:pointer;">Subscribe</button>
+    </form>
+    <div id="sub-done-sticky" style="display:none;font-family:var(--od-mono);font-size:12px;color:var(--od-verdict-good);">You&rsquo;re on the list.</div>
+    <button id="sticky-dismiss" aria-label="Dismiss" style="font-family:var(--od-mono);font-size:16px;color:var(--od-faint-2);background:none;border:none;cursor:pointer;line-height:1;padding:4px;">&times;</button>
+  </div>
+</div>
 
 <!-- Contact modal -->
 <div class="modal-overlay" id="contact-overlay" style="display:none;position:fixed;inset:0;background:rgba(20,24,29,.6);z-index:200;align-items:center;justify-content:center;padding:20px;">
@@ -2129,9 +2356,12 @@ if __name__ == "__main__":
     neos         = fetch_neo(now);          print(f"  NEOs: {len(neos)}")
     flares       = fetch_solar_flares(now); print(f"  Flares: {len(flares)}")
     stocks       = fetch_stocks();          print(f"  Stocks: {len(stocks)}")
+    stock_vol_pct, stock_vol_sym = stock_volatility(stocks)
+    print(f"  Stock volatility: {stock_vol_sym} {stock_vol_pct:.1f}%" if stock_vol_pct is not None else "  Stock volatility: unavailable (no FINNHUB_KEY)")
     iss_pass     = fetch_iss_pass();        print(f"  ISS pass: {iss_pass['time'] if iss_pass else 'none'}")
     ovation_pct  = fetch_ovation_aurora();  print(f"  Ovation aurora: {ovation_pct}%" if ovation_pct is not None else "  Ovation aurora: unavailable")
-    exoplanet_ct = fetch_exoplanet_discoveries(now); print(f"  Exoplanets this month: {exoplanet_ct}" if exoplanet_ct is not None else "  Exoplanets: unavailable")
+    exoplanet_ct, exoplanet_avg = fetch_exoplanet_discoveries(now)
+    print(f"  Exoplanets this month: {exoplanet_ct} (trailing 6mo avg {exoplanet_avg:.1f})" if exoplanet_ct is not None else "  Exoplanets: unavailable")
     storm_scale  = fetch_storm_scale();     print(f"  Storm scale: G{storm_scale}" if storm_scale is not None else "  Storm scale: unavailable")
     cloud_data   = fetch_cloud_cover()
     if cloud_data:
@@ -2148,10 +2378,12 @@ if __name__ == "__main__":
     moon_illum_global = moon_illum
     score     = astro_score(kp, moon_illum, showers[0][0] if showers else None,
                             tonight_cloud["cloud_pct"] if tonight_cloud else None)
-    sai, sai_status, sai_color = compute_sai(kp, launches, neos, flares,
-                                              exoplanet_count=exoplanet_ct, storm_scale=storm_scale)
+    sai, sai_status, sai_color, sai_components = compute_sai(
+        kp, launches, neos, flares,
+        exoplanet_count=exoplanet_ct, exoplanet_avg=exoplanet_avg,
+        storm_scale=storm_scale, stock_volatility_pct=stock_vol_pct, stock_volatility_sym=stock_vol_sym)
     seven_day = compute_7day(now, kp, kp_forecast, cloud_week)
-    ed_p1, ed_p2 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct)
+    ed_p1 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct)
     week_sum  = fetch_week_summary(seven_day, launches, showers)
 
     # Morning run (before noon UTC) sends email; afternoon run refreshes only
@@ -2163,11 +2395,19 @@ if __name__ == "__main__":
     print(f"  Week summary: {'done' if week_sum else 'none'}")
     print(f"  Run type: {'morning (newsletter)' if is_morning else 'afternoon (refresh only)'}")
 
+    today_str = now.strftime("%Y-%m-%d")
+    sai_trend = sai_trend_callout(_load_json_history(SAI_HISTORY_FILE), sai, today_str)
+    print(f"  SAI trend: {sai_trend}" if sai_trend else "  SAI trend: none (not enough history yet or nothing notable)")
+    log_sai_history(today_str, sai, sai_status, sai_components)
+    log_editorial_history(today_str, ed_p1)
+    log_prediction_history(today_str, seven_day)
+    print("  sai_history.json / editorial_history.json / prediction_history.json updated")
+
     html = render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
-                  neos, flares, history, ed_p1, ed_p2, now, sai, sai_status, sai_color,
+                  neos, flares, history, ed_p1, now, sai, sai_status, sai_color,
                   score, moon_illum, moon_name, moon_emoji, seven_day,
                   stocks=stocks, iss_pass=iss_pass, week_summary=week_sum,
-                  cloud_data=tonight_cloud, ovation_pct=ovation_pct)
+                  cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_trend=sai_trend)
 
     with open("index.html","w",encoding="utf-8") as f: f.write(html)
     print("  index.html")
@@ -2176,7 +2416,7 @@ if __name__ == "__main__":
 
     if is_morning:
         send_daily_email(kp, score, sai, launches, news, neos, flares,
-                         moon_name, moon_illum, ed_p1, ed_p2, now)
+                         moon_name, moon_illum, ed_p1, now)
     else:
         print("  Afternoon run -- skipping email")
     print("Done.")
