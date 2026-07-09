@@ -29,5 +29,36 @@
         "reason": "LUNR moved 4.6% today"
       }
     }
+  },
+  {
+    "date": "2026-07-09",
+    "sai": 27,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 48.3,
+        "reason": "Crewed mission on manifest: Soyuz 2.1a | Soyuz MS-29"
+      },
+      "geomagnetic": {
+        "score": 19.4,
+        "reason": "Kp 2.3, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C2.7 flare detected"
+      },
+      "neo": {
+        "score": 4.5,
+        "reason": "2007 AA2 passing at 17.8 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "0 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "SPCX moved 2.0% today"
+      }
+    }
   }
 ]
