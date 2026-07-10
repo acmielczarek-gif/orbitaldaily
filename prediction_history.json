@@ -101,21 +101,21 @@
     "predicted_on": "2026-07-10",
     "predicted_for": "2026-07-10",
     "days_ahead": 0,
-    "score": 5.9,
+    "score": 6.4,
     "estimated": false
   },
   {
     "predicted_on": "2026-07-10",
     "predicted_for": "2026-07-11",
     "days_ahead": 1,
-    "score": 7.7,
+    "score": 7.2,
     "estimated": true
   },
   {
     "predicted_on": "2026-07-10",
     "predicted_for": "2026-07-12",
     "days_ahead": 2,
-    "score": 8.2,
+    "score": 8.3,
     "estimated": true
   },
   {
@@ -136,14 +136,14 @@
     "predicted_on": "2026-07-10",
     "predicted_for": "2026-07-15",
     "days_ahead": 5,
-    "score": 7.6,
+    "score": 7.1,
     "estimated": true
   },
   {
     "predicted_on": "2026-07-10",
     "predicted_for": "2026-07-16",
     "days_ahead": 6,
-    "score": 7.3,
+    "score": 7.8,
     "estimated": true
   }
 ]
