@@ -94,7 +94,7 @@
   },
   {
     "date": "2026-07-11",
-    "sai": 29,
+    "sai": 28,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -102,8 +102,8 @@
         "reason": "Crewed mission on manifest: Soyuz 2.1a | Soyuz MS-29"
       },
       "geomagnetic": {
-        "score": 19.4,
-        "reason": "Kp 2.3, quiet geomagnetic field"
+        "score": 11.1,
+        "reason": "Kp 1.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
