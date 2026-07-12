@@ -199,49 +199,49 @@
     "predicted_on": "2026-07-12",
     "predicted_for": "2026-07-12",
     "days_ahead": 0,
-    "score": 6.7,
+    "score": 7.6,
     "estimated": false
   },
   {
     "predicted_on": "2026-07-12",
     "predicted_for": "2026-07-13",
     "days_ahead": 1,
-    "score": 7.2,
+    "score": 8.3,
     "estimated": true
   },
   {
     "predicted_on": "2026-07-12",
     "predicted_for": "2026-07-14",
     "days_ahead": 2,
-    "score": 7.3,
+    "score": 8.4,
     "estimated": true
   },
   {
     "predicted_on": "2026-07-12",
     "predicted_for": "2026-07-15",
     "days_ahead": 3,
-    "score": 7.3,
+    "score": 8.4,
     "estimated": true
   },
   {
     "predicted_on": "2026-07-12",
     "predicted_for": "2026-07-16",
     "days_ahead": 4,
-    "score": 7.1,
+    "score": 7.7,
     "estimated": true
   },
   {
     "predicted_on": "2026-07-12",
     "predicted_for": "2026-07-17",
     "days_ahead": 5,
-    "score": 6.9,
+    "score": 7.6,
     "estimated": true
   },
   {
     "predicted_on": "2026-07-12",
     "predicted_for": "2026-07-18",
     "days_ahead": 6,
-    "score": 6.5,
+    "score": 7.6,
     "estimated": true
   }
 ]
