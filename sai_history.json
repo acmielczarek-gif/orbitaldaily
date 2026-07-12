@@ -122,5 +122,36 @@
         "reason": "SPCX moved 4.5% today"
       }
     }
+  },
+  {
+    "date": "2026-07-12",
+    "sai": 30,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 56.7,
+        "reason": "Crewed mission on manifest: Soyuz 2.1a | Soyuz MS-29"
+      },
+      "geomagnetic": {
+        "score": 22.2,
+        "reason": "Kp 2.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C5.9 flare detected"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "2016 NB1 passing at 30.1 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "SPCX moved 4.5% today"
+      }
+    }
   }
 ]
