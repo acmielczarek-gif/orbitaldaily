@@ -826,15 +826,13 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
                       f"Write a short editorial for a space intelligence dispatch. 3-5 sentences total. "
                       f"Directive: {directive}. "
                       "Sentence 1: Lead with the single most notable thing tonight -- a flare, launch, the moon, a NEO, or weather. Be specific with numbers. "
+                      "If weather or sky-condition numbers (cloud cover, score) are the lead, attribute them to a national reference point in this same sentence -- "
+                      "e.g. 'from the geographic center of the country' or 'nationwide' -- do not state them as plain unqualified fact. "
+                      "If the lead is something location-independent (a flare, launch, NEO, moon phase), this attribution isn't needed in sentence 1. "
                       "Sentence 2-3: What does it mean for someone who wants to go outside tonight or follow space news. Practical and direct. "
                       "Sentence 4 (optional): What is coming in the next few days worth knowing. "
-                      "Closing sentence (required): These are national/aggregate conditions, not the reader's exact location. "
-                      "Explicitly hand off to the Shoot Score and Your Sky Tonight cards by name for the reader's real local forecast -- "
-                      "e.g. 'check your Shoot Score and Your Sky Tonight for how this plays out where you are.' "
-                      "Do not use positional words like 'above', 'below', 'to the right', or 'to the left' -- these cards render in different positions on different devices. "
-                      "Do not use generic disclaimers like 'check local conditions' or 'conditions may vary by location' -- name the two cards specifically. "
-                      "Voice: dry, informed, like a field correspondent. No em dashes. No generic openings like 'Tonight is'. No padding. "
-                      "Return only the sentences separated by a single space. No line breaks."}]},
+                      "Closing sentence (required): Explicitly hand off to the Shoot Score and Your Sky Tonight cards by name for the reader's real local forecast -- "
+                      "e.g. 'check your Shoot Score and Your Sky Tonight for how this plays out where you are.' "}]},
             timeout=18
         )
         if r.status_code == 200:
