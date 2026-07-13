@@ -825,14 +825,11 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
                       f"Tonight's conditions:\n{chr(10).join(ctx)}\n\n"
                       f"Write a short editorial for a space intelligence dispatch. 3-5 sentences total. "
                       f"Directive: {directive}. "
-                      "Sentence 1: Lead with the single most notable thing tonight -- a flare, launch, the moon, a NEO, or weather. Be specific with numbers. "
-                      "If weather or sky-condition numbers (cloud cover, score) are the lead, attribute them to a national reference point in this same sentence -- "
-                      "e.g. 'from the geographic center of the country' or 'nationwide' -- do not state them as plain unqualified fact. "
-                      "If the lead is something location-independent (a flare, launch, NEO, moon phase), this attribution isn't needed in sentence 1. "
-                      "Sentence 2-3: What does it mean for someone who wants to go outside tonight or follow space news. Practical and direct. "
+                      "Sentence 1: Open with today's global space-activity picture -- the flare, launch, geomagnetic storm, or NEO driving the Space Activity Index today. Be specific with numbers. Frame it explicitly as the global/national picture (e.g. 'Nationally,' 'Across the country,' 'Globally,') -- not a description of any single reader's sky. "
+                      "If weather or a sky-condition score is genuinely the most notable thing today, it's still fair to lead with it, but state plainly that it's a national reference point, not the reader's own sky. "
+                      "Sentence 2-3: What this activity means in practical terms for space-news readers generally. "
                       "Sentence 4 (optional): What is coming in the next few days worth knowing. "
-                      "Closing sentence (required): Explicitly hand off to the Shoot Score and Your Sky Tonight cards by name for the reader's real local forecast -- "
-                      "e.g. 'check your Shoot Score and Your Sky Tonight for how this plays out where you are.' "}]},
+                      "Closing sentence (required): Transition explicitly into the reader's own sky -- something like 'For what this looks like from where you actually are, check your Shoot Score and Your Sky Tonight.' Name both cards. "}]},
             timeout=18
         )
         if r.status_code == 200:
