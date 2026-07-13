@@ -1923,8 +1923,11 @@ function initLocation(){{
     var saved = localStorage.getItem('od_location');
     if(saved){{
       var loc = JSON.parse(saved);
-      applyLocation(loc.lat, loc.lon, loc.city);
-      return;
+      var age = Date.now() - (loc.ts || 0);
+      if(age < 12 * 60 * 60 * 1000){{
+        applyLocation(loc.lat, loc.lon, loc.city);
+        return;
+      }}
     }}
   }}catch(e){{}}
 
@@ -1938,7 +1941,7 @@ function initLocation(){{
           .then(function(d){{
             var a = d.address || {{}};
             var city = a.city || a.town || a.village || a.municipality || a.hamlet || a.suburb || 'your location';
-            try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city}})); }}catch(e){{}}
+            try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city,ts:Date.now()}})); }}catch(e){{}}
             applyLocation(lat, lon, city);
           }}).catch(function(){{ applyLocation(lat, lon, 'your location'); }});
       }},
@@ -1947,7 +1950,7 @@ function initLocation(){{
           .then(function(r){{ return r.json(); }})
           .then(function(d){{
             var lat=parseFloat(d.latitude)||40, lon=parseFloat(d.longitude)||-74, city=d.city||'your location';
-            try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city}})); }}catch(e){{}}
+            try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city,ts:Date.now()}})); }}catch(e){{}}
             applyLocation(lat, lon, city);
           }}).catch(function(){{}});
       }},
@@ -1958,7 +1961,7 @@ function initLocation(){{
       .then(function(r){{ return r.json(); }})
       .then(function(d){{
         var lat=parseFloat(d.latitude)||40, lon=parseFloat(d.longitude)||-74, city=d.city||'your location';
-        try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city}})); }}catch(e){{}}
+        try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city,ts:Date.now()}})); }}catch(e){{}}
         applyLocation(lat, lon, city);
       }}).catch(function(){{}});
   }}
@@ -1977,7 +1980,7 @@ document.getElementById('change-loc').addEventListener('click', function(e){{
         var city = a.city || a.town || a.village || a.municipality || a.hamlet || a.suburb || data[0].display_name.split(',')[0];
         var lat  = parseFloat(data[0].lat);
         var lon  = parseFloat(data[0].lon);
-        try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city}})); }}catch(e){{}}
+        try{{ localStorage.setItem('od_location', JSON.stringify({{lat:lat,lon:lon,city:city,ts:Date.now()}})); }}catch(e){{}}
         applyLocation(lat, lon, city);
       }}
     }}).catch(function(){{}});
@@ -2102,7 +2105,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
     </div>
 
     <div class="eyebrow" style="margin-bottom:6px;">The desk&rsquo;s read for tonight</div>
-    <div class="mono" style="font-size:11px;color:var(--od-faint-2);margin-bottom:18px;letter-spacing:.04em;">Global space intelligence &middot; local conditions on the right</div>
+    <div class="mono" style="font-size:11px;color:var(--od-faint-2);margin-bottom:18px;letter-spacing:.04em;">Nationwide space conditions &middot; your Shoot Score personalizes it to your sky</div>
 
     <div class="lede-grid" style="display:grid;grid-template-columns:1fr 220px;gap:34px;align-items:start;">
       <div>
@@ -2127,7 +2130,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
         </div>
 
         <!-- Shoot score card -->
-        <div style="border:1px solid var(--od-rule-row);border-radius:6px;padding:12px;background:var(--od-field);">
+        <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:12px;background:var(--od-field);">
           <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Shoot Score &middot; <span id="rail-score-label" style="color:var(--od-faint-2);letter-spacing:.04em;font-size:10px;text-transform:none;font-weight:400;">global forecast</span></div>
           <div style="display:flex;align-items:baseline;gap:6px;">
             <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;color:{stamp_color};" id="rail-score">{score}</span>
@@ -2135,6 +2138,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
           </div>
           <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:{stamp_color};" id="rail-stamp">{esc(stamp_label)}</div>
           <div id="rail-score-warning" style="display:none;font-family:var(--od-mono);font-size:10px;color:var(--od-verdict-poor);letter-spacing:.06em;margin-top:6px;">cloud override active</div>
+          <span class="tip below">Starts from the nationwide astrophotography score, then adjusts to match live cloud cover at your detected location. If your location wasn't detected, this is still the national figure.</span>
         </div>
 
         <!-- Cloud / weather card -->
