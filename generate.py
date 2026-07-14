@@ -783,12 +783,13 @@ def launch_when_color(timing):
 
 # ── fetch_editorial — 2 paragraphs, returns (p1, p2) ──────────────────────────
 
-def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=None, ovation_pct=None):
+def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=None, ovation_pct=None, sai_score=None, sai_status=None):
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key: return None
     kp_text, _ = kp_label(kp)
     ctx = []
     if kp is not None: ctx.append(f"Kp: {kp:.1f} ({kp_text.lower()})")
+      if sai_score is not None: ctx.append(f"Space Activity Index (national, aggregate): {sai_score}/100 ({sai_status})")
     ctx.append(f"Astrophotography score: {score}/10 ({score_label(score)})")
     ctx.append(f"Moon: {moon_name} ({int(moon_illum_global * 100)}% illuminated)")
     if cloud_data:
@@ -1750,7 +1751,7 @@ function applyLocation(lat, lon, label){{
       }});
       ['rail-score-label','rail-score-label-mobile'].forEach(function(id){{
         var el=document.getElementById(id);
-        if(el) el.textContent='local forecast';
+        if(el) el.textContent=label||'your location';
       }});
       var rwEl=document.getElementById('rail-score-warning');
       if(rwEl && socked) rwEl.style.display='block';
@@ -2384,7 +2385,7 @@ if __name__ == "__main__":
         exoplanet_count=exoplanet_ct, exoplanet_avg=exoplanet_avg,
         storm_scale=storm_scale, stock_volatility_pct=stock_vol_pct, stock_volatility_sym=stock_vol_sym)
     seven_day = compute_7day(now, kp, kp_forecast, cloud_week)
-    ed_p1 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct)
+    ed_p1 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_score=sai_score, sai_status=sai_status)
     week_sum  = fetch_week_summary(seven_day, launches, showers)
 
     # Morning run (before noon UTC) sends email; afternoon run refreshes only
