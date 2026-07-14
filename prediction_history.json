@@ -297,14 +297,14 @@
     "predicted_on": "2026-07-14",
     "predicted_for": "2026-07-14",
     "days_ahead": 0,
-    "score": 8.4,
+    "score": 8.3,
     "estimated": false
   },
   {
     "predicted_on": "2026-07-14",
     "predicted_for": "2026-07-15",
     "days_ahead": 1,
-    "score": 8.2,
+    "score": 8.0,
     "estimated": true
   },
   {
