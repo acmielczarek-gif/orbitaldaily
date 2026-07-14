@@ -141,6 +141,47 @@ def fetch_launches():
     r = get("https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=8&format=json")
     return r.json().get("results", []) if r else []
 
+def fetch_landings():
+    """Recent completed launches with a landing attempt, last ~36h.
+    Uses detailed mode to get landing outcome data. Defensive throughout --
+    schema for this endpoint hasn't been verified against a live response,
+    so any unexpected shape just yields an empty list instead of crashing."""
+    r = get("https://ll.thespacedevs.com/2.2.0/launch/previous/?limit=10&mode=detailed&ordering=-net&format=json")
+    if not r:
+        return []
+    try:
+        launches = r.json().get("results", [])
+    except Exception:
+        return []
+
+    cutoff  = datetime.now(timezone.utc) - timedelta(hours=36)
+    results = []
+    for l in launches:
+        try:
+            net_str = l.get("net", "")
+            if not net_str:
+                continue
+            net_dt = datetime.strptime(net_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+            if net_dt < cutoff:
+                continue
+            rocket = l.get("rocket") or {}
+            stages = rocket.get("launcher_stage") or []
+            for stage in stages:
+                landing = stage.get("landing") or {}
+                if not landing.get("attempt"):
+                    continue
+                results.append({
+                    "mission":  l.get("name", "Unknown mission"),
+                    "provider": (l.get("launch_service_provider") or {}).get("name", "Unknown provider"),
+                    "success":  bool(landing.get("success")),
+                    "type":     (landing.get("type") or {}).get("name", "Landing"),
+                    "location": (landing.get("location") or {}).get("name", ""),
+                    "date":     f"{net_dt.strftime('%b')} {net_dt.day}",
+                })
+        except Exception:
+            continue
+    return results
+      
 def fetch_space_history(date):
     import random
     r = get(f"https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/{date.month}/{date.day}")
@@ -783,7 +824,7 @@ def launch_when_color(timing):
 
 # ── fetch_editorial — 2 paragraphs, returns (p1, p2) ──────────────────────────
 
-def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=None, ovation_pct=None, sai_score=None, sai_status=None):
+def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=None, ovation_pct=None, sai_score=None, sai_status=None, landings=None):
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key: return None
     kp_text, _ = kp_label(kp)
@@ -801,6 +842,7 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
     if flares:   ctx.append(f"Solar: {flares[0].get('classType', '')} flare recently")
     if neos:     ctx.append(f"NEO: {neos[0]['name']} at {neos[0]['ld']:.1f} lunar distances")
     if launches: ctx.append(f"Next launch: {launches[0].get('name', '')} ({launch_timing(launches[0].get('net', ''))})")
+    if landings: ctx.append(f"Recent booster landing: {landings[0]['mission']} -- {landings[0]['type']} landing {'succeeded' if landings[0]['success'] else 'failed'}")
     if showers:  ctx.append(f"Next shower: {showers[0][1]} in {showers[0][0]} days")
     if history:  ctx.append(f"Today in history ({history['year']}): {history['text'][:100]}")
 
@@ -1260,7 +1302,7 @@ PAGE_CSS = """<style>
 def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
            neos, flares, history, ed_p1, now, sai_score, sai_status, sai_color,
            score, moon_illum, moon_name, moon_emoji, seven_day,
-           stocks=None, iss_pass=None, week_summary=None, cloud_data=None, ovation_pct=None, sai_trend=None):
+           stocks=None, iss_pass=None, week_summary=None, cloud_data=None, ovation_pct=None, sai_trend=None, landings=None):
 
     global moon_illum_global
     moon_illum_global = moon_illum
@@ -1469,6 +1511,25 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
 
   # GEAR JSON -- weather + condition aware
     gear_items = select_gear(score, kp, cloud_data)
+
+    landings_html = ""
+    if landings:
+        rows = "".join(
+            f'<div style="padding:12px 0;border-bottom:1px solid var(--od-rule-row);">'
+            f'<span style="font-weight:600;">{esc(l["mission"])}</span> '
+            f'<span class="mono" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:{"var(--od-verdict-good)" if l["success"] else "var(--od-verdict-poor)"};">'
+            f'{"LANDED" if l["success"] else "LANDING FAILED"}</span><br>'
+            f'<span style="font-size:14px;color:var(--od-ink-2);">{esc(l["provider"])} &middot; {esc(l["type"])}'
+            + (f' at {esc(l["location"])}' if l["location"] else '') + f' &middot; {esc(l["date"])}</span>'
+            f'</div>'
+            for l in landings
+        )
+        landings_html = f'''
+  <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
+    <div class="mono" style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:6px;">Distinct from the manifest above</div>
+    <h3 style="font-size:28px;margin:0 0 14px;">Booster landings</h3>
+    {rows}
+  </section>'''
 
     gear_json = json.dumps([
         {"cat": g[0], "name": g[1], "why": g[2], "url": g[4]}
@@ -2255,7 +2316,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
       <div id="sub-done-inline" style="display:none;font-style:italic;font-size:13px;color:var(--od-verdict-good);">You&rsquo;re on the list.</div>
     </div>
   </section>
-
+{landings_html}
   <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
     <div class="activity-grid" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center;">
       <div class="term" data-tip tabindex="0" style="text-align:center;padding-right:32px;border-right:1px solid var(--od-rule-row);">
@@ -2471,7 +2532,8 @@ if __name__ == "__main__":
         exoplanet_count=exoplanet_ct, exoplanet_avg=exoplanet_avg,
         storm_scale=storm_scale, stock_volatility_pct=stock_vol_pct, stock_volatility_sym=stock_vol_sym)
     seven_day = compute_7day(now, kp, kp_forecast, cloud_week)
-    ed_p1 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_score=sai, sai_status=sai_status)
+    landings = fetch_landings();            print(f"  Landings: {len(landings)}")
+    ed_p1 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_score=sai, sai_status=sai_status, landings=landings)
     week_sum, day_blurbs = fetch_week_narrative(seven_day, launches, showers)
 
     # Morning run (before noon UTC) sends email; afternoon run refreshes only
@@ -2495,7 +2557,7 @@ if __name__ == "__main__":
                   neos, flares, history, ed_p1, now, sai, sai_status, sai_color,
                   score, moon_illum, moon_name, moon_emoji, seven_day,
                   stocks=stocks, iss_pass=iss_pass, week_summary=week_sum,
-                  cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_trend=sai_trend)
+                  cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_trend=sai_trend,landings=landings)
 
     with open("index.html","w",encoding="utf-8") as f: f.write(html)
     print("  index.html")
