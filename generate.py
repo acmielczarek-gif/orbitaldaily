@@ -789,7 +789,7 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
     kp_text, _ = kp_label(kp)
     ctx = []
     if kp is not None: ctx.append(f"Kp: {kp:.1f} ({kp_text.lower()})")
-      if sai_score is not None: ctx.append(f"Space Activity Index (national, aggregate): {sai_score}/100 ({sai_status})")
+    if sai_score is not None: ctx.append(f"Space Activity Index (national, aggregate): {sai_score}/100 ({sai_status})")
     ctx.append(f"Astrophotography score: {score}/10 ({score_label(score)})")
     ctx.append(f"Moon: {moon_name} ({int(moon_illum_global * 100)}% illuminated)")
     if cloud_data:
