@@ -184,5 +184,36 @@
         "reason": "ASTS moved 7.8% today"
       }
     }
+  },
+  {
+    "date": "2026-07-14",
+    "sai": 31,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 53.3,
+        "reason": "Crewed mission on manifest: Soyuz 2.1a | Soyuz MS-29"
+      },
+      "geomagnetic": {
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C3.9 flare detected"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "2019 NG2 passing at 23.2 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "SPCE moved 9.5% today"
+      }
+    }
   }
 ]
