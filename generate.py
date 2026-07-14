@@ -978,6 +978,39 @@ def fetch_week_summary(seven_day, launches, showers):
             f"{l.get('name','')} ({launch_timing(l.get('net',''))})"
             for l in launches[:2]
         )
+def fetch_week_narrative(seven_day, launches, showers):
+    """Week-ahead summary + per-day blurbs, generated together in one call."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return None, None
+
+    best   = max(seven_day, key=lambda d: d["score"])
+    worst  = min(seven_day, key=lambda d: d["score"])
+    scores = [d["score"] for d in seven_day]
+    avg    = round(sum(scores) / len(scores), 1)
+    trend  = "improving" if scores[-1] > scores[0] else "declining" if scores[-1] < scores[0] else "steady"
+
+    days_ctx = []
+    for d in seven_day:
+        day_name = d["dt"].strftime("%A")
+        day_str  = d["dt"].strftime("%Y-%m-%d")
+        launch_today = [l for l in launches if l.get("net", "").startswith(day_str)]
+        launch_str = f"; launch: {launch_today[0].get('name','')}" if launch_today else ""
+        shower_str = ""
+        if showers and showers[0][0] == (d["dt"].date() - seven_day[0]["dt"].date()).days:
+            shower_str = f"; {showers[0][1]} meteor shower peaks today"
+        kp_str    = f"Kp {d['kp']:.0f}" if d.get("kp") is not None else "Kp n/a"
+        cloud_str = f", {d['cloud_pct']}% cloud" if d.get("cloud_pct") is not None else ""
+        days_ctx.append(
+            f"{day_name}: score {d['score']}/10, {kp_str}, moon {round(d['illum']*100)}% illuminated{cloud_str}{launch_str}{shower_str}"
+        )
+
+    ctx  = "\n".join(days_ctx)
+    ctx += f"\n\nBest night: {best['dt'].strftime('%A')} at {best['score']}/10"
+    ctx += f"\nWeakest night: {worst['dt'].strftime('%A')} at {worst['score']}/10"
+    ctx += f"\nWeek average: {avg}/10, trend {trend} across the week"
+    if launches:
+        next_launches = "; ".join(f"{l.get('name','')} ({launch_timing(l.get('net',''))})" for l in launches[:3])
         ctx += f"\nUpcoming launches: {next_launches}"
     else:
         ctx += "\nLaunches: none on the manifest"
@@ -997,26 +1030,35 @@ def fetch_week_summary(seven_day, launches, showers):
             "https://api.anthropic.com/v1/messages",
             headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
                      "content-type": "application/json"},
-            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 450,
+            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 700,
                   "messages": [{"role": "user", "content":
-                      f"Week forecast:\n{ctx}\n\n"
-                      "Write 2-3 punchy sentences for space watchers. "
+                      f"Seven-day forecast, in order starting today:\n{ctx}\n\n"
+                      "Return ONLY valid JSON, no markdown fences, no preamble, in this exact shape:\n"
+                      '{"summary": "...", "days": ["...", "...", "...", "...", "...", "...", "..."]}\n\n'
+                      "summary: 2-3 punchy sentences for space watchers. "
                       f"Directive: {directive}. "
-                      "You must name the best night specifically. "
-                      "If there is at least one upcoming launch, name at least one specifically -- do not just say launches are happening. "
-                      "If any day this week has Kp 6 or higher, call it out by name as a geomagnetic storm / aurora risk day, in plain language. "
-                      "Voice: dry, informed, like a field correspondent. "
-                      "No em dashes. No markdown. No bold. No filler. Max 65 words."}]},
-            timeout=12
+                      "Do not just name the best night and stop -- describe the actual shape of the week: trending up or down, what is driving the swings, any day worth circling. "
+                      "If there is at least one upcoming launch, name at least one specifically. "
+                      "If any day this week has Kp 6 or higher, call it out by name as a geomagnetic storm / aurora risk day. "
+                      "days: exactly 7 short blurbs, one per day, same order as the input, 3-8 words each. "
+                      "Each blurb must reflect what is specific to that day -- not a generic score-band phrase. Reference the actual driver: moon phase, a launch that day, a meteor shower, a Kp storm, heavy cloud, etc. "
+                      "Voice: dry, informed, like a field correspondent. No em dashes. No markdown. No filler."}]},
+            timeout=18
         )
         if r.status_code == 200:
             for block in r.json().get("content", []):
                 if block.get("type") == "text":
                     import re as _re
-                    return _re.sub(r'\*+', '', block["text"]).strip()
+                    txt = _re.sub(r'```json|```', '', block["text"]).strip()
+                    parsed  = json.loads(txt)
+                    summary = _re.sub(r'\*+', '', parsed.get("summary", "")).strip()
+                    days    = parsed.get("days", [])
+                    if len(days) == 7:
+                        return summary, days
+                    return summary, None
     except Exception as e:
-        print(f"  Week summary: {e}", file=sys.stderr)
-    return None
+        print(f"  Week narrative: {e}", file=sys.stderr)
+    return None, None
 
 
 # ── Renderer ───────────────────────────────────────────────────────────────────
@@ -1159,15 +1201,18 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
                    f'{rest1}</p>')
         p2_html = f'<p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">{esc(fallback[1])}</p>'
 
-    # SAI description — actionable, balanced
+    # SAI description — actionable, balanced, names the actual top driver
+    top_driver_name, top_driver = max(sai_components.items(), key=lambda kv: kv[1]["score"])
+    top_reason = top_driver["reason"]
+
     if sai_score >= 75:
-        sai_desc = "Something significant is happening overhead. A launch is imminent, the sun is active, or both. Check the bulletin and don't miss tonight."
+        sai_desc = f"Something significant is happening overhead. {top_reason}. Check the bulletin and don't miss tonight."
     elif sai_score >= 50:
-        sai_desc = "An active week. Worth checking the wires and keeping an eye on conditions -- something is likely to develop."
+        sai_desc = f"An active stretch. {top_reason} is the main driver right now -- worth keeping an eye on."
     elif sai_score >= 25:
-        sai_desc = "A few things on the manifest and conditions are holding. A good week to follow along."
+        sai_desc = f"{top_reason}. Conditions otherwise holding steady -- a good week to follow along."
     else:
-        sai_desc = "Quiet across the board. Good conditions to focus on the sky itself -- nothing competing for your attention."
+        sai_desc = f"Quiet across the board. {top_reason}. Good conditions to focus on the sky itself."
 
     # Aurora, moon darkness, NEO values (used in tiles and subscribe)
     if ovation_pct is not None:
@@ -1284,7 +1329,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
             "date":  d["dt"].strftime(f"%b {d['dt'].day}"),
             "illum": round(d["illum"], 2),
             "score": d["score"],
-            "note":  forecast_note(d["score"], d.get("kp")),
+            "note":  (day_blurbs[i] if day_blurbs else forecast_note(d["score"], d.get("kp"))),
             "cloud": d.get("cloud_pct"),
             "rain":  d.get("raining", False),
             "flag":  (
@@ -1295,7 +1340,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
                 ), "est." if d["estimated"] else "")
             ),
         }
-        for d in seven_day
+        for i, d in enumerate(seven_day)
     ])
 
     # GEAR JSON -- weather + condition aware
@@ -2386,7 +2431,7 @@ if __name__ == "__main__":
         storm_scale=storm_scale, stock_volatility_pct=stock_vol_pct, stock_volatility_sym=stock_vol_sym)
     seven_day = compute_7day(now, kp, kp_forecast, cloud_week)
     ed_p1 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_score=sai, sai_status=sai_status)
-    week_sum  = fetch_week_summary(seven_day, launches, showers)
+    week_sum, day_blurbs = fetch_week_narrative(seven_day, launches, showers)
 
     # Morning run (before noon UTC) sends email; afternoon run refreshes only
     is_morning = now.hour < 12
