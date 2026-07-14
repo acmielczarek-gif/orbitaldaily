@@ -2557,7 +2557,7 @@ if __name__ == "__main__":
                   neos, flares, history, ed_p1, now, sai, sai_status, sai_color,
                   score, moon_illum, moon_name, moon_emoji, seven_day,
                   stocks=stocks, iss_pass=iss_pass, week_summary=week_sum,
-                  cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_trend=sai_trend,landings=landings)
+                  cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_trend=sai_trend, landings=landings)
 
     with open("index.html","w",encoding="utf-8") as f: f.write(html)
     print("  index.html")
