@@ -1012,9 +1012,11 @@ def send_daily_email(kp, score, sai_score, launches, news, neos, flares,
             print(f"  Email sent: {subject}")
         else:
             print(f"  Email failed: {r.status_code} -- {r.text[:200]}", file=sys.stderr)
+    except Exception as e:
+        print(f"  Email failed: {e}", file=sys.stderr)
 
 
-def fetch_week_summary(seven_day, launches, showers):
+def fetch_week_narrative(seven_day, launches, showers):
     """Short punchy week description for the forecast header."""
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
