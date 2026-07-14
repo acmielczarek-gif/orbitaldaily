@@ -2385,7 +2385,7 @@ if __name__ == "__main__":
         exoplanet_count=exoplanet_ct, exoplanet_avg=exoplanet_avg,
         storm_scale=storm_scale, stock_volatility_pct=stock_vol_pct, stock_volatility_sym=stock_vol_sym)
     seven_day = compute_7day(now, kp, kp_forecast, cloud_week)
-    ed_p1 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_score=sai_score, sai_status=sai_status)
+    ed_p1 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_score=sai, sai_status=sai_status)
     week_sum  = fetch_week_summary(seven_day, launches, showers)
 
     # Morning run (before noon UTC) sends email; afternoon run refreshes only
