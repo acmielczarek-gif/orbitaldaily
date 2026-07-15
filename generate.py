@@ -180,6 +180,47 @@ def fetch_landings():
             continue
     return results
 
+def fetch_landings():
+    """Recent completed launches with a landing attempt, last ~36h.
+    Uses detailed mode to get landing outcome data. Defensive throughout --
+    schema for this endpoint hasn't been verified against a live response,
+    so any unexpected shape just yields an empty list instead of crashing."""
+    r = get("https://ll.thespacedevs.com/2.2.0/launch/previous/?limit=10&mode=detailed&ordering=-net&format=json")
+    if not r:
+        return []
+    try:
+        launches = r.json().get("results", [])
+    except Exception:
+        return []
+
+    cutoff  = datetime.now(timezone.utc) - timedelta(hours=36)
+    results = []
+    for l in launches:
+        try:
+            net_str = l.get("net", "")
+            if not net_str:
+                continue
+            net_dt = datetime.strptime(net_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+            if net_dt < cutoff:
+                continue
+            rocket = l.get("rocket") or {}
+            stages = rocket.get("launcher_stage") or []
+            for stage in stages:
+                landing = stage.get("landing") or {}
+                if not landing.get("attempt"):
+                    continue
+                results.append({
+                    "mission":  l.get("name", "Unknown mission"),
+                    "provider": (l.get("launch_service_provider") or {}).get("name", "Unknown provider"),
+                    "success":  bool(landing.get("success")),
+                    "type":     (landing.get("type") or {}).get("name", "Landing"),
+                    "location": (landing.get("location") or {}).get("name", ""),
+                    "date":     f"{net_dt.strftime('%b')} {net_dt.day}",
+                })
+        except Exception:
+            continue
+    return results
+      
 def fetch_space_history(date):
     import random
     r = get(f"https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/{date.month}/{date.day}")
@@ -909,7 +950,7 @@ DARK_SKY_PARKS = [
 # ── Buttondown email ───────────────────────────────────────────────────────────
 
 def send_daily_email(kp, score, sai_score, launches, news, neos, flares,
-                     moon_name, moon_illum, ed_p1, now):
+                     moon_name, moon_illum, ed_p1, now, gear_items=None):
     api_key = os.environ.get("BUTTONDOWN_API_KEY", "")
     if not api_key:
         print("  Email: no BUTTONDOWN_API_KEY -- skipping")
@@ -919,9 +960,9 @@ def send_daily_email(kp, score, sai_score, launches, news, neos, flares,
     kp_display  = f"{kp:.1f}" if kp is not None else "N/A"
     moon_pct    = int(round(moon_illum * 100))
     date_str    = now.strftime(f"%B {now.day}, %Y")
-    divider     = "-" * 48
     gps_status  = "Degraded" if kp and kp >= 4 else "Normal"
     editorial   = (ed_p1 or "").strip()
+    score_color = {"poor":"#b04a2f","fair":"#a07508","good":"#2f7d3e","excellent":"#2f7d3e"}[score_band(score)]
 
     if kp and kp >= 5:
         subject = f"Orbital Daily: {now.strftime('%b')} {now.day} -- Aurora alert active, Kp {kp_display}"
@@ -934,49 +975,108 @@ def send_daily_email(kp, score, sai_score, launches, news, neos, flares,
     else:
         subject = f"Orbital Daily: {now.strftime('%b')} {now.day} -- Space Activity Index {sai_score}/100"
 
-    launch_block = "\n".join(
-        f"  {launch_timing(l.get('net',''))} -- {l.get('name','')}"
+    launch_rows = "".join(
+        f'<tr><td style="padding:6px 0;font-family:\'IBM Plex Mono\',ui-monospace,monospace;font-size:13px;color:#6b6a62;white-space:nowrap;padding-right:14px;">{escape(launch_timing(l.get("net","")))}</td>'
+        f'<td style="padding:6px 0;font-size:15px;color:#14181d;">{escape(l.get("name",""))}</td></tr>'
         for l in launches[:4]
-    ) if launches else "  No launches scheduled"
+    ) if launches else '<tr><td style="padding:6px 0;font-size:15px;color:#6b6a62;">No launches scheduled</td></tr>'
 
-    solar_block = f"{flares[0].get('classType','')} flare detected recently" if flares else "No active solar events"
-    neo_block   = f"{neos[0]['name']} -- {neos[0]['ld']:.1f} lunar distances, {neos[0].get('date','this week')}" if neos else "No notable close approaches"
-    headlines   = "\n".join(f"  * {a['title']}" for a in news[:5]) if news else "  * No headlines available"
-    editorial_text = editorial if editorial else "Visit orbitaldaily.com for today's full briefing."
+    solar_block = f"{escape(flares[0].get('classType',''))} flare detected recently" if flares else "No active solar events"
+    neo_block   = f"{escape(neos[0]['name'])} -- {neos[0]['ld']:.1f} lunar distances, {escape(neos[0].get('date','this week'))}" if neos else "No notable close approaches"
+    editorial_text = escape(editorial) if editorial else "Visit orbitaldaily.com for today's full briefing."
 
-    body = f"""Orbital Daily tracks space conditions daily: astrophotography scores, rocket launches, aurora alerts, and near-Earth objects, computed fresh every morning.
+    headline_rows = "".join(
+        f'<tr><td style="padding:8px 0;border-top:1px solid #e7e3d8;font-size:15px;line-height:1.4;color:#14181d;">{escape(a["title"])}</td></tr>'
+        for a in news[:5]
+    ) if news else '<tr><td style="padding:8px 0;font-size:15px;color:#6b6a62;">No headlines available</td></tr>'
 
-{divider}
+    gear_html = ""
+    if gear_items:
+        cat, name, why, _, url = gear_items[0]
+        gear_html = f"""
+    <tr><td style="padding:28px 0 0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2ddd0;border-radius:8px;background:#fdfcf8;">
+        <tr><td style="padding:18px 20px;">
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#a8a294;margin-bottom:8px;">Sponsored -- {escape(cat)}</div>
+          <div style="font-family:Georgia,serif;font-weight:600;font-size:17px;color:#14181d;margin-bottom:6px;">{escape(name)}</div>
+          <div style="font-size:14px;color:#4a4f57;line-height:1.5;margin-bottom:12px;">{escape(why)}</div>
+          <a href="{url}" target="_blank" rel="sponsored noopener" style="display:inline-block;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;letter-spacing:.06em;color:#1b3a6b;text-decoration:none;">VIEW ON AMAZON &rarr;</a>
+        </td></tr>
+      </table>
+    </td></tr>"""
 
-{editorial_text}
+    body = f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{escape(subject)}</title>
+</head>
+<body style="margin:0;padding:0;background:#faf9f5;font-family:Georgia,serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#faf9f5;">
+<tr><td align="center" style="padding:32px 16px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
 
-{divider}
+  <tr><td style="padding-bottom:22px;border-bottom:2px solid #14181d;">
+    <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a8578;">Orbital Daily</div>
+    <div style="font-family:Georgia,serif;font-size:15px;color:#4a4f57;margin-top:4px;">{escape(date_str)}</div>
+  </td></tr>
 
-TONIGHT -- {date_str}
-Astrophotography Score: {score}/10 -- {score_label(score)}
-Moon: {moon_name} -- {moon_pct}% illuminated
+  <tr><td style="padding:26px 0;font-family:Georgia,serif;font-size:18px;line-height:1.6;color:#2a2f36;border-bottom:1px solid #ddd8cc;">
+    {editorial_text}
+  </td></tr>
 
-SPACE WEATHER
-Kp Index: {kp_display} -- {kp_text}
-GPS: {gps_status}
-Solar: {solar_block}
+  <tr><td style="padding:24px 0 8px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td width="50%" style="vertical-align:top;padding-right:14px;">
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8a8578;margin-bottom:6px;">Tonight</div>
+          <div style="font-family:Georgia,serif;font-weight:700;font-size:32px;color:{score_color};line-height:1;">{score}<span style="font-size:16px;color:#a8a294;">/10</span></div>
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:{score_color};margin-top:4px;">{escape(score_label(score))}</div>
+          <div style="font-size:14px;color:#4a4f57;margin-top:8px;">Moon: {escape(moon_name)} -- {moon_pct}% illuminated</div>
+        </td>
+        <td width="50%" style="vertical-align:top;padding-left:14px;border-left:1px solid #e7e3d8;">
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8a8578;margin-bottom:6px;">Space Weather</div>
+          <div style="font-size:14px;color:#14181d;line-height:1.7;">
+            Kp Index: {kp_display} -- {escape(kp_text)}<br>
+            GPS: {gps_status}<br>
+            Solar: {escape(solar_block)}
+          </div>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
 
-UPCOMING LAUNCHES
-{launch_block}
+  <tr><td style="padding:22px 0 4px;border-top:1px solid #e7e3d8;">
+    <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8a8578;margin-bottom:10px;">Upcoming Launches</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{launch_rows}</table>
+  </td></tr>
 
-NEAR-EARTH OBJECTS
-{neo_block}
+  <tr><td style="padding:20px 0 4px;border-top:1px solid #e7e3d8;">
+    <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8a8578;margin-bottom:8px;">Near-Earth Objects</div>
+    <div style="font-size:15px;color:#14181d;">{neo_block}</div>
+  </td></tr>
+{gear_html}
+  <tr><td style="padding:24px 0 4px;border-top:1px solid #e7e3d8;">
+    <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8a8578;margin-bottom:8px;">Top Headlines</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{headline_rows}</table>
+  </td></tr>
 
-{divider}
+  <tr><td style="padding:26px 0 6px;">
+    <a href="https://orbitaldaily.com" style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;font-weight:600;color:#1b3a6b;text-decoration:none;">Read the full dispatch at orbitaldaily.com &rarr;</a>
+  </td></tr>
 
-TOP HEADLINES
+  <tr><td style="padding:22px 0 0;border-top:1px solid #ddd8cc;font-size:12px;line-height:1.7;color:#8a8578;">
+    &copy; {now.year} Orbital Daily. All rights reserved.<br>
+    As an Amazon Associate, Orbital Daily earns from qualifying purchases made through affiliate links in this newsletter.<br>
+    Questions or feedback: contact@orbitaldaily.com
+  </td></tr>
 
-{headlines}
-
-{divider}
-
-Read the full dispatch at orbitaldaily.com
-"""
+</table>
+</td></tr>
+</table>
+</body>
+</html>"""
 
     try:
         r = requests.post(
@@ -994,10 +1094,10 @@ Read the full dispatch at orbitaldaily.com
         else:
             print(f"  Email failed: {r.status_code} -- {r.text[:200]}", file=sys.stderr)
     except Exception as e:
-        print(f"  Email error: {e}", file=sys.stderr)
+        print(f"  Email failed: {e}", file=sys.stderr)
 
 
-def fetch_week_summary(seven_day, launches, showers):
+def fetch_week_narrative(seven_day, launches, showers):
     """Short punchy week description for the forecast header."""
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
@@ -1100,6 +1200,71 @@ def fetch_week_narrative(seven_day, launches, showers):
         print(f"  Week narrative: {e}", file=sys.stderr)
     return None, None
 
+def select_gear(score, kp, cloud_data):
+    """Weather + condition aware gear picks. Returns list of (cat, name, why, note, url) tuples."""
+    cloud_pct_now = cloud_data["cloud_pct"] if cloud_data else None
+    raining_now   = cloud_data["raining"]   if cloud_data else False
+
+    if raining_now or (cloud_pct_now is not None and cloud_pct_now >= 70):
+        return [
+            ("Plan your next session", "The Night Sky 30-40 Degree Star Finder",
+             "A planisphere for your latitude. Learn what is up before the clouds clear.",
+             "", "https://amzn.to/4ym1J7k"),
+            ("The essential field guide", "Turn Left at Orion",
+             "The book every visual observer keeps nearby. Learn the sky on nights like this.",
+             "", "https://amzn.to/4vQfWYt"),
+            ("Protect your gear on a wet night", "Protective Telescope Cover",
+             "23.8\" diameter cover keeps moisture and dust off when the scope has to sit outside.",
+             "", "https://amzn.to/4gnWe1s"),
+        ]
+    elif kp and kp >= 5:
+        return [
+            ("For tonight's aurora", "Vaonis Vespera 3 Smart Telescope",
+             "Fully automated, app-controlled. Point it at the aurora band and let it do the work.",
+             "", "https://amzn.to/4pcEFUo"),
+            ("Block the glow", "Light Pollution Filters",
+             "Cut through urban skyglow and bring out structure even under a lit-up sky.",
+             "", "https://amzn.to/3SKInIH"),
+            ("Track the conditions", "Tempest Weather Station",
+             "Wind, rain, pressure -- know exactly what the sky is doing before you commit.",
+             "", "https://amzn.to/4p4UFrb"),
+        ]
+    elif score >= 7.0:
+        return [
+            ("For tonight's dark window", "Celestron StarSense Explorer DX 130AZ",
+             "App-guided star finding on a solid 130mm reflector. Best value at this aperture.",
+             "", "https://amzn.to/4v9UNan"),
+            ("Step up to computerized", "Celestron NexStar 102SLT",
+             "Go-to mount finds everything automatically. Good for a night you want to cover ground.",
+             "", "https://amzn.to/4p1xsGm"),
+            ("Compact and smart", "Dwarf Mini Smart Telescope",
+             "Pairs with your phone for guided astrophotography. Portable enough for anywhere.",
+             "", "https://amzn.to/3Ti2ePs"),
+        ]
+    elif score >= 5.0:
+        return [
+            ("A capable starter", "Celestron StarSense Explorer LT 114AZ",
+             "App-enabled 114mm reflector. The phone does the star-finding, you do the looking.",
+             "", "https://amzn.to/4gFMlML"),
+            ("More aperture", "Celestron StarSense Explorer DX 5-inch",
+             "Five inches of light-gathering on an app-guided mount. Solid upgrade from the LT.",
+             "", "https://amzn.to/4wovMJz"),
+            ("Keep your gear safe", "Telescope Storage Bag",
+             "40.8\" padded bag fits tube and tripod. Protect the investment between sessions.",
+             "", "https://amzn.to/4f19si6"),
+        ]
+    else:
+        return [
+            ("Learn the sky tonight", "The Night Sky 30-40 Degree Star Finder",
+             "Know what is overhead before the clouds clear. Cheap, accurate, always useful.",
+             "", "https://amzn.to/4ym1J7k"),
+            ("The essential guide", "Turn Left at Orion",
+             "The book that teaches you the night sky. Better nights are coming -- get ready.",
+             "", "https://amzn.to/4vQfWYt"),
+            ("Track when conditions improve", "Tempest Weather Station",
+             "Know the moment the sky clears before you even look out the window.",
+             "", "https://amzn.to/4p4UFrb"),
+        ]
 
 # ── Renderer ───────────────────────────────────────────────────────────────────
 
@@ -1383,91 +1548,27 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         for i, d in enumerate(seven_day)
     ])
 
-    # GEAR JSON -- weather + condition aware
-    # Determine effective weather state
-    cloud_pct_now = cloud_data["cloud_pct"] if cloud_data else None
-    raining_now   = cloud_data["raining"]   if cloud_data else False
+  # GEAR JSON -- weather + condition aware
+    gear_items = select_gear(score, kp, cloud_data)
 
-    if raining_now or (cloud_pct_now is not None and cloud_pct_now >= 70):
-        # Socked in -- no point looking up, pivot to planning gear
-        gear_items = [
-            ("Plan your next session",
-             "The Night Sky 30-40 Degree Star Finder",
-             "A planisphere for your latitude. Learn what is up before the clouds clear.",
-             "", "https://amzn.to/4ym1J7k"),
-            ("The essential field guide",
-             "Turn Left at Orion",
-             "The book every visual observer keeps nearby. Learn the sky on nights like this.",
-             "", "https://amzn.to/4vQfWYt"),
-            ("Protect your gear on a wet night",
-             "Protective Telescope Cover",
-             "23.8\" diameter cover keeps moisture and dust off when the scope has to sit outside.",
-             "", "https://amzn.to/4gnWe1s"),
-        ]
-    elif kp and kp >= 5:
-        # Aurora storm -- get out regardless of score
-        gear_items = [
-            ("For tonight's aurora",
-             "Vaonis Vespera 3 Smart Telescope",
-             "Fully automated, app-controlled. Point it at the aurora band and let it do the work.",
-             "", "https://amzn.to/4pcEFUo"),
-            ("Block the glow",
-             "Light Pollution Filters",
-             "Cut through urban skyglow and bring out structure even under a lit-up sky.",
-             "", "https://amzn.to/3SKInIH"),
-            ("Track the conditions",
-             "Tempest Weather Station",
-             "Wind, rain, pressure -- know exactly what the sky is doing before you commit.",
-             "", "https://amzn.to/4p4UFrb"),
-        ]
-    elif score >= 7.0:
-        # Excellent and clear -- prime observing gear
-        gear_items = [
-            ("For tonight's dark window",
-             "Celestron StarSense Explorer DX 130AZ",
-             "App-guided star finding on a solid 130mm reflector. Best value at this aperture.",
-             "", "https://amzn.to/4v9UNan"),
-            ("Step up to computerized",
-             "Celestron NexStar 102SLT",
-             "Go-to mount finds everything automatically. Good for a night you want to cover ground.",
-             "", "https://amzn.to/4p1xsGm"),
-            ("Compact and smart",
-             "Dwarf Mini Smart Telescope",
-             "Pairs with your phone for guided astrophotography. Portable enough for anywhere.",
-             "", "https://amzn.to/3Ti2ePs"),
-        ]
-    elif score >= 5.0:
-        # Good conditions -- solid entry gear
-        gear_items = [
-            ("A capable starter",
-             "Celestron StarSense Explorer LT 114AZ",
-             "App-enabled 114mm reflector. The phone does the star-finding, you do the looking.",
-             "", "https://amzn.to/4gFMlML"),
-            ("More aperture",
-             "Celestron StarSense Explorer DX 5-inch",
-             "Five inches of light-gathering on an app-guided mount. Solid upgrade from the LT.",
-             "", "https://amzn.to/4wovMJz"),
-            ("Keep your gear safe",
-             "Telescope Storage Bag",
-             "40.8\" padded bag fits tube and tripod. Protect the investment between sessions.",
-             "", "https://amzn.to/4f19si6"),
-        ]
-    else:
-        # Poor or fair -- lean into planning and protection
-        gear_items = [
-            ("Learn the sky tonight",
-             "The Night Sky 30-40 Degree Star Finder",
-             "Know what is overhead before the clouds clear. Cheap, accurate, always useful.",
-             "", "https://amzn.to/4ym1J7k"),
-            ("The essential guide",
-             "Turn Left at Orion",
-             "The book that teaches you the night sky. Better nights are coming -- get ready.",
-             "", "https://amzn.to/4vQfWYt"),
-            ("Track when conditions improve",
-             "Tempest Weather Station",
-             "Know the moment the sky clears before you even look out the window.",
-             "", "https://amzn.to/4p4UFrb"),
-        ]
+    landings_html = ""
+    if landings:
+        rows = "".join(
+            f'<div style="padding:12px 0;border-bottom:1px solid var(--od-rule-row);">'
+            f'<span style="font-weight:600;">{esc(l["mission"])}</span> '
+            f'<span class="mono" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:{"var(--od-verdict-good)" if l["success"] else "var(--od-verdict-poor)"};">'
+            f'{"LANDED" if l["success"] else "LANDING FAILED"}</span><br>'
+            f'<span style="font-size:14px;color:var(--od-ink-2);">{esc(l["provider"])} &middot; {esc(l["type"])}'
+            + (f' at {esc(l["location"])}' if l["location"] else '') + f' &middot; {esc(l["date"])}</span>'
+            f'</div>'
+            for l in landings
+        )
+        landings_html = f'''
+  <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
+    <div class="mono" style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:6px;">Distinct from the manifest above</div>
+    <h3 style="font-size:28px;margin:0 0 14px;">Booster landings</h3>
+    {rows}
+  </section>'''
 
     gear_json = json.dumps([
         {"cat": g[0], "name": g[1], "why": g[2], "url": g[4]}
@@ -2272,7 +2373,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
       <div id="sub-done-inline" style="display:none;font-style:italic;font-size:13px;color:var(--od-verdict-good);">You&rsquo;re on the list.</div>
     </div>
   </section>
-
+{landings_html}
   <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
     <div class="activity-grid" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center;">
       <div class="term" data-tip tabindex="0" style="text-align:center;padding-right:32px;border-right:1px solid var(--od-rule-row);">
@@ -2522,8 +2623,9 @@ if __name__ == "__main__":
     write_llms(now)
 
     if is_morning:
+        gear_items = select_gear(score, kp, tonight_cloud)
         send_daily_email(kp, score, sai, launches, news, neos, flares,
-                         moon_name, moon_illum, ed_p1, now)
+                         moon_name, moon_illum, ed_p1, now, gear_items)
     else:
         print("  Afternoon run -- skipping email")
     print("Done.")
