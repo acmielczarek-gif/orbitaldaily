@@ -1551,25 +1551,6 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
   # GEAR JSON -- weather + condition aware
     gear_items = select_gear(score, kp, cloud_data)
 
-    landings_html = ""
-    if landings:
-        rows = "".join(
-            f'<div style="padding:12px 0;border-bottom:1px solid var(--od-rule-row);">'
-            f'<span style="font-weight:600;">{esc(l["mission"])}</span> '
-            f'<span class="mono" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:{"var(--od-verdict-good)" if l["success"] else "var(--od-verdict-poor)"};">'
-            f'{"LANDED" if l["success"] else "LANDING FAILED"}</span><br>'
-            f'<span style="font-size:14px;color:var(--od-ink-2);">{esc(l["provider"])} &middot; {esc(l["type"])}'
-            + (f' at {esc(l["location"])}' if l["location"] else '') + f' &middot; {esc(l["date"])}</span>'
-            f'</div>'
-            for l in landings
-        )
-        landings_html = f'''
-  <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
-    <div class="mono" style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:6px;">Distinct from the manifest above</div>
-    <h3 style="font-size:28px;margin:0 0 14px;">Booster landings</h3>
-    {rows}
-  </section>'''
-
     gear_json = json.dumps([
         {"cat": g[0], "name": g[1], "why": g[2], "url": g[4]}
         for g in gear_items
@@ -1588,7 +1569,6 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         )
         landings_html = f'''
   <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
-    <div class="mono" style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:6px;">Distinct from the manifest above</div>
     <h3 style="font-size:28px;margin:0 0 14px;">Booster landings</h3>
     {rows}
   </section>'''
@@ -2373,7 +2353,6 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
       <div id="sub-done-inline" style="display:none;font-style:italic;font-size:13px;color:var(--od-verdict-good);">You&rsquo;re on the list.</div>
     </div>
   </section>
-{landings_html}
   <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
     <div class="activity-grid" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center;">
       <div class="term" data-tip tabindex="0" style="text-align:center;padding-right:32px;border-right:1px solid var(--od-rule-row);">
