@@ -2001,17 +2001,6 @@ function applyLocation(lat, lon, label){{
     var loadEl = document.getElementById('forecast-loading');
     if(loadEl) loadEl.style.display='none';
 
-    // Personalized best night phrasing in week-ahead header
-    var DAY_NAMES = {{SUN:'Sunday',MON:'Monday',TUE:'Tuesday',WED:'Wednesday',THU:'Thursday',FRI:'Friday',SAT:'Saturday'}};
-    var bestDay = updated.reduce(function(a,b){{ return b.score>a.score?b:a; }});
-    var weekSubEl = document.getElementById('week-sub');
-    if(weekSubEl && bestDay){{
-      var socked = updated[0].rain || updated[0].cloud >= 70;
-      var prefix = socked ? 'Tonight is socked in. ' : '';
-      weekSubEl.textContent = prefix + (DAY_NAMES[bestDay.day] || bestDay.day)
-        + ' looks like your best night at ' + bestDay.score.toFixed(1) + '/10 from '
-        + (document.getElementById('loc-name')||{{}}).textContent.split(' (')[0] + '.';
-    }}
 
     document.getElementById('forecast').innerHTML = updated.map(function(d){{
       var cloudBadge='';
