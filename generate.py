@@ -2297,7 +2297,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Orbital Daily: Space Intelligence -- Aurora, Launches &amp; Astrophotography Forecast</title>
+<title>Orbital Daily &middot; One Score for How Busy Space Is Today</title>
 <meta name="description" content="Daily space intelligence: astrophotography shoot score, aurora alerts, ISS pass times, rocket launches, and near-Earth asteroid tracker. Updated every morning.">
 <meta name="keywords" content="{keywords}">
 <meta name="author" content="Orbital Daily">
@@ -2330,13 +2330,13 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
 <div class="wrap">
 
   <header style="text-align:center;padding:40px 0 0;">
-    <h1 style="font-family:var(--od-serif);font-weight:600;font-size:clamp(32px,8vw,64px);line-height:1;letter-spacing:-.02em;margin:0 0 8px;">Orbital Daily</h1>
+    <div style="font-family:var(--od-serif);font-weight:600;font-size:clamp(32px,8vw,64px);line-height:1;letter-spacing:-.02em;margin:0 0 8px;">Orbital Daily</div>
     <div style="display:flex;align-items:center;justify-content:center;gap:14px;font-family:var(--od-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-muted);padding-top:6px;">
       <span style="flex:1;height:1px;background:var(--od-rule-mast);max-width:120px;"></span>
       <span>{esc(date_str)}</span>
       <span style="flex:1;height:1px;background:var(--od-rule-mast);max-width:120px;"></span>
     </div>
-    <div style="font-family:var(--od-serif);font-style:italic;font-size:15px;color:var(--od-muted);margin-top:10px;">Independent space intelligence, read over each morning before it goes out.</div>
+    <h1 style="font-family:var(--od-serif);font-style:italic;font-size:15px;color:var(--od-muted);margin-top:10px;">One score for how busy space is today, read over each morning before it goes out.</h1>
   </header>
 
   <div style="height:2px;background:var(--od-ink);margin:22px 0 0;"></div>
