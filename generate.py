@@ -1647,7 +1647,7 @@ document.getElementById('tiles').innerHTML = TILES_DATA.map(function(t,i){{
     +'<div style="font-size:26px;font-weight:700;line-height:1;letter-spacing:-.02em;color:'+t.color+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(t.value)
     +(t.unit?'<span style="font-size:11px;color:var(--od-faint-2);margin-left:3px;">'+esc(t.unit)+'</span>':'')+'</div>'
     +'<div style="margin-top:6px;font-family:var(--od-mono);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--od-muted);display:flex;align-items:center;gap:3px;">'
-    +esc(t.label)+'<span class="idot">i</span></div>'
+    +esc(t.label)+(t.id?'<span class="tile-loc-suffix"></span>':'')+'<span class="idot">i</span></div>'
     +'<span class="tip '+(row===0?'below':'above')+'">'+esc(t.detail)+'</span></div>';
 }}).join('');
 
@@ -1904,6 +1904,9 @@ function applyLocation(lat, lon, label){{
       var vEl=wEl.querySelector('div:first-child'), tEl=wEl.querySelector('.tip');
       if(vEl) vEl.innerHTML='<span style="font-size:26px;font-weight:700;color:'+wColor+';">'+wVal+'</span>';
       if(tEl) tEl.textContent=wDetail;
+      var lblEl = wEl.querySelector('.tile-loc-suffix');
+      var cityName = ((document.getElementById('loc-name')||{{}}).textContent||'').split(' (')[0];
+      if(lblEl && cityName) lblEl.textContent = ' \u00b7 ' + cityName;
     }}
 
     // ── Local score override ───────────────────────────────────────
