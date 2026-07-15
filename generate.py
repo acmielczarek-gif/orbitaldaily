@@ -2560,6 +2560,10 @@ if __name__ == "__main__":
     seven_day = compute_7day(now, kp, kp_forecast, cloud_week)
     landings = fetch_landings();            print(f"  Landings: {len(landings)}")
     ed_p1 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_score=sai, sai_status=sai_status, landings=landings)
+    if ed_p1:
+        import re as _re
+        ed_p1 = _re.sub(r'^#+\s*.*?\n+', '', ed_p1)  # drop a leading markdown header line if Haiku adds one
+        ed_p1 = _re.sub(r'\*+', '', ed_p1).strip()
     week_sum, day_blurbs = fetch_week_narrative(seven_day, launches, showers)
 
     # Morning run (before noon UTC) sends email; afternoon run refreshes only
