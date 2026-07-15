@@ -1102,7 +1102,7 @@ def send_daily_email(kp, score, sai_score, launches, news, neos, flares,
 </head>
 <body style="margin:0;padding:0;background:#faf9f5;font-family:Georgia,serif;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#faf9f5;">
-<tr><td align="center" style="padding:32px 16px;">
+<tr><td align="center" style="padding:32px 0;">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
 
   <tr><td style="padding-bottom:22px;border-bottom:2px solid #14181d;">
