@@ -220,6 +220,93 @@ def fetch_landings():
         except Exception:
             continue
     return results
+def fetch_contracts(now):
+    """Federal contract awards to space/space-adjacent companies, last ~14 days.
+    Source: USASpending.gov spending_by_award, NAICS 336414 (space vehicle manufacturing).
+    Verified live: API's own time_period filter does NOT reliably exclude old awards
+    (saw 2025 results in a 2026-06-01+ query), so cutoff is enforced here client-side
+    against Start Date. $5M floor separates real contract news from routine task-order
+    noise -- confirmed against real data: both large ($66M) and small ($400K-2M) awards
+    under this NAICS code carry the identical 'Contract Award Type', so type alone
+    doesn't distinguish signal from noise, dollar amount does."""
+    start_str = (now - timedelta(days=30)).strftime("%Y-%m-%d")
+    end_str   = now.strftime("%Y-%m-%d")
+    try:
+        r = requests.post(
+            "https://api.usaspending.gov/api/v2/search/spending_by_award/",
+            headers={"Content-Type": "application/json"},
+            json={
+                "filters": {
+                    "award_type_codes": ["A", "B", "C", "D"],
+                    "time_period": [{"start_date": start_str, "end_date": end_str}],
+                    "naics_codes": ["336414"],
+                },
+                "fields": ["Award ID", "Recipient Name", "Award Amount", "Awarding Agency",
+                           "Description", "Start Date", "Contract Award Type"],
+                "page": 1,
+                "limit": 20,
+                "sort": "Start Date",
+                "order": "desc",
+            },
+            timeout=15,
+        )
+        r.raise_for_status()
+        awards = r.json().get("results", [])
+    except Exception as e:
+        print(f"  ⚠  usaspending.gov: {e}", file=sys.stderr)
+        return []
+
+    cutoff = now - timedelta(days=14)
+    floor  = 5_000_000
+    results = []
+    for a in awards:
+        try:
+            start_date_str = a.get("Start Date", "")
+            if not start_date_str:
+                continue
+            start_dt = datetime.strptime(start_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            if start_dt < cutoff:
+                continue
+            amount = a.get("Award Amount") or 0
+            if amount < floor:
+                continue
+            results.append({
+                "recipient": a.get("Recipient Name", "Unknown recipient"),
+                "amount":    amount,
+                "agency":    a.get("Awarding Agency", "Unknown agency"),
+                "type":      a.get("Contract Award Type", ""),
+                "desc_raw":  (a.get("Description") or "").strip(),
+                "date":      f"{start_dt.strftime('%b')} {start_dt.day}",
+            })
+        except Exception:
+            continue
+        if len(results) >= 3:
+            break
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    for c in results:
+        c["desc"] = c["desc_raw"][:200]
+        if not api_key or not c["desc_raw"]:
+            continue
+        try:
+            resp = requests.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
+                         "content-type": "application/json"},
+                json={"model": "claude-haiku-4-5-20251001", "max_tokens": 80,
+                      "messages": [{"role": "user", "content":
+                          f"Rewrite this federal contract description as one plain-English sentence for a general news reader, no jargon, no acronyms unless defined: {c['desc_raw'][:800]}\n\n"
+                          "One sentence only. No preamble, no quotes around it."}]},
+                timeout=12,
+            )
+            if resp.status_code == 200:
+                for block in resp.json().get("content", []):
+                    if block.get("type") == "text":
+                        c["desc"] = block["text"].strip()
+        except Exception:
+            pass
+
+    return results
       
 def fetch_space_history(date):
     import random
@@ -863,7 +950,7 @@ def launch_when_color(timing):
 
 # ── fetch_editorial — 2 paragraphs, returns (p1, p2) ──────────────────────────
 
-def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=None, ovation_pct=None, sai_score=None, sai_status=None, landings=None):
+def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=None, ovation_pct=None, sai_score=None, sai_status=None, landings=None, contracts=None):
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key: return None
     kp_text, _ = kp_label(kp)
@@ -882,6 +969,7 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
     if neos:     ctx.append(f"NEO: {neos[0]['name']} at {neos[0]['ld']:.1f} lunar distances")
     if launches: ctx.append(f"Next launch: {launches[0].get('name', '')} ({launch_timing(launches[0].get('net', ''))})")
     if landings: ctx.append(f"Recent booster landing: {landings[0]['mission']} -- {landings[0]['type']} landing {'succeeded' if landings[0]['success'] else 'failed'}")
+    if contracts: ctx.append(f"Recent contract award: {contracts[0]['recipient']} awarded ${contracts[0]['amount']/1_000_000:.1f}M by {contracts[0]['agency']}")
     if showers:  ctx.append(f"Next shower: {showers[0][1]} in {showers[0][0]} days")
     if history:  ctx.append(f"Today in history ({history['year']}): {history['text'][:100]}")
 
@@ -1341,7 +1429,7 @@ PAGE_CSS = """<style>
 def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
            neos, flares, history, ed_p1, now, sai_score, sai_status, sai_color,
            score, moon_illum, moon_name, moon_emoji, seven_day,
-           stocks=None, iss_pass=None, week_summary=None, cloud_data=None, ovation_pct=None, sai_trend=None, landings=None):
+           stocks=None, iss_pass=None, week_summary=None, cloud_data=None, ovation_pct=None, sai_trend=None, landings=None, contracts=None):
 
     global moon_illum_global
     moon_illum_global = moon_illum
@@ -1572,6 +1660,23 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
     <h3 style="font-size:28px;margin:0 0 14px;">Booster landings</h3>
     {rows}
   </section>'''
+    contracts_html = ""
+    if contracts:
+        crows = "".join(
+            f'<div style="padding:12px 0;border-bottom:1px solid var(--od-rule-row);">'
+            f'<span style="font-weight:600;">{esc(c["recipient"])}</span> '
+            f'<span class="mono" style="font-size:11px;letter-spacing:.06em;color:var(--od-faint-2);">'
+            f'${c["amount"]/1_000_000:.1f}M</span><br>'
+            f'<span style="font-size:14px;color:var(--od-ink-2);">{esc(c["desc"])}</span><br>'
+            f'<span class="mono" style="font-size:11px;color:var(--od-faint-2);">{esc(c["agency"])} &middot; {esc(c["date"])}</span>'
+            f'</div>'
+            for c in contracts
+        )
+        contracts_html = f'''
+    <div style="margin-top:22px;">
+      <div class="mono" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:8px;">Contract awards</div>
+      {crows}
+    </div>'''
 
     # LAUNCHES JSON
     launches_json = json.dumps([
@@ -2423,6 +2528,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
       <span class="mono" style="font-size:11px;letter-spacing:.04em;color:var(--od-faint-2);max-width:34ch;text-align:right;">Not investment advice &middot; prices delayed</span>
     </div>
     <div id="stocks" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));"></div>
+    {contracts_html}
   </section>
 
   <footer style="text-align:center;padding-top:26px;font-family:var(--od-mono);font-size:11px;letter-spacing:.06em;color:var(--od-faint-2);line-height:1.9;">
@@ -2561,8 +2667,9 @@ if __name__ == "__main__":
         exoplanet_count=exoplanet_ct, exoplanet_avg=exoplanet_avg,
         storm_scale=storm_scale, stock_volatility_pct=stock_vol_pct, stock_volatility_sym=stock_vol_sym)
     seven_day = compute_7day(now, kp, kp_forecast, cloud_week)
+    contracts = fetch_contracts(now);       print(f"  Contracts: {len(contracts)}")
     landings = fetch_landings();            print(f"  Landings: {len(landings)}")
-    ed_p1 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_score=sai, sai_status=sai_status, landings=landings)
+    ed_p1 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_score=sai, sai_status=sai_status, landings=landings, contracts=contracts)
     if ed_p1:
         import re as _re
         ed_p1 = _re.sub(r'^#+\s*.*?\n+', '', ed_p1)  # drop a leading markdown header line if Haiku adds one
@@ -2590,7 +2697,7 @@ if __name__ == "__main__":
                   neos, flares, history, ed_p1, now, sai, sai_status, sai_color,
                   score, moon_illum, moon_name, moon_emoji, seven_day,
                   stocks=stocks, iss_pass=iss_pass, week_summary=week_sum,
-                  cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_trend=sai_trend, landings=landings)
+                  cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_trend=sai_trend, landings=landings, contracts=contracts)
 
     with open("index.html","w",encoding="utf-8") as f: f.write(html)
     print("  index.html")
