@@ -218,16 +218,16 @@
   },
   {
     "date": "2026-07-15",
-    "sai": 32,
-    "status": "MODERATE",
+    "sai": 23,
+    "status": "LOW",
     "components": {
       "launches": {
-        "score": 55.0,
-        "reason": "Crewed mission on manifest: Soyuz 2.1a | Soyuz MS-29"
+        "score": 41.7,
+        "reason": "Falcon 9 Block 5 | SDA Tranche 1 Transport Layer E (Government/Top Secret)"
       },
       "geomagnetic": {
-        "score": 27.8,
-        "reason": "Kp 3.3, quiet geomagnetic field"
+        "score": 11.1,
+        "reason": "Kp 1.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
@@ -242,8 +242,8 @@
         "reason": "2 confirmed this month vs 41 avg"
       },
       "stock_volatility": {
-        "score": 60,
-        "reason": "SPCE moved 7.9% today"
+        "score": 30,
+        "reason": "SPCE moved 3.8% today"
       }
     }
   }
