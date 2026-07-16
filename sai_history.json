@@ -246,5 +246,36 @@
         "reason": "SPCE moved 3.8% today"
       }
     }
+  },
+  {
+    "date": "2026-07-16",
+    "sai": 24,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 41.7,
+        "reason": "Falcon 9 Block 5 | SDA Tranche 1 Transport Layer E (Government/Top Secret)"
+      },
+      "geomagnetic": {
+        "score": 16.7,
+        "reason": "Kp 2.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C3.9 flare detected"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "2019 NG2 passing at 23.2 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "SPCE moved 3.8% today"
+      }
+    }
   }
 ]
