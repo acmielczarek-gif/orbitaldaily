@@ -280,20 +280,20 @@
   },
   {
     "date": "2026-07-17",
-    "sai": 25,
-    "status": "MODERATE",
+    "sai": 18,
+    "status": "LOW",
     "components": {
       "launches": {
-        "score": 39.2,
-        "reason": "Falcon 9 Block 5 | SDA Tranche 1 Transport Layer E (Government/Top Secret)"
+        "score": 35.8,
+        "reason": "Falcon 9 Block 5 | MRV-1 (Mission Extension)"
       },
       "geomagnetic": {
-        "score": 5.6,
-        "reason": "Kp 0.7, quiet geomagnetic field"
+        "score": 11.1,
+        "reason": "Kp 1.3, quiet geomagnetic field"
       },
       "solar": {
-        "score": 20,
-        "reason": "C3.9 flare detected"
+        "score": 0,
+        "reason": "No significant flare activity"
       },
       "neo": {
         "score": 0,
@@ -304,8 +304,8 @@
         "reason": "5 confirmed this month vs 42 avg"
       },
       "stock_volatility": {
-        "score": 100,
-        "reason": "ASTS moved 17.0% today"
+        "score": 60,
+        "reason": "SPCX moved 5.4% today"
       }
     }
   }
