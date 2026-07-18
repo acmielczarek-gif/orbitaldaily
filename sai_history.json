@@ -311,7 +311,7 @@
   },
   {
     "date": "2026-07-18",
-    "sai": 18,
+    "sai": 23,
     "status": "LOW",
     "components": {
       "launches": {
@@ -319,12 +319,12 @@
         "reason": "Falcon 9 Block 5 | MRV-1 (Mission Extension)"
       },
       "geomagnetic": {
-        "score": 8.3,
-        "reason": "Kp 1.0, quiet geomagnetic field"
+        "score": 11.1,
+        "reason": "Kp 1.3, quiet geomagnetic field"
       },
       "solar": {
-        "score": 0,
-        "reason": "No significant flare activity"
+        "score": 20,
+        "reason": "C3.9 flare detected"
       },
       "neo": {
         "score": 0,
