@@ -537,5 +537,54 @@
     "days_ahead": 6,
     "score": 3.7,
     "estimated": true
+  },
+  {
+    "predicted_on": "2026-07-19",
+    "predicted_for": "2026-07-19",
+    "days_ahead": 0,
+    "score": 7.6,
+    "estimated": false
+  },
+  {
+    "predicted_on": "2026-07-19",
+    "predicted_for": "2026-07-20",
+    "days_ahead": 1,
+    "score": 7.1,
+    "estimated": true
+  },
+  {
+    "predicted_on": "2026-07-19",
+    "predicted_for": "2026-07-21",
+    "days_ahead": 2,
+    "score": 6.6,
+    "estimated": true
+  },
+  {
+    "predicted_on": "2026-07-19",
+    "predicted_for": "2026-07-22",
+    "days_ahead": 3,
+    "score": 5.4,
+    "estimated": true
+  },
+  {
+    "predicted_on": "2026-07-19",
+    "predicted_for": "2026-07-23",
+    "days_ahead": 4,
+    "score": 4.2,
+    "estimated": true
+  },
+  {
+    "predicted_on": "2026-07-19",
+    "predicted_for": "2026-07-24",
+    "days_ahead": 5,
+    "score": 4.2,
+    "estimated": true
+  },
+  {
+    "predicted_on": "2026-07-19",
+    "predicted_for": "2026-07-25",
+    "days_ahead": 6,
+    "score": 4.3,
+    "estimated": true
   }
 ]
