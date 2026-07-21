@@ -404,7 +404,7 @@
   },
   {
     "date": "2026-07-21",
-    "sai": 36,
+    "sai": 35,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -412,12 +412,12 @@
         "reason": "Falcon 9 Block 5 | MRV-1 (Mission Extension)"
       },
       "geomagnetic": {
-        "score": 30.6,
-        "reason": "Kp 3.7, quiet geomagnetic field"
+        "score": 22.2,
+        "reason": "Kp 2.7, quiet geomagnetic field"
       },
       "solar": {
-        "score": 67.2,
-        "reason": "M3.4 flare detected"
+        "score": 55.2,
+        "reason": "M1.9 flare detected"
       },
       "neo": {
         "score": 5.5,
@@ -428,8 +428,8 @@
         "reason": "5 confirmed this month vs 42 avg"
       },
       "stock_volatility": {
-        "score": 30,
-        "reason": "SPCX moved 3.3% today"
+        "score": 100,
+        "reason": "ASTS moved 10.3% today"
       }
     }
   }
