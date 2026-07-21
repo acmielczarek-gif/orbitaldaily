@@ -401,5 +401,36 @@
         "reason": "SPCX moved 3.3% today"
       }
     }
+  },
+  {
+    "date": "2026-07-21",
+    "sai": 36,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 35.0,
+        "reason": "Falcon 9 Block 5 | MRV-1 (Mission Extension)"
+      },
+      "geomagnetic": {
+        "score": 30.6,
+        "reason": "Kp 3.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 67.2,
+        "reason": "M3.4 flare detected"
+      },
+      "neo": {
+        "score": 5.5,
+        "reason": "2015 BF passing at 17.2 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "5 confirmed this month vs 42 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "SPCX moved 3.3% today"
+      }
+    }
   }
 ]
