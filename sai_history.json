@@ -432,5 +432,36 @@
         "reason": "ASTS moved 10.3% today"
       }
     }
+  },
+  {
+    "date": "2026-07-22",
+    "sai": 41,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 40.8,
+        "reason": "Gravity-1 | 9 satellites (Earth Science)"
+      },
+      "geomagnetic": {
+        "score": 27.8,
+        "reason": "Kp 3.3, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 68.8,
+        "reason": "M3.6 flare detected"
+      },
+      "neo": {
+        "score": 5.5,
+        "reason": "2015 BF passing at 17.2 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "5 confirmed this month vs 42 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "ASTS moved 10.3% today"
+      }
+    }
   }
 ]
