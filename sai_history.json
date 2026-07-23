@@ -463,5 +463,36 @@
         "reason": "SPCX moved 6.7% today"
       }
     }
+  },
+  {
+    "date": "2026-07-23",
+    "sai": 38,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 40.8,
+        "reason": "Falcon 9 Block 5 | NROL-95 (Government/Top Secret)"
+      },
+      "geomagnetic": {
+        "score": 22.2,
+        "reason": "Kp 2.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 68.8,
+        "reason": "M3.6 flare detected"
+      },
+      "neo": {
+        "score": 5.5,
+        "reason": "2015 BF passing at 17.2 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "5 confirmed this month vs 42 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "SPCX moved 6.7% today"
+      }
+    }
   }
 ]
