@@ -501,12 +501,12 @@
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 43.3,
+        "score": 46.7,
         "reason": "Kinetica 1 | 5 satellites (Earth Science)"
       },
       "geomagnetic": {
-        "score": 13.9,
-        "reason": "Kp 1.7, quiet geomagnetic field"
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
@@ -522,7 +522,7 @@
       },
       "stock_volatility": {
         "score": 100,
-        "reason": "LMT moved 10.5% today"
+        "reason": "RKLB moved 8.7% today"
       }
     }
   }
