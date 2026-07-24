@@ -494,5 +494,36 @@
         "reason": "LMT moved 10.5% today"
       }
     }
+  },
+  {
+    "date": "2026-07-24",
+    "sai": 28,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 43.3,
+        "reason": "Kinetica 1 | 5 satellites (Earth Science)"
+      },
+      "geomagnetic": {
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C2.7 flare detected"
+      },
+      "neo": {
+        "score": 5.5,
+        "reason": "2015 BF passing at 17.2 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "5 confirmed this month vs 42 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "LMT moved 10.5% today"
+      }
+    }
   }
 ]
