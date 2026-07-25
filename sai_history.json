@@ -528,7 +528,7 @@
   },
   {
     "date": "2026-07-25",
-    "sai": 28,
+    "sai": 30,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -536,8 +536,8 @@
         "reason": "Falcon 9 Block 5 | NROL-95 (Government/Top Secret)"
       },
       "geomagnetic": {
-        "score": 8.3,
-        "reason": "Kp 1.0, quiet geomagnetic field"
+        "score": 16.7,
+        "reason": "Kp 2.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
