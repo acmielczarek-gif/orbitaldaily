@@ -525,5 +525,36 @@
         "reason": "RKLB moved 8.7% today"
       }
     }
+  },
+  {
+    "date": "2026-07-25",
+    "sai": 28,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 46.7,
+        "reason": "Falcon 9 Block 5 | NROL-95 (Government/Top Secret)"
+      },
+      "geomagnetic": {
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C2.7 flare detected"
+      },
+      "neo": {
+        "score": 5.5,
+        "reason": "2015 BF passing at 17.2 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "5 confirmed this month vs 42 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "RKLB moved 8.7% today"
+      }
+    }
   }
 ]
