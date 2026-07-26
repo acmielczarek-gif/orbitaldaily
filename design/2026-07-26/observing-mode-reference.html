@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbital Daily — Observing Mode Selector (reference build)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ==========================================================================
+     Tokens — identical to index.html. Dark mode overrides only the values,
+     never the markup: every color in observing-mode.js is a var().
+     ========================================================================== */
+  :root {
+    --od-paper:#faf9f5; --od-field:#fffdf8;
+    --od-ink:#14181d; --od-ink-2:#2a2f36; --od-ink-3:#4a4f57;
+    --od-muted:#6b6a62; --od-faint:#8a8578; --od-faint-2:#a8a294;
+    --od-rule:#ddd8cc; --od-rule-row:#e7e3d8; --od-rule-mast:#d8d4c8;
+    --od-accent:#1b3a6b; --od-alert:#b45309;
+    --od-verdict-poor:#b04a2f; --od-verdict-fair:#a07508; --od-verdict-good:#2f7d3e;
+    --od-moon-lit:#f3efe4; --od-moon-shadow:#c7cbd2;
+    --od-serif:'Newsreader',Georgia,serif; --od-mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  [data-theme="dark"] {
+    --od-paper:#121212; --od-field:#181818;
+    --od-ink:#eceae4; --od-ink-2:#c8c5bd; --od-ink-3:#a8a49b;
+    --od-muted:#8b877e; --od-faint:#6e6a62; --od-faint-2:#5e5b54;
+    --od-rule:#33322e; --od-rule-row:#2b2b2b; --od-rule-mast:#2b2b2b;
+    --od-accent:#8fb0dc;
+    --od-verdict-poor:#e08466; --od-verdict-fair:#d4aa3a; --od-verdict-good:#6fbf7f;
+    --od-moon-lit:#d8d4c8; --od-moon-shadow:#3a3d42;
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; padding:0; }
+  body { background:#e9e6de; font-family:var(--od-serif); -webkit-font-smoothing:antialiased; }
+  a { color:var(--od-accent); text-decoration:none; }
+  a:hover { color:var(--od-ink); }
+  .mono { font-family:var(--od-mono); }
+
+  /* --- the page shell each phone frame simulates: 20px gutter, nothing else --- */
+  .phone {
+    width:375px; background:var(--od-paper); color:var(--od-ink);
+    border:1px solid #cfcabc; overflow:hidden;
+  }
+  .gutter { padding-left:20px; padding-right:20px; }
+  .caption { font-family:var(--od-mono); font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a8578; margin-bottom:8px; }
+</style>
+</head>
+<body>
+
+<div style="max-width:1000px; margin:0 auto; padding:44px 26px 90px;">
+
+  <div style="border-bottom:1px solid #cfcabc; padding-bottom:14px; margin-bottom:26px;">
+    <h1 style="font-size:30px; font-weight:600; letter-spacing:-.02em; margin:0 0 8px; color:#14181d;">Observing mode selector — reference build</h1>
+    <p class="mono" style="font-size:11px; line-height:1.8; letter-spacing:.02em; color:#6b6a62; margin:0;">
+      Designs 1a (dark) and 2a (light) from the same code path. Tap the tabs — the choice persists in
+      <code>localStorage['od.observingMode']</code>. Scoring lives in <a href="observing-mode.js">observing-mode.js</a>.
+    </p>
+  </div>
+
+  <div style="display:flex; gap:24px; flex-wrap:wrap;">
+
+    <div>
+      <div class="caption">2a · light (site default)</div>
+      <div class="phone" data-theme="light">
+        <div class="gutter" style="display:flex; justify-content:space-between; padding-top:12px; padding-bottom:8px; font-family:var(--od-mono); font-size:11px; color:var(--od-faint);"><span>9:42</span><span>&#9646;&#9646;&#9647; &#8961;</span></div>
+        <div class="gutter" style="text-align:center; padding-top:8px; padding-bottom:16px; border-bottom:1px solid var(--od-rule-mast);">
+          <div class="mono" style="font-size:13px; font-weight:600; letter-spacing:.34em; text-transform:uppercase;">Orbital Daily</div>
+          <div class="mono" style="font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--od-faint); margin-top:8px;">Saturday &middot; July 26 &middot; 03:11 UTC</div>
+        </div>
+        <div class="gutter" style="padding-top:20px;">
+          <div class="mono" style="font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--od-faint);">The desk's read for tonight</div>
+          <h2 style="font-family:var(--od-serif); font-size:32px; font-weight:600; letter-spacing:-.025em; line-height:1.05; margin:12px 0 8px;">Stay in tonight.</h2>
+          <p style="font-size:15px; line-height:1.55; color:var(--od-ink-3); margin:0;">There's a storm chewing at the sky and a waning gibbous moon washing out what's left of it.</p>
+        </div>
+        <div class="gutter" style="padding-top:20px;"><div id="card-light"></div></div>
+        <div class="gutter" style="display:flex; align-items:center; gap:16px; padding-top:20px; padding-bottom:20px; margin-top:20px; border-top:1px solid var(--od-rule-row);">
+          <div>
+            <div style="display:flex; align-items:flex-end; gap:4px;"><span style="font-size:40px; font-weight:700; line-height:.85;">62</span><span class="mono" style="font-size:11px; color:var(--od-faint); padding-bottom:5px;">/100</span></div>
+            <div class="mono" style="font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:var(--od-accent); margin-top:6px;">Space activity</div>
+          </div>
+          <div style="flex:1;">
+            <p style="font-size:14px; line-height:1.45; color:var(--od-ink-3); margin:0;">Storm overhead, eight launches on the manifest, an asteroid inbound.</p>
+            <div style="height:4px; background:var(--od-rule-row); margin-top:10px;"><div style="width:62%; height:100%; background:var(--od-accent);"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="caption">1a · dark</div>
+      <div class="phone" data-theme="dark">
+        <div class="gutter" style="display:flex; justify-content:space-between; padding-top:12px; padding-bottom:8px; font-family:var(--od-mono); font-size:11px; color:var(--od-faint);"><span>9:42</span><span>&#9646;&#9646;&#9647; &#8961;</span></div>
+        <div class="gutter" style="text-align:center; padding-top:8px; padding-bottom:16px; border-bottom:1px solid var(--od-rule-mast);">
+          <div class="mono" style="font-size:13px; font-weight:600; letter-spacing:.34em; text-transform:uppercase;">Orbital Daily</div>
+          <div class="mono" style="font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--od-faint); margin-top:8px;">Saturday &middot; July 26 &middot; 03:11 UTC</div>
+        </div>
+        <div class="gutter" style="padding-top:20px;">
+          <div class="mono" style="font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--od-faint);">The desk's read for tonight</div>
+          <h2 style="font-family:var(--od-serif); font-size:32px; font-weight:600; letter-spacing:-.025em; line-height:1.05; margin:12px 0 8px;">Stay in tonight.</h2>
+          <p style="font-size:15px; line-height:1.55; color:var(--od-ink-3); margin:0;">There's a storm chewing at the sky and a waning gibbous moon washing out what's left of it.</p>
+        </div>
+        <div class="gutter" style="padding-top:20px;"><div id="card-dark"></div></div>
+        <div class="gutter" style="display:flex; align-items:center; gap:16px; padding-top:20px; padding-bottom:20px; margin-top:20px; border-top:1px solid var(--od-rule-row);">
+          <div>
+            <div style="display:flex; align-items:flex-end; gap:4px;"><span style="font-size:40px; font-weight:700; line-height:.85;">62</span><span class="mono" style="font-size:11px; color:var(--od-faint); padding-bottom:5px;">/100</span></div>
+            <div class="mono" style="font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:var(--od-accent); margin-top:6px;">Space activity</div>
+          </div>
+          <div style="flex:1;">
+            <p style="font-size:14px; line-height:1.45; color:var(--od-ink-3); margin:0;">Storm overhead, eight launches on the manifest, an asteroid inbound.</p>
+            <div style="height:4px; background:var(--od-rule-row); margin-top:10px;"><div style="width:62%; height:100%; background:var(--od-accent);"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="border-top:1px solid #cfcabc; margin-top:34px; padding-top:16px;">
+    <div class="mono" style="font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a8578; margin-bottom:10px;">Tonight's signals (stand-in for the backend payload)</div>
+    <pre class="mono" id="dump" style="font-size:11px; line-height:1.7; color:#4a4f57; margin:0; white-space:pre-wrap;"></pre>
+  </div>
+
+</div>
+
+<script src="observing-mode.js"></script>
+<script>
+/* ============================================================================
+   SIGNALS — one normalized payload for the night. Replace with your API call;
+   keep a static object like this as the fallback so the card is never blank.
+   ========================================================================== */
+var SIGNALS = {
+  moonDark: 0.21, bortle: 0.66, transparency: 0.58, cloud: 0.85,
+  seeing: 0.78, jet: 0.71, targetAlt: 0.69,
+  kpCalm: 0.32, kpActive: 0.88, bzSouth: 0.79,
+  shower: 0.14, radiant: 0.52,
+  raw: {
+    kp: 5.7, bortle: 4, seeingArcsec: 2.1, jetKt: 24, cloudPct: 15,
+    target: 'Jupiter', targetAltDeg: 48, radiantDeg: 31, bzNt: -9, moonLitPct: 79
+  }
+};
+
+var opts = { location: 'Albany, NY', signals: SIGNALS };
+
+// Both frames share one persisted mode — that is the real behavior. Mounting
+// twice here is only so light and dark can be seen side by side.
+var light = OD_ObservingMode.mount(document.getElementById('card-light'), Object.assign({}, opts, {
+  onChange: function (m) { dark.set(m); dump(); }
+}));
+var dark = OD_ObservingMode.mount(document.getElementById('card-dark'), Object.assign({}, opts, {
+  onChange: function (m) { light.set(m); dump(); }
+}));
+
+function dump() {
+  var lines = OD_ObservingMode.MODES.map(function (m) {
+    var n = OD_ObservingMode.score(m.key, SIGNALS);
+    var mark = m.key === light.get() ? '\u25b8 ' : '  ';
+    return mark + (m.label + '                  ').slice(0, 20) + n.toFixed(1) + '  ' + OD_ObservingMode.verdict(n).word;
+  });
+  document.getElementById('dump').textContent =
+    'stored mode: ' + (OD_ObservingMode.stored() || '(none — default deep sky)') + '\n\n' + lines.join('\n');
+}
+dump();
+</script>
+</body>
+</html>

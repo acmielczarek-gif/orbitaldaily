@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;background:#e9e6de;}
+  a{color:#1b3a6b;}
+  a:hover{color:#14181d;}
+  @keyframes odblink{0%,100%{opacity:1}50%{opacity:.25}}
+</style>
+</helmet>
+
+<section style="display:flex; flex-direction:column; gap:26px; padding:44px 48px 40px; font-family:'Newsreader',Georgia,serif;">
+
+  <div style="display:flex; align-items:baseline; gap:16px; border-bottom:1px solid #cfcabc; padding-bottom:14px;">
+    <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#8a8578;">Turn 2</span>
+    <h1 style="font-size:30px; font-weight:600; letter-spacing:-.02em; margin:0; color:#14181d;">1a in light mode — padding rebuilt on a 4&thinsp;px grid</h1>
+  </div>
+
+  <div id="2a" style="display:flex; flex-direction:column; gap:14px;">
+    <div style="display:flex; align-items:baseline; gap:12px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.14em; color:#faf9f5; background:#14181d; padding:4px 8px;">2a</span>
+      <span style="font-size:21px; font-weight:600; color:#14181d;">Mode tabs on the score card · paper palette</span>
+    </div>
+    <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.7; letter-spacing:.02em; color:#6b6a62; margin:0; max-width:560px;">20&thinsp;px page gutter · card bleeds to the gutter, 16&thinsp;px inside · 48&thinsp;px tabs, full-bleed dividers · 12&thinsp;px between metric rows · every vertical step a multiple of 4.</p>
+    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a8578; margin-bottom:8px;">Default · deep sky</div>
+        <div style="width:375px; background:#faf9f5; border:1px solid #cfcabc; overflow:hidden; color:#14181d;">
+          <div style="display:flex; justify-content:space-between; padding:12px 20px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8a8578;"><span>9:42</span><span>▮▮▯ ⌁</span></div>
+          <div style="text-align:center; padding:8px 20px 16px; border-bottom:1px solid #d8d4c8;">
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; letter-spacing:.34em; text-transform:uppercase; color:#14181d;">Orbital Daily</div>
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#8a8578; margin-top:8px;">Saturday · July 26 · 03:11 UTC</div>
+          </div>
+          <div style="padding:20px 20px 0;">
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#8a8578;">The desk's read for tonight</div>
+            <h2 style="font-size:32px; font-weight:600; letter-spacing:-.025em; line-height:1.05; margin:12px 0 8px; color:#14181d;">Stay in tonight.</h2>
+            <p style="font-size:15px; line-height:1.55; color:#4a4f57; margin:0;">There's a storm chewing at the sky and a waning gibbous moon washing out what's left of it.</p>
+          </div>
+          <div style="margin:20px 20px 0; border:1px solid #ddd8cc; background:#fffdf8;">
+            <div style="display:flex; border-bottom:1px solid #ddd8cc;">
+              <sc-for list="{{ d1.tabs }}" as="t" hint-placeholder-count="5">
+                <button onClick="{{ t.pick }}" style="appearance:none; flex:1; min-width:0; height:48px; padding:0 2px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.07em; border:none; border-right:1px solid #e7e3d8; border-bottom:2px solid {{ t.lbb }}; background:{{ t.lbg }}; color:{{ t.lfg }};">{{ t.label }}</button>
+              </sc-for>
+            </div>
+            <div style="padding:16px;">
+              <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px;">
+                <div>
+                  <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:{{ d1.lcolor }};">{{ d1.verdict }}</div>
+                  <div style="display:flex; align-items:flex-end; gap:6px; margin-top:4px;">
+                    <span style="font-size:52px; font-weight:700; line-height:.82; letter-spacing:-.03em; color:{{ d1.lcolor }};">{{ d1.score }}</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.12em; color:#8a8578; padding-bottom:6px;">/ 10</span>
+                  </div>
+                </div>
+                <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#8a8578; line-height:1.8;">Shoot score<br>Albany, NY</div>
+              </div>
+              <p style="font-family:'Newsreader',serif; font-style:italic; font-size:15px; line-height:1.5; color:#4a4f57; margin:12px 0 0;">{{ d1.sub }}</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px; padding:16px; border-top:1px solid #e7e3d8;">
+              <sc-for list="{{ d1.metrics }}" as="m" hint-placeholder-count="4">
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:baseline; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:#6b6a62;"><span>{{ m.label }}</span><span style="color:#14181d;">{{ m.val }}</span></div>
+                  <div style="height:3px; background:#e7e3d8; margin-top:6px;"><div style="height:100%; width:{{ m.w }}; background:{{ m.lbar }};"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:16px; padding:20px; border-top:1px solid #e7e3d8; margin-top:20px;">
+            <div>
+              <div style="display:flex; align-items:flex-end; gap:4px;"><span style="font-size:40px; font-weight:700; line-height:.85; color:#14181d;">62</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8a8578; padding-bottom:5px;">/100</span></div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:#1b3a6b; margin-top:6px;">Space activity</div>
+            </div>
+            <div style="flex:1;">
+              <p style="font-size:14px; line-height:1.45; color:#4a4f57; margin:0;">Storm overhead, eight launches on the manifest, an asteroid inbound.</p>
+              <div style="height:4px; background:#e7e3d8; margin-top:10px;"><div style="width:62%; height:100%; background:#1b3a6b;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a8578; margin-bottom:8px;">Planetary / lunar tapped</div>
+        <div style="width:375px; background:#faf9f5; border:1px solid #cfcabc; overflow:hidden; color:#14181d;">
+          <div style="display:flex; justify-content:space-between; padding:12px 20px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8a8578;"><span>9:42</span><span>▮▮▯ ⌁</span></div>
+          <div style="text-align:center; padding:8px 20px 16px; border-bottom:1px solid #d8d4c8;">
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; letter-spacing:.34em; text-transform:uppercase; color:#14181d;">Orbital Daily</div>
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#8a8578; margin-top:8px;">Saturday · July 26 · 03:11 UTC</div>
+          </div>
+          <div style="padding:20px 20px 0;">
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#8a8578;">The desk's read for tonight</div>
+            <h2 style="font-size:32px; font-weight:600; letter-spacing:-.025em; line-height:1.05; margin:12px 0 8px; color:#14181d;">Stay in tonight.</h2>
+            <p style="font-size:15px; line-height:1.55; color:#4a4f57; margin:0;">There's a storm chewing at the sky and a waning gibbous moon washing out what's left of it.</p>
+          </div>
+          <div style="margin:20px 20px 0; border:1px solid #ddd8cc; background:#fffdf8;">
+            <div style="display:flex; border-bottom:1px solid #ddd8cc;">
+              <sc-for list="{{ d2.tabs }}" as="t" hint-placeholder-count="5">
+                <button onClick="{{ t.pick }}" style="appearance:none; flex:1; min-width:0; height:48px; padding:0 2px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.07em; border:none; border-right:1px solid #e7e3d8; border-bottom:2px solid {{ t.lbb }}; background:{{ t.lbg }}; color:{{ t.lfg }};">{{ t.label }}</button>
+              </sc-for>
+            </div>
+            <div style="padding:16px;">
+              <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px;">
+                <div>
+                  <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:{{ d2.lcolor }};">{{ d2.verdict }}</div>
+                  <div style="display:flex; align-items:flex-end; gap:6px; margin-top:4px;">
+                    <span style="font-size:52px; font-weight:700; line-height:.82; letter-spacing:-.03em; color:{{ d2.lcolor }};">{{ d2.score }}</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.12em; color:#8a8578; padding-bottom:6px;">/ 10</span>
+                  </div>
+                </div>
+                <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#8a8578; line-height:1.8;">Shoot score<br>Albany, NY</div>
+              </div>
+              <p style="font-family:'Newsreader',serif; font-style:italic; font-size:15px; line-height:1.5; color:#4a4f57; margin:12px 0 0;">{{ d2.sub }}</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px; padding:16px; border-top:1px solid #e7e3d8;">
+              <sc-for list="{{ d2.metrics }}" as="m" hint-placeholder-count="4">
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:baseline; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:#6b6a62;"><span>{{ m.label }}</span><span style="color:#14181d;">{{ m.val }}</span></div>
+                  <div style="height:3px; background:#e7e3d8; margin-top:6px;"><div style="height:100%; width:{{ m.w }}; background:{{ m.lbar }};"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:16px; padding:20px; border-top:1px solid #e7e3d8; margin-top:20px;">
+            <div>
+              <div style="display:flex; align-items:flex-end; gap:4px;"><span style="font-size:40px; font-weight:700; line-height:.85; color:#14181d;">62</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8a8578; padding-bottom:5px;">/100</span></div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:#1b3a6b; margin-top:6px;">Space activity</div>
+            </div>
+            <div style="flex:1;">
+              <p style="font-size:14px; line-height:1.45; color:#4a4f57; margin:0;">Storm overhead, eight launches on the manifest, an asteroid inbound.</p>
+              <div style="height:4px; background:#e7e3d8; margin-top:10px;"><div style="width:62%; height:100%; background:#1b3a6b;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<section style="display:flex; flex-direction:column; gap:26px; padding:24px 48px 80px; font-family:'Newsreader',Georgia,serif;">
+
+  <div style="display:flex; align-items:baseline; gap:16px; border-bottom:1px solid #cfcabc; padding-bottom:14px;">
+    <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#8a8578;">Turn 1</span>
+    <h1 style="font-size:30px; font-weight:600; letter-spacing:-.02em; margin:0; color:#14181d;">Observing mode selector — three interaction models</h1>
+    <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; color:#8a8578;">375&thinsp;px · dark mode · all three are live — tap them</span>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:44px; align-items:flex-start;">
+
+    <!-- ══════════════ OPTION A ══════════════ -->
+    <div id="1a" style="display:flex; flex-direction:column; gap:14px;">
+      <div style="display:flex; align-items:baseline; gap:12px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.14em; color:#faf9f5; background:#14181d; padding:4px 8px;">1a</span>
+        <span style="font-size:21px; font-weight:600; color:#14181d;">Mode tabs on the score card</span>
+      </div>
+      <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.7; letter-spacing:.02em; color:#6b6a62; margin:0; max-width:340px;">One tap, zero chrome. The card <em>is</em> the selector.</p>
+      <div style="display:flex; gap:20px;">
+
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a8578; margin-bottom:8px;">Default · deep sky</div>
+          <div style="width:375px; background:#121212; border:1px solid #cfcabc; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; padding:10px 18px 6px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6e6a62;"><span>9:42</span><span>▮▮▯ ⌁</span></div>
+            <div style="text-align:center; padding:8px 18px 12px; border-bottom:1px solid #2b2b2b;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; letter-spacing:.34em; text-transform:uppercase; color:#eceae4;">Orbital Daily</div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#6e6a62; margin-top:6px;">Saturday · July 26 · 03:11 UTC</div>
+            </div>
+            <div style="padding:18px 18px 16px;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#6e6a62;">The desk's read for tonight</div>
+              <h2 style="font-size:32px; font-weight:600; letter-spacing:-.025em; line-height:1.05; margin:10px 0 8px; color:#eceae4;">Stay in tonight.</h2>
+              <p style="font-size:15px; line-height:1.55; color:#a8a49b; margin:0;">There's a storm chewing at the sky and a waning gibbous moon washing out what's left of it.</p>
+            </div>
+            <div style="margin:0 18px 18px; border:1px solid #33322e; background:#181818;">
+              <div style="display:flex; border-bottom:1px solid #33322e;">
+                <sc-for list="{{ a1.tabs }}" as="t" hint-placeholder-count="5">
+                  <button onClick="{{ t.pick }}" style="appearance:none; flex:1; min-width:0; height:48px; padding:0 2px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.07em; border:none; border-right:1px solid #2a2a26; border-bottom:2px solid {{ t.bb }}; background:{{ t.bg }}; color:{{ t.fg }};">{{ t.label }}</button>
+                </sc-for>
+              </div>
+              <div style="padding:16px 16px 18px;">
+                <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:10px;">
+                  <div>
+                    <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:{{ a1.color }};">{{ a1.verdict }}</div>
+                    <div style="display:flex; align-items:flex-end; gap:6px; margin-top:2px;">
+                      <span style="font-size:52px; font-weight:700; line-height:.82; letter-spacing:-.03em; color:{{ a1.color }};">{{ a1.score }}</span>
+                      <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.12em; color:#6e6a62; padding-bottom:6px;">/ 10</span>
+                    </div>
+                  </div>
+                  <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#6e6a62; line-height:1.7;">Shoot score<br>Albany, NY</div>
+                </div>
+                <p style="font-family:'Newsreader',serif; font-style:italic; font-size:15px; line-height:1.5; color:#a8a49b; margin:12px 0 0;">{{ a1.sub }}</p>
+                <div style="display:flex; flex-direction:column; gap:11px; margin-top:16px; padding-top:14px; border-top:1px solid #2b2b2b;">
+                  <sc-for list="{{ a1.metrics }}" as="m" hint-placeholder-count="4">
+                    <div>
+                      <div style="display:flex; justify-content:space-between; align-items:baseline; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:#8b877e;"><span>{{ m.label }}</span><span style="color:#c8c5bd;">{{ m.val }}</span></div>
+                      <div style="height:3px; background:#2b2b2b; margin-top:5px;"><div style="height:100%; width:{{ m.w }}; background:{{ m.bar }};"></div></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; padding:0 18px 22px;">
+              <div>
+                <div style="display:flex; align-items:flex-end; gap:4px;"><span style="font-size:40px; font-weight:700; line-height:.85; color:#eceae4;">62</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6e6a62; padding-bottom:5px;">/100</span></div>
+                <div style="font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:#8fb0dc; margin-top:4px;">Space activity</div>
+              </div>
+              <div style="flex:1;">
+                <p style="font-size:14px; line-height:1.45; color:#a8a49b; margin:0;">Storm overhead, eight launches on the manifest, an asteroid inbound.</p>
+                <div style="height:4px; background:#2b2b2b; margin-top:8px;"><div style="width:62%; height:100%; background:#8fb0dc;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a8578; margin-bottom:8px;">Planetary / lunar tapped</div>
+          <div style="width:375px; background:#121212; border:1px solid #cfcabc; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; padding:10px 18px 6px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6e6a62;"><span>9:42</span><span>▮▮▯ ⌁</span></div>
+            <div style="text-align:center; padding:8px 18px 12px; border-bottom:1px solid #2b2b2b;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; letter-spacing:.34em; text-transform:uppercase; color:#eceae4;">Orbital Daily</div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#6e6a62; margin-top:6px;">Saturday · July 26 · 03:11 UTC</div>
+            </div>
+            <div style="padding:18px 18px 16px;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#6e6a62;">The desk's read for tonight</div>
+              <h2 style="font-size:32px; font-weight:600; letter-spacing:-.025em; line-height:1.05; margin:10px 0 8px; color:#eceae4;">Stay in tonight.</h2>
+              <p style="font-size:15px; line-height:1.55; color:#a8a49b; margin:0;">There's a storm chewing at the sky and a waning gibbous moon washing out what's left of it.</p>
+            </div>
+            <div style="margin:0 18px 18px; border:1px solid #33322e; background:#181818;">
+              <div style="display:flex; border-bottom:1px solid #33322e;">
+                <sc-for list="{{ a2.tabs }}" as="t" hint-placeholder-count="5">
+                  <button onClick="{{ t.pick }}" style="appearance:none; flex:1; min-width:0; height:48px; padding:0 2px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.07em; border:none; border-right:1px solid #2a2a26; border-bottom:2px solid {{ t.bb }}; background:{{ t.bg }}; color:{{ t.fg }};">{{ t.label }}</button>
+                </sc-for>
+              </div>
+              <div style="padding:16px 16px 18px;">
+                <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:10px;">
+                  <div>
+                    <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:{{ a2.color }};">{{ a2.verdict }}</div>
+                    <div style="display:flex; align-items:flex-end; gap:6px; margin-top:2px;">
+                      <span style="font-size:52px; font-weight:700; line-height:.82; letter-spacing:-.03em; color:{{ a2.color }};">{{ a2.score }}</span>
+                      <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.12em; color:#6e6a62; padding-bottom:6px;">/ 10</span>
+                    </div>
+                  </div>
+                  <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#6e6a62; line-height:1.7;">Shoot score<br>Albany, NY</div>
+                </div>
+                <p style="font-family:'Newsreader',serif; font-style:italic; font-size:15px; line-height:1.5; color:#a8a49b; margin:12px 0 0;">{{ a2.sub }}</p>
+                <div style="display:flex; flex-direction:column; gap:11px; margin-top:16px; padding-top:14px; border-top:1px solid #2b2b2b;">
+                  <sc-for list="{{ a2.metrics }}" as="m" hint-placeholder-count="4">
+                    <div>
+                      <div style="display:flex; justify-content:space-between; align-items:baseline; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:#8b877e;"><span>{{ m.label }}</span><span style="color:#c8c5bd;">{{ m.val }}</span></div>
+                      <div style="height:3px; background:#2b2b2b; margin-top:5px;"><div style="height:100%; width:{{ m.w }}; background:{{ m.bar }};"></div></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; padding:0 18px 22px;">
+              <div>
+                <div style="display:flex; align-items:flex-end; gap:4px;"><span style="font-size:40px; font-weight:700; line-height:.85; color:#eceae4;">62</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6e6a62; padding-bottom:5px;">/100</span></div>
+                <div style="font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:#8fb0dc; margin-top:4px;">Space activity</div>
+              </div>
+              <div style="flex:1;">
+                <p style="font-size:14px; line-height:1.45; color:#a8a49b; margin:0;">Storm overhead, eight launches on the manifest, an asteroid inbound.</p>
+                <div style="height:4px; background:#2b2b2b; margin-top:8px;"><div style="width:62%; height:100%; background:#8fb0dc;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════ OPTION B ══════════════ -->
+    <div id="1b" style="display:flex; flex-direction:column; gap:14px;">
+      <div style="display:flex; align-items:baseline; gap:12px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.14em; color:#faf9f5; background:#14181d; padding:4px 8px;">1b</span>
+        <span style="font-size:21px; font-weight:600; color:#14181d;">Instrument dial by the location line</span>
+      </div>
+      <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.7; letter-spacing:.02em; color:#6b6a62; margin:0; max-width:340px;">Arrows step to the next mode; the mode name opens all five.</p>
+      <div style="display:flex; gap:20px;">
+
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a8578; margin-bottom:8px;">Default · deep sky</div>
+          <div style="width:375px; background:#121212; border:1px solid #cfcabc; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; padding:10px 18px 6px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6e6a62;"><span>9:42</span><span>▮▮▯ ⌁</span></div>
+            <div style="text-align:center; padding:8px 18px 12px; border-bottom:1px solid #2b2b2b;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; letter-spacing:.34em; text-transform:uppercase; color:#eceae4;">Orbital Daily</div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#6e6a62; margin-top:6px;">Saturday · July 26 · 03:11 UTC</div>
+            </div>
+            <div style="padding:18px 18px 16px;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#6e6a62;">The desk's read for tonight</div>
+              <h2 style="font-size:32px; font-weight:600; letter-spacing:-.025em; line-height:1.05; margin:10px 0 8px; color:#eceae4;">Stay in tonight.</h2>
+              <p style="font-size:15px; line-height:1.55; color:#a8a49b; margin:0;">There's a storm chewing at the sky and a waning gibbous moon washing out what's left of it.</p>
+            </div>
+            <div style="margin:0 18px 18px; border-top:1px solid #33322e; border-bottom:1px solid #33322e; padding:16px 0 18px;">
+              <div style="display:flex; justify-content:space-between; align-items:baseline; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#6e6a62;"><span>Shoot score · Albany, NY</span><span>Bortle 4</span></div>
+              <div style="display:flex; align-items:stretch; gap:0; margin-top:12px; border:1px solid #3a3934; background:#181818;">
+                <button onClick="{{ b1.prev }}" style="appearance:none; width:46px; height:46px; flex:none; cursor:pointer; border:none; border-right:1px solid #2a2a26; background:transparent; color:#8b877e; font-family:'IBM Plex Mono',monospace; font-size:15px;">◂</button>
+                <button onClick="{{ b1.toggle }}" style="appearance:none; flex:1; height:46px; cursor:pointer; border:none; background:transparent; text-align:left; padding:0 12px; display:flex; flex-direction:column; justify-content:center; gap:3px;">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:8px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e6a62;">Observing</span>
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:{{ accent }};">{{ b1.upper }} {{ b1.caret }}</span>
+                </button>
+                <button onClick="{{ b1.next }}" style="appearance:none; width:46px; height:46px; flex:none; cursor:pointer; border:none; border-left:1px solid #2a2a26; background:transparent; color:#8b877e; font-family:'IBM Plex Mono',monospace; font-size:15px;">▸</button>
+              </div>
+              <div style="display:flex; gap:5px; margin-top:8px;">
+                <sc-for list="{{ b1.tabs }}" as="t" hint-placeholder-count="5">
+                  <div style="flex:1; height:2px; background:{{ t.tick }};"></div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ b1.open }}" hint-placeholder-val="{{ false }}">
+                <div style="border:1px solid #3a3934; border-top:none; background:#161616;">
+                  <sc-for list="{{ b1.tabs }}" as="t" hint-placeholder-count="5">
+                    <button onClick="{{ t.pick }}" style="appearance:none; display:flex; width:100%; align-items:center; justify-content:space-between; height:48px; padding:0 14px; cursor:pointer; border:none; border-bottom:1px solid #232322; background:{{ t.rowBg }}; color:{{ t.rowFg }}; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;"><span>{{ t.full }}</span><span>{{ t.check }}</span></button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin-top:18px;">
+                <div>
+                  <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:{{ b1.color }};">{{ b1.verdict }}</div>
+                  <div style="display:flex; align-items:flex-end; gap:6px; margin-top:2px;">
+                    <span style="font-size:56px; font-weight:700; line-height:.82; letter-spacing:-.03em; color:{{ b1.color }};">{{ b1.score }}</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.12em; color:#6e6a62; padding-bottom:7px;">/ 10</span>
+                  </div>
+                </div>
+                <svg viewBox="0 0 100 100" width="60" height="60" style="display:block; flex:none;">
+                  <circle cx="50" cy="50" r="48" fill="#3a3d42"></circle>
+                  <clipPath id="mclipb"><circle cx="50" cy="50" r="48"></circle></clipPath>
+                  <circle cx="39.9" cy="50" r="48" fill="#d8d4c8" clip-path="url(#mclipb)"></circle>
+                </svg>
+              </div>
+              <p style="font-family:'Newsreader',serif; font-style:italic; font-size:15px; line-height:1.5; color:#a8a49b; margin:10px 0 0;">{{ b1.sub }}</p>
+              <div style="display:flex; flex-direction:column; gap:11px; margin-top:16px;">
+                <sc-for list="{{ b1.metrics }}" as="m" hint-placeholder-count="4">
+                  <div>
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:#8b877e;"><span>{{ m.label }}</span><span style="color:#c8c5bd;">{{ m.val }}</span></div>
+                    <div style="height:3px; background:#2b2b2b; margin-top:5px;"><div style="height:100%; width:{{ m.w }}; background:{{ m.bar }};"></div></div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; padding:0 18px 22px;">
+              <div>
+                <div style="display:flex; align-items:flex-end; gap:4px;"><span style="font-size:40px; font-weight:700; line-height:.85; color:#eceae4;">62</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6e6a62; padding-bottom:5px;">/100</span></div>
+                <div style="font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:#8fb0dc; margin-top:4px;">Space activity</div>
+              </div>
+              <div style="flex:1;">
+                <p style="font-size:14px; line-height:1.45; color:#a8a49b; margin:0;">Storm overhead, eight launches on the manifest, an asteroid inbound.</p>
+                <div style="height:4px; background:#2b2b2b; margin-top:8px;"><div style="width:62%; height:100%; background:#8fb0dc;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a8578; margin-bottom:8px;">Dial opened → planetary</div>
+          <div style="width:375px; background:#121212; border:1px solid #cfcabc; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; padding:10px 18px 6px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6e6a62;"><span>9:42</span><span>▮▮▯ ⌁</span></div>
+            <div style="text-align:center; padding:8px 18px 12px; border-bottom:1px solid #2b2b2b;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; letter-spacing:.34em; text-transform:uppercase; color:#eceae4;">Orbital Daily</div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#6e6a62; margin-top:6px;">Saturday · July 26 · 03:11 UTC</div>
+            </div>
+            <div style="padding:18px 18px 16px;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#6e6a62;">The desk's read for tonight</div>
+              <h2 style="font-size:32px; font-weight:600; letter-spacing:-.025em; line-height:1.05; margin:10px 0 8px; color:#eceae4;">Stay in tonight.</h2>
+              <p style="font-size:15px; line-height:1.55; color:#a8a49b; margin:0;">There's a storm chewing at the sky and a waning gibbous moon washing out what's left of it.</p>
+            </div>
+            <div style="margin:0 18px 18px; border-top:1px solid #33322e; border-bottom:1px solid #33322e; padding:16px 0 18px;">
+              <div style="display:flex; justify-content:space-between; align-items:baseline; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#6e6a62;"><span>Shoot score · Albany, NY</span><span>Bortle 4</span></div>
+              <div style="display:flex; align-items:stretch; gap:0; margin-top:12px; border:1px solid #3a3934; background:#181818;">
+                <button onClick="{{ b2.prev }}" style="appearance:none; width:46px; height:46px; flex:none; cursor:pointer; border:none; border-right:1px solid #2a2a26; background:transparent; color:#8b877e; font-family:'IBM Plex Mono',monospace; font-size:15px;">◂</button>
+                <button onClick="{{ b2.toggle }}" style="appearance:none; flex:1; height:46px; cursor:pointer; border:none; background:transparent; text-align:left; padding:0 12px; display:flex; flex-direction:column; justify-content:center; gap:3px;">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:8px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e6a62;">Observing</span>
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:{{ accent }};">{{ b2.upper }} {{ b2.caret }}</span>
+                </button>
+                <button onClick="{{ b2.next }}" style="appearance:none; width:46px; height:46px; flex:none; cursor:pointer; border:none; border-left:1px solid #2a2a26; background:transparent; color:#8b877e; font-family:'IBM Plex Mono',monospace; font-size:15px;">▸</button>
+              </div>
+              <div style="display:flex; gap:5px; margin-top:8px;">
+                <sc-for list="{{ b2.tabs }}" as="t" hint-placeholder-count="5">
+                  <div style="flex:1; height:2px; background:{{ t.tick }};"></div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ b2.open }}" hint-placeholder-val="{{ true }}">
+                <div style="border:1px solid #3a3934; border-top:none; background:#161616;">
+                  <sc-for list="{{ b2.tabs }}" as="t" hint-placeholder-count="5">
+                    <button onClick="{{ t.pick }}" style="appearance:none; display:flex; width:100%; align-items:center; justify-content:space-between; height:48px; padding:0 14px; cursor:pointer; border:none; border-bottom:1px solid #232322; background:{{ t.rowBg }}; color:{{ t.rowFg }}; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;"><span>{{ t.full }}</span><span>{{ t.check }}</span></button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin-top:18px;">
+                <div>
+                  <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:{{ b2.color }};">{{ b2.verdict }}</div>
+                  <div style="display:flex; align-items:flex-end; gap:6px; margin-top:2px;">
+                    <span style="font-size:56px; font-weight:700; line-height:.82; letter-spacing:-.03em; color:{{ b2.color }};">{{ b2.score }}</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.12em; color:#6e6a62; padding-bottom:7px;">/ 10</span>
+                  </div>
+                </div>
+                <svg viewBox="0 0 100 100" width="60" height="60" style="display:block; flex:none;">
+                  <circle cx="50" cy="50" r="48" fill="#3a3d42"></circle>
+                  <clipPath id="mclipb2"><circle cx="50" cy="50" r="48"></circle></clipPath>
+                  <circle cx="39.9" cy="50" r="48" fill="#d8d4c8" clip-path="url(#mclipb2)"></circle>
+                </svg>
+              </div>
+              <p style="font-family:'Newsreader',serif; font-style:italic; font-size:15px; line-height:1.5; color:#a8a49b; margin:10px 0 0;">{{ b2.sub }}</p>
+              <div style="display:flex; flex-direction:column; gap:11px; margin-top:16px;">
+                <sc-for list="{{ b2.metrics }}" as="m" hint-placeholder-count="4">
+                  <div>
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:#8b877e;"><span>{{ m.label }}</span><span style="color:#c8c5bd;">{{ m.val }}</span></div>
+                    <div style="height:3px; background:#2b2b2b; margin-top:5px;"><div style="height:100%; width:{{ m.w }}; background:{{ m.bar }};"></div></div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; padding:0 18px 22px;">
+              <div>
+                <div style="display:flex; align-items:flex-end; gap:4px;"><span style="font-size:40px; font-weight:700; line-height:.85; color:#eceae4;">62</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6e6a62; padding-bottom:5px;">/100</span></div>
+                <div style="font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:#8fb0dc; margin-top:4px;">Space activity</div>
+              </div>
+              <div style="flex:1;">
+                <p style="font-size:14px; line-height:1.45; color:#a8a49b; margin:0;">Storm overhead, eight launches on the manifest, an asteroid inbound.</p>
+                <div style="height:4px; background:#2b2b2b; margin-top:8px;"><div style="width:62%; height:100%; background:#8fb0dc;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════ OPTION C ══════════════ -->
+    <div id="1c" style="display:flex; flex-direction:column; gap:14px;">
+      <div style="display:flex; align-items:baseline; gap:12px;">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.14em; color:#faf9f5; background:#14181d; padding:4px 8px;">1c</span>
+        <span style="font-size:21px; font-weight:600; color:#14181d;">Asked once, then a quiet indicator</span>
+      </div>
+      <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.7; letter-spacing:.02em; color:#6b6a62; margin:0; max-width:340px;">Inline prompt, never a gate — the default score stays visible below it.</p>
+      <div style="display:flex; gap:20px;">
+
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a8578; margin-bottom:8px;">First visit · nothing stored</div>
+          <div style="width:375px; background:#121212; border:1px solid #cfcabc; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; padding:10px 18px 6px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6e6a62;"><span>9:42</span><span>▮▮▯ ⌁</span></div>
+            <div style="text-align:center; padding:8px 18px 12px; border-bottom:1px solid #2b2b2b;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; letter-spacing:.34em; text-transform:uppercase; color:#eceae4;">Orbital Daily</div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#6e6a62; margin-top:6px;">Saturday · July 26 · 03:11 UTC</div>
+            </div>
+            <div style="padding:18px 18px 16px;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#6e6a62;">The desk's read for tonight</div>
+              <h2 style="font-size:32px; font-weight:600; letter-spacing:-.025em; line-height:1.05; margin:10px 0 8px; color:#eceae4;">Stay in tonight.</h2>
+              <p style="font-size:15px; line-height:1.55; color:#a8a49b; margin:0;">There's a storm chewing at the sky and a waning gibbous moon washing out what's left of it.</p>
+            </div>
+            <div style="margin:0 18px 18px; border:1px solid #33322e; background:#181818;">
+              <sc-if value="{{ c1.asking }}" hint-placeholder-val="{{ true }}">
+                <div>
+                  <div style="padding:16px 16px 12px; border-bottom:1px solid #2b2b2b;">
+                    <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:{{ accent }};">Before we score it</div>
+                    <h3 style="font-size:23px; font-weight:600; letter-spacing:-.02em; line-height:1.2; margin:8px 0 0; color:#eceae4;">What are you observing tonight?</h3>
+                  </div>
+                  <button onClick="{{ c1.pickDeep }}" style="appearance:none; display:flex; width:100%; align-items:center; gap:13px; height:54px; padding:0 16px; cursor:pointer; border:none; border-bottom:1px solid #232322; background:transparent; text-align:left;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" style="flex:none;"><ellipse cx="10" cy="10" rx="8.5" ry="3.4" transform="rotate(-24 10 10)" fill="none" stroke="#8fb0dc" stroke-width="1.1"></ellipse><circle cx="10" cy="10" r="1.9" fill="#8fb0dc"></circle></svg>
+                    <span style="flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#eceae4;">Deep sky</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#6e6a62;">›</span>
+                  </button>
+                  <button onClick="{{ c1.pickPlanetary }}" style="appearance:none; display:flex; width:100%; align-items:center; gap:13px; height:54px; padding:0 16px; cursor:pointer; border:none; border-bottom:1px solid #232322; background:transparent; text-align:left;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" style="flex:none;"><circle cx="10" cy="10" r="5" fill="none" stroke="#8fb0dc" stroke-width="1.1"></circle><ellipse cx="10" cy="10" rx="9" ry="2.6" transform="rotate(-18 10 10)" fill="none" stroke="#8fb0dc" stroke-width="1.1"></ellipse></svg>
+                    <span style="flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#eceae4;">Planetary / lunar</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#6e6a62;">›</span>
+                  </button>
+                  <button onClick="{{ c1.pickVisual }}" style="appearance:none; display:flex; width:100%; align-items:center; gap:13px; height:54px; padding:0 16px; cursor:pointer; border:none; border-bottom:1px solid #232322; background:transparent; text-align:left;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" style="flex:none;"><circle cx="10" cy="10" r="8.2" fill="none" stroke="#8fb0dc" stroke-width="1.1"></circle><circle cx="10" cy="10" r="3" fill="none" stroke="#8fb0dc" stroke-width="1.1"></circle><circle cx="10" cy="10" r="1" fill="#8fb0dc"></circle></svg>
+                    <span style="flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#eceae4;">Just looking up</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#6e6a62;">›</span>
+                  </button>
+                  <button onClick="{{ c1.pickAurora }}" style="appearance:none; display:flex; width:100%; align-items:center; gap:13px; height:54px; padding:0 16px; cursor:pointer; border:none; border-bottom:1px solid #232322; background:transparent; text-align:left;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" style="flex:none;"><path d="M3 17 C4 10 5 5 7 3" fill="none" stroke="#8fb0dc" stroke-width="1.1"></path><path d="M8.5 17 C9.5 9 10.5 5 12 3" fill="none" stroke="#8fb0dc" stroke-width="1.1"></path><path d="M14 17 C15 10 16 6 17.5 4" fill="none" stroke="#8fb0dc" stroke-width="1.1"></path></svg>
+                    <span style="flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#eceae4;">Aurora</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#6e6a62;">›</span>
+                  </button>
+                  <button onClick="{{ c1.pickMeteors }}" style="appearance:none; display:flex; width:100%; align-items:center; gap:13px; height:54px; padding:0 16px; cursor:pointer; border:none; border-bottom:1px solid #2b2b2b; background:transparent; text-align:left;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" style="flex:none;"><path d="M2.5 5 L8 10.5" stroke="#8fb0dc" stroke-width="1.1"></path><path d="M9 3.5 L14 8.5" stroke="#8fb0dc" stroke-width="1.1"></path><path d="M11 11 L16.5 16.5" stroke="#8fb0dc" stroke-width="1.1"></path><circle cx="8.4" cy="10.9" r="1.2" fill="#8fb0dc"></circle><circle cx="14.4" cy="8.9" r="1.2" fill="#8fb0dc"></circle></svg>
+                    <span style="flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#eceae4;">Meteors</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#6e6a62;">›</span>
+                  </button>
+                  <div style="padding:11px 16px 12px; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#5e5b54;">Remembered on this device · change any time</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ c1.chosen }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; height:48px; padding:0 14px; border-bottom:1px solid #2b2b2b;">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:{{ accent }};">Observing · {{ c1.upper }}</span>
+                  <button onClick="{{ c1.reopen }}" style="appearance:none; height:40px; padding:0 4px; cursor:pointer; border:none; background:transparent; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#8b877e; text-decoration:underline; text-underline-offset:3px;">Change</button>
+                </div>
+              </sc-if>
+              <div style="padding:16px 16px 18px; opacity:{{ c1.dim }};">
+                <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:10px;">
+                  <div>
+                    <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:{{ c1.color }};">{{ c1.verdict }}</div>
+                    <div style="display:flex; align-items:flex-end; gap:6px; margin-top:2px;">
+                      <span style="font-size:52px; font-weight:700; line-height:.82; letter-spacing:-.03em; color:{{ c1.color }};">{{ c1.score }}</span>
+                      <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.12em; color:#6e6a62; padding-bottom:6px;">/ 10</span>
+                    </div>
+                  </div>
+                  <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#6e6a62; line-height:1.7;">{{ c1.caption }}<br>Albany, NY</div>
+                </div>
+                <p style="font-family:'Newsreader',serif; font-style:italic; font-size:15px; line-height:1.5; color:#a8a49b; margin:12px 0 0;">{{ c1.sub }}</p>
+                <div style="display:flex; flex-direction:column; gap:11px; margin-top:16px; padding-top:14px; border-top:1px solid #2b2b2b;">
+                  <sc-for list="{{ c1.metrics }}" as="m" hint-placeholder-count="4">
+                    <div>
+                      <div style="display:flex; justify-content:space-between; align-items:baseline; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:#8b877e;"><span>{{ m.label }}</span><span style="color:#c8c5bd;">{{ m.val }}</span></div>
+                      <div style="height:3px; background:#2b2b2b; margin-top:5px;"><div style="height:100%; width:{{ m.w }}; background:{{ m.bar }};"></div></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; padding:0 18px 22px;">
+              <div>
+                <div style="display:flex; align-items:flex-end; gap:4px;"><span style="font-size:40px; font-weight:700; line-height:.85; color:#eceae4;">62</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6e6a62; padding-bottom:5px;">/100</span></div>
+                <div style="font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:#8fb0dc; margin-top:4px;">Space activity</div>
+              </div>
+              <div style="flex:1;">
+                <p style="font-size:14px; line-height:1.45; color:#a8a49b; margin:0;">Storm overhead, eight launches on the manifest, an asteroid inbound.</p>
+                <div style="height:4px; background:#2b2b2b; margin-top:8px;"><div style="width:62%; height:100%; background:#8fb0dc;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a8578; margin-bottom:8px;">Answered → returning visits</div>
+          <div style="width:375px; background:#121212; border:1px solid #cfcabc; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; padding:10px 18px 6px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6e6a62;"><span>9:42</span><span>▮▮▯ ⌁</span></div>
+            <div style="text-align:center; padding:8px 18px 12px; border-bottom:1px solid #2b2b2b;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; letter-spacing:.34em; text-transform:uppercase; color:#eceae4;">Orbital Daily</div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#6e6a62; margin-top:6px;">Saturday · July 26 · 03:11 UTC</div>
+            </div>
+            <div style="padding:18px 18px 16px;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#6e6a62;">The desk's read for tonight</div>
+              <h2 style="font-size:32px; font-weight:600; letter-spacing:-.025em; line-height:1.05; margin:10px 0 8px; color:#eceae4;">Stay in tonight.</h2>
+              <p style="font-size:15px; line-height:1.55; color:#a8a49b; margin:0;">There's a storm chewing at the sky and a waning gibbous moon washing out what's left of it.</p>
+            </div>
+            <div style="margin:0 18px 18px; border:1px solid #33322e; background:#181818;">
+              <sc-if value="{{ c2.asking }}" hint-placeholder-val="{{ false }}">
+                <div>
+                  <div style="padding:16px 16px 12px; border-bottom:1px solid #2b2b2b;">
+                    <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:{{ accent }};">Before we score it</div>
+                    <h3 style="font-size:23px; font-weight:600; letter-spacing:-.02em; line-height:1.2; margin:8px 0 0; color:#eceae4;">What are you observing tonight?</h3>
+                  </div>
+                  <button onClick="{{ c2.pickDeep }}" style="appearance:none; display:flex; width:100%; align-items:center; gap:13px; height:54px; padding:0 16px; cursor:pointer; border:none; border-bottom:1px solid #232322; background:transparent; text-align:left;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" style="flex:none;"><ellipse cx="10" cy="10" rx="8.5" ry="3.4" transform="rotate(-24 10 10)" fill="none" stroke="#8fb0dc" stroke-width="1.1"></ellipse><circle cx="10" cy="10" r="1.9" fill="#8fb0dc"></circle></svg>
+                    <span style="flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#eceae4;">Deep sky</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#6e6a62;">›</span>
+                  </button>
+                  <button onClick="{{ c2.pickPlanetary }}" style="appearance:none; display:flex; width:100%; align-items:center; gap:13px; height:54px; padding:0 16px; cursor:pointer; border:none; border-bottom:1px solid #232322; background:transparent; text-align:left;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" style="flex:none;"><circle cx="10" cy="10" r="5" fill="none" stroke="#8fb0dc" stroke-width="1.1"></circle><ellipse cx="10" cy="10" rx="9" ry="2.6" transform="rotate(-18 10 10)" fill="none" stroke="#8fb0dc" stroke-width="1.1"></ellipse></svg>
+                    <span style="flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#eceae4;">Planetary / lunar</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#6e6a62;">›</span>
+                  </button>
+                  <button onClick="{{ c2.pickVisual }}" style="appearance:none; display:flex; width:100%; align-items:center; gap:13px; height:54px; padding:0 16px; cursor:pointer; border:none; border-bottom:1px solid #232322; background:transparent; text-align:left;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" style="flex:none;"><circle cx="10" cy="10" r="8.2" fill="none" stroke="#8fb0dc" stroke-width="1.1"></circle><circle cx="10" cy="10" r="3" fill="none" stroke="#8fb0dc" stroke-width="1.1"></circle><circle cx="10" cy="10" r="1" fill="#8fb0dc"></circle></svg>
+                    <span style="flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#eceae4;">Just looking up</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#6e6a62;">›</span>
+                  </button>
+                  <button onClick="{{ c2.pickAurora }}" style="appearance:none; display:flex; width:100%; align-items:center; gap:13px; height:54px; padding:0 16px; cursor:pointer; border:none; border-bottom:1px solid #232322; background:transparent; text-align:left;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" style="flex:none;"><path d="M3 17 C4 10 5 5 7 3" fill="none" stroke="#8fb0dc" stroke-width="1.1"></path><path d="M8.5 17 C9.5 9 10.5 5 12 3" fill="none" stroke="#8fb0dc" stroke-width="1.1"></path><path d="M14 17 C15 10 16 6 17.5 4" fill="none" stroke="#8fb0dc" stroke-width="1.1"></path></svg>
+                    <span style="flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#eceae4;">Aurora</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#6e6a62;">›</span>
+                  </button>
+                  <button onClick="{{ c2.pickMeteors }}" style="appearance:none; display:flex; width:100%; align-items:center; gap:13px; height:54px; padding:0 16px; cursor:pointer; border:none; border-bottom:1px solid #2b2b2b; background:transparent; text-align:left;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" style="flex:none;"><path d="M2.5 5 L8 10.5" stroke="#8fb0dc" stroke-width="1.1"></path><path d="M9 3.5 L14 8.5" stroke="#8fb0dc" stroke-width="1.1"></path><path d="M11 11 L16.5 16.5" stroke="#8fb0dc" stroke-width="1.1"></path><circle cx="8.4" cy="10.9" r="1.2" fill="#8fb0dc"></circle><circle cx="14.4" cy="8.9" r="1.2" fill="#8fb0dc"></circle></svg>
+                    <span style="flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#eceae4;">Meteors</span>
+                    <span style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#6e6a62;">›</span>
+                  </button>
+                  <div style="padding:11px 16px 12px; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#5e5b54;">Remembered on this device · change any time</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ c2.chosen }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; height:48px; padding:0 14px; border-bottom:1px solid #2b2b2b;">
+                  <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:{{ accent }};">Observing · {{ c2.upper }}</span>
+                  <button onClick="{{ c2.reopen }}" style="appearance:none; height:40px; padding:0 4px; cursor:pointer; border:none; background:transparent; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#8b877e; text-decoration:underline; text-underline-offset:3px;">Change</button>
+              </div>
+              </sc-if>
+              <div style="padding:16px 16px 18px; opacity:{{ c2.dim }};">
+                <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:10px;">
+                  <div>
+                    <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:{{ c2.color }};">{{ c2.verdict }}</div>
+                    <div style="display:flex; align-items:flex-end; gap:6px; margin-top:2px;">
+                      <span style="font-size:52px; font-weight:700; line-height:.82; letter-spacing:-.03em; color:{{ c2.color }};">{{ c2.score }}</span>
+                      <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.12em; color:#6e6a62; padding-bottom:6px;">/ 10</span>
+                    </div>
+                  </div>
+                  <div style="text-align:right; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#6e6a62; line-height:1.7;">{{ c2.caption }}<br>Albany, NY</div>
+                </div>
+                <p style="font-family:'Newsreader',serif; font-style:italic; font-size:15px; line-height:1.5; color:#a8a49b; margin:12px 0 0;">{{ c2.sub }}</p>
+                <div style="display:flex; flex-direction:column; gap:11px; margin-top:16px; padding-top:14px; border-top:1px solid #2b2b2b;">
+                  <sc-for list="{{ c2.metrics }}" as="m" hint-placeholder-count="4">
+                    <div>
+                      <div style="display:flex; justify-content:space-between; align-items:baseline; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:#8b877e;"><span>{{ m.label }}</span><span style="color:#c8c5bd;">{{ m.val }}</span></div>
+                      <div style="height:3px; background:#2b2b2b; margin-top:5px;"><div style="height:100%; width:{{ m.w }}; background:{{ m.bar }};"></div></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; padding:0 18px 22px;">
+              <div>
+                <div style="display:flex; align-items:flex-end; gap:4px;"><span style="font-size:40px; font-weight:700; line-height:.85; color:#eceae4;">62</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#6e6a62; padding-bottom:5px;">/100</span></div>
+                <div style="font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:#8fb0dc; margin-top:4px;">Space activity</div>
+              </div>
+              <div style="flex:1;">
+                <p style="font-size:14px; line-height:1.45; color:#a8a49b; margin:0;">Storm overhead, eight launches on the manifest, an asteroid inbound.</p>
+                <div style="height:4px; background:#2b2b2b; margin-top:8px;"><div style="width:62%; height:100%; background:#8fb0dc;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div style="border-top:1px solid #cfcabc; padding-top:16px; display:flex; gap:34px; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.9; letter-spacing:.02em; color:#4a4f57;">
+    <div style="max-width:290px;"><strong style="letter-spacing:.12em;">1a</strong> — fastest switch (1 tap), most discoverable, but eats a full row of the card and labels get cramped at five.</div>
+    <div style="max-width:290px;"><strong style="letter-spacing:.12em;">1b</strong> — reads like a dial and stays compact next to the location line; reaching a non-adjacent mode takes 2 taps.</div>
+    <div style="max-width:290px;"><strong style="letter-spacing:.12em;">1c</strong> — teaches the concept once, then gets out of the way; costs a one-time question and 2 taps to switch later.</div>
+  </div>
+
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#8fb0dc&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#8fb0dc&quot;,&quot;#c9b27a&quot;,&quot;#7fbfa8&quot;,&quot;#d49a8c&quot;],&quot;section&quot;:&quot;Theme&quot;},&quot;activeTabStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;filled&quot;,&quot;options&quot;:[&quot;filled&quot;,&quot;underline&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Option 1a&quot;}}">
+class Component extends DCLogic {
+  state = { a1:'deep', a2:'planetary', b1:'deep', b2:'planetary', b1open:false, b2open:true, c1:null, c2:'planetary', d1:'deep', d2:'planetary' };
+
+  modes() {
+    return [
+      { key:'deep', label:'DEEP', full:'Deep sky', score:'1.7', verdict:'Unfavourable', color:'#e08466',
+        sub:'A gibbous moon and an active storm — nothing faint survives tonight.',
+        metrics:[['Moon darkness','21%',21],['Field calm · Kp 5.7','32%',32],['Transparency','58%',58],['Sky darkness · Bortle 4','66%',66]] },
+      { key:'planetary', label:'PLANET', full:'Planetary / lunar', score:'6.8', verdict:'Good', color:'#6fbf7f',
+        sub:"Moonlight barely matters here — the air is steady and Jupiter rides high.",
+        metrics:[['Seeing · 2.1″','78%',78],['Jet stream · 24 kt','71%',71],['Jupiter altitude · 48°','69%',69],['Moon · 79% lit, a target','79%',79]] },
+      { key:'visual', label:'VISUAL', full:'Just looking up', score:'4.6', verdict:'Mixed', color:'#d4aa3a',
+        sub:'Clear enough for the bright stuff; the moon takes the rest of the sky.',
+        metrics:[['Cloud cover · 15%','85%',85],['Moon darkness','21%',21],['Transparency','58%',58]] },
+      { key:'aurora', label:'AURORA', full:'Aurora', score:'8.1', verdict:'Excellent', color:'#6fbf7f',
+        sub:'Kp 5.7 and climbing — the best northern window in three weeks.',
+        metrics:[['Kp index · 5.7','88%',88],['Bz southward · −9 nT','79%',79],['Cloud cover · 15%','85%',85]] },
+      { key:'meteors', label:'METEOR', full:'Meteors', score:'2.4', verdict:'Poor', color:'#e08466',
+        sub:'No shower near peak, and the moon drowns what sporadics there are.',
+        metrics:[['Shower activity','14%',14],['Moon darkness','21%',21],['Radiant altitude · 31°','52%',52]] }
+    ];
+  }
+
+  set(key, val) { this.setState({ [key]: val }); }
+
+  screen(key, opts) {
+    const o = opts || {};
+    const A = this.props.accent ?? '#8fb0dc';
+    const filled = (this.props.activeTabStyle ?? 'filled') === 'filled';
+    const M = this.modes();
+    const cur = this.state[key];
+    const m = M.find(x => x.key === cur) || M[0];
+    const openKey = key + 'open';
+    const tabs = M.map(t => {
+      const on = t.key === cur;
+      return {
+        key: t.key, label: t.label, full: t.full,
+        bg: on && filled ? A : 'transparent',
+        fg: on ? (filled ? '#121212' : A) : '#8b877e',
+        bb: on && !filled ? A : 'transparent',
+        tick: on ? A : '#33322e',
+        lbg: on && filled ? '#1b3a6b' : 'transparent',
+        lfg: on ? (filled ? '#fffdf8' : '#1b3a6b') : '#8a8578',
+        lbb: on && !filled ? '#1b3a6b' : 'transparent',
+        rowBg: on ? 'rgba(143,176,220,.10)' : 'transparent',
+        rowFg: on ? A : '#c8c5bd',
+        check: on ? '●' : '',
+        pick: () => this.setState(o.closeOnPick ? { [key]: t.key, [openKey]: false } : { [key]: t.key })
+      };
+    });
+    const i = M.findIndex(x => x.key === (cur || 'deep'));
+    const step = d => () => this.setState({ [key]: M[(i + d + M.length) % M.length].key });
+    return {
+      score: cur ? m.score : M[0].score,
+      verdict: cur ? m.verdict : M[0].verdict,
+      color: cur ? m.color : M[0].color,
+      sub: cur ? m.sub : M[0].sub,
+      lcolor: { '#e08466':'#b04a2f', '#6fbf7f':'#2f7d3e', '#d4aa3a':'#a07508' }[(cur ? m : M[0]).color],
+      metrics: (cur ? m : M[0]).metrics.map(x => ({ label:x[0], val:x[1], w:x[2] + '%', bar: x[2] >= 70 ? '#6fbf7f' : x[2] >= 40 ? '#8fb0dc' : '#6b6a62', lbar: x[2] >= 70 ? '#2f7d3e' : x[2] >= 40 ? '#1b3a6b' : '#a8a294' })),
+      full: m.full,
+      upper: (cur ? m.full : M[0].full).toUpperCase(),
+      caret: this.state[openKey] ? '▴' : '▾',
+      open: !!this.state[openKey],
+      asking: !cur,
+      chosen: !!cur,
+      dim: cur ? 1 : 0.45,
+      caption: cur ? 'Shoot score' : 'Default view',
+      tabs,
+      prev: step(-1),
+      next: step(1),
+      toggle: () => this.setState({ [openKey]: !this.state[openKey] }),
+      reopen: () => this.setState({ [key]: null }),
+      pickDeep: () => this.set(key, 'deep'),
+      pickPlanetary: () => this.set(key, 'planetary'),
+      pickVisual: () => this.set(key, 'visual'),
+      pickAurora: () => this.set(key, 'aurora'),
+      pickMeteors: () => this.set(key, 'meteors')
+    };
+  }
+
+  renderVals() {
+    return {
+      accent: this.props.accent ?? '#8fb0dc',
+      a1: this.screen('a1'), a2: this.screen('a2'),
+      b1: this.screen('b1', { closeOnPick:true }), b2: this.screen('b2', { closeOnPick:true }),
+      c1: this.screen('c1'), c2: this.screen('c2'),
+      d1: this.screen('d1'), d2: this.screen('d2')
+    };
+  }
+}
+</script>
+</body>
+</html>
