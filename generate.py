@@ -308,40 +308,6 @@ def fetch_contracts(now):
 
     return results
       
-def fetch_space_history(date):
-    import random
-    r = get(f"https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/{date.month}/{date.day}")
-    # Unambiguous space-specific terms only -- no generic words like "space", "launch", "orbit"
-    tier1 = [
-        "nasa", "spacex", "apollo", "sputnik", "hubble", "astronaut", "cosmonaut",
-        "spacewalk", "vostok", "gagarin", "armstrong", "aldrin", "tiangong",
-        "international space station", "space station", "space shuttle", "space telescope",
-        "falcon 9", "saturn v", "voyager", "cassini", "curiosity rover", "perseverance",
-        "new horizons", "ariane", "lunar module", "moon landing", "first human in space",
-        "crewed spacecraft", "manned spacecraft", "orbital launch", "rocket launch",
-        "mars rover", "space probe", "satellite launch", "aerospace", "cosmodrome",
-        "extravehicular", "mir station", "challenger", "columbia shuttle", "gemini mission",
-        "mercury astronaut", "skylab", "iss ", "iss,", "iss.", "spacelab"
-    ]
-    curated = [
-        {"year":"1957","text":"Sputnik 1, the first artificial satellite, was launched by the Soviet Union, marking the dawn of the Space Age.","url":"https://en.wikipedia.org/wiki/Sputnik_1"},
-        {"year":"1969","text":"Apollo 11 astronauts Neil Armstrong and Buzz Aldrin became the first humans to walk on the Moon.","url":"https://en.wikipedia.org/wiki/Apollo_11"},
-        {"year":"1990","text":"The Hubble Space Telescope was launched aboard Space Shuttle Discovery into low Earth orbit.","url":"https://en.wikipedia.org/wiki/Hubble_Space_Telescope"},
-        {"year":"1998","text":"The first module of the International Space Station, Zarya, was launched into orbit.","url":"https://en.wikipedia.org/wiki/Zarya"},
-        {"year":"2012","text":"NASA's Curiosity rover successfully landed on Mars in Gale Crater, beginning its mission to assess Mars habitability.","url":"https://en.wikipedia.org/wiki/Curiosity_(rover)"},
-        {"year":"1961","text":"Soviet cosmonaut Yuri Gagarin became the first human to travel into space aboard Vostok 1.","url":"https://en.wikipedia.org/wiki/Vostok_1"},
-        {"year":"1977","text":"NASA launched Voyager 1, which would go on to become the first spacecraft to enter interstellar space.","url":"https://en.wikipedia.org/wiki/Voyager_1"},
-        {"year":"1981","text":"Space Shuttle Columbia launched on STS-1, the first orbital spaceflight of NASA's Space Shuttle program.","url":"https://en.wikipedia.org/wiki/STS-1"},
-    ]
-    if r:
-        for ev in r.json().get("events", []):
-            text = ev.get("text","").lower()
-            if any(k in text for k in tier1):
-                pages = ev.get("pages", [])
-                url   = pages[0].get("content_urls",{}).get("desktop",{}).get("page","") if pages else ""
-                return {"year": ev.get("year",""), "text": ev.get("text",""), "url": url}
-    return random.choice(curated)
-
 def fetch_humans_in_space():
     r = get("http://api.open-notify.org/astros.json")
     if not r: return 0, []
@@ -950,7 +916,7 @@ def launch_when_color(timing):
 
 # ── fetch_editorial — 2 paragraphs, returns (p1, p2) ──────────────────────────
 
-def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=None, ovation_pct=None, sai_score=None, sai_status=None, landings=None, contracts=None):
+def fetch_editorial(kp, score, launches, showers, moon_name, flares, neos, cloud_data=None, ovation_pct=None, sai_score=None, sai_status=None, landings=None, contracts=None):
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key: return None
     kp_text, _ = kp_label(kp)
@@ -971,7 +937,6 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
     if landings: ctx.append(f"Recent booster landing: {landings[0]['mission']} -- {landings[0]['type']} landing {'succeeded' if landings[0]['success'] else 'failed'}")
     if contracts: ctx.append(f"Recent contract award: {contracts[0]['recipient']} awarded ${contracts[0]['amount']/1_000_000:.1f}M by {contracts[0]['agency']}")
     if showers:  ctx.append(f"Next shower: {showers[0][1]} in {showers[0][0]} days")
-    if history:  ctx.append(f"Today in history ({history['year']}): {history['text'][:100]}")
 
     # Override directive if weather is bad
     if cloud_data and (cloud_data.get("raining") or cloud_data.get("cloud_pct", 0) >= 70):
@@ -985,27 +950,61 @@ def fetch_editorial(kp, score, launches, showers, moon_name, history, flares, ne
             "excellent": "be enthusiastic -- this is a genuinely good night, say why",
         }[band]
 
+    # Canonical Shoot Score mode ids -- must match observing-mode.js's MODES
+    # keys (deep/planetary/visual/aurora/meteors) exactly.
+    mode_ids = ("deep", "planetary", "visual", "aurora", "meteors")
+
     try:
         r = requests.post(
             "https://api.anthropic.com/v1/messages",
             headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
                      "content-type": "application/json"},
-            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 450,
+            json={"model": "claude-haiku-4-5-20251001", "max_tokens": 650,
                   "messages": [{"role": "user", "content":
                       f"Tonight's conditions:\n{chr(10).join(ctx)}\n\n"
-                      f"Write a short editorial for a space intelligence dispatch. 3-5 sentences total. "
-                      f"Directive: {directive}. "
+                      "Write a short editorial for a space intelligence dispatch, plus five short clauses about "
+                      "tonight's Shoot Score -- one per observing mode. Respond with ONLY a JSON object, no "
+                      "markdown code fences, no commentary before or after, in exactly this shape:\n"
+                      '{"lede": "...", "mode_clauses": {"deep": "...", "planetary": "...", "visual": "...", "aurora": "...", "meteors": "..."}}\n\n'
+                      f"\"lede\": 3-5 sentences total. Directive: {directive}. "
                       "Sentence 1: Open with today's global space-activity picture -- the flare, launch, geomagnetic storm, or NEO driving the Space Activity Index today. Be specific with numbers. Frame it explicitly as the global/national picture (e.g. 'Nationally,' 'Across the country,' 'Globally,') -- not a description of any single reader's sky. "
                       "If weather or a sky-condition score is genuinely the most notable thing today, it's still fair to lead with it, but state plainly that it's a national reference point, not the reader's own sky. "
                       "Sentence 2-3: What this activity means in practical terms for space-news readers generally. "
                       "Sentence 4 (optional): What is coming in the next few days worth knowing. "
-                      "Closing sentence (required): Transition explicitly into the reader's own sky -- something like 'For what this looks like from where you actually are, check your Shoot Score and Your Sky Tonight.' Name both cards. "}]},
-            timeout=18
+                      "Closing sentence (required): Transition explicitly into the reader's own sky -- something like 'For what this looks like from where you actually are, check your Shoot Score and Your Sky Tonight.' Name both cards. "
+                      "\"mode_clauses\": one short clause per Shoot Score mode, in the desk's voice, each noting what's actually different about observing that way tonight given the conditions above. "
+                      "They must be genuinely distinct from each other -- each grounded in what actually differs for that mode, not the same sentence with one word swapped: "
+                      "\"deep\" (deep sky) needs real darkness -- moonlight and light pollution kill it outright; "
+                      "\"planetary\" (planetary/lunar) does not care about moonlight at all, it lives or dies on steady air (seeing) and how high the target sits; "
+                      "\"visual\" (naked-eye) tolerates some moon and light pollution and is mostly about cloud cover; "
+                      "\"aurora\" needs geomagnetic activity, moonlight barely matters, cloud cover does; "
+                      "\"meteors\" need a shower near its peak and a dark sky for the faint ones. "
+                      "Keep each clause to one short clause, not a full restated sentence -- concrete, no hedging, no percentages, no exclamation points, no 'new' framing."}]},
+            timeout=20
         )
         if r.status_code == 200:
             for block in r.json().get("content", []):
-                if block.get("type") == "text":
-                    return block["text"].strip()
+                if block.get("type") != "text":
+                    continue
+                text = block["text"].strip()
+                if text.startswith("```"):
+                    text = text.strip("`")
+                    if text.startswith("json"):
+                        text = text[4:]
+                    text = text.strip()
+                try:
+                    data = json.loads(text)
+                except (json.JSONDecodeError, ValueError):
+                    return None
+                lede = data.get("lede") if isinstance(data, dict) else None
+                clauses = data.get("mode_clauses") if isinstance(data, dict) else None
+                if not isinstance(lede, str) or not lede.strip():
+                    return None
+                if not isinstance(clauses, dict):
+                    return None
+                if any(not isinstance(clauses.get(k), str) or not clauses.get(k).strip() for k in mode_ids):
+                    return None
+                return lede.strip(), {k: clauses[k].strip() for k in mode_ids}
     except Exception as e:
         print(f"  Editorial: {e}", file=sys.stderr)
     return None
@@ -1369,6 +1368,18 @@ PAGE_CSS = """<style>
     --od-serif:'Newsreader',Georgia,serif; --od-mono:'IBM Plex Mono',ui-monospace,monospace;
     --od-max:940px;
   }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --od-paper:#121212; --od-field:#181818;
+      --od-ink:#eceae4; --od-ink-2:#c8c5bd; --od-ink-3:#a8a49b;
+      --od-muted:#8b877e; --od-faint:#6e6a62; --od-faint-2:#5e5b54;
+      --od-rule:#33322e; --od-rule-row:#2b2b2b; --od-rule-mast:#2b2b2b; --od-field-border:#33322e;
+      --od-accent:#8fb0dc; --od-alert:#d98a4f;
+      --od-verdict-poor:#e08466; --od-verdict-fair:#d4aa3a; --od-verdict-good:#6fbf7f;
+      --od-moon-lit:#d8d4c8; --od-moon-shadow:#3a3d42;
+      --od-tooltip-bg:#0a0c0f; --od-tooltip-text:#c9cdd4;
+    }
+  }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
   body{ background:var(--od-paper); color:var(--od-ink); font-family:var(--od-serif); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
@@ -1427,9 +1438,10 @@ PAGE_CSS = """<style>
 
 
 def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
-           neos, flares, history, ed_p1, now, sai_score, sai_status, sai_color,
+           neos, flares, ed_p1, now, sai_score, sai_status, sai_color,
            score, moon_illum, moon_name, moon_emoji, seven_day,
-           stocks=None, iss_pass=None, week_summary=None, cloud_data=None, ovation_pct=None, sai_trend=None, landings=None, contracts=None):
+           stocks=None, iss_pass=None, week_summary=None, cloud_data=None, ovation_pct=None, sai_trend=None, landings=None, contracts=None,
+           mode_clauses=None):
 
     global moon_illum_global
     moon_illum_global = moon_illum
@@ -1456,16 +1468,32 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
               f'"url":"{SITE_URL}","description":"Independent daily space intelligence.",'
               f'"publisher":{{"@type":"Organization","name":"Orbital Daily"}}}}')
 
-    # Bulletin
+    # Bulletin -- always wrapped in a stable slot so client JS can inject its
+    # own aurora-crossover bulletin (observing mode's local aurora score vs
+    # this nationwide Kp>=5 trigger) without clobbering a real one server-side.
     if kp and kp >= 5:
-        bulletin_html = (f'<div style="display:flex;align-items:center;gap:14px;padding:12px 2px;border-bottom:1px solid var(--od-ink);">'
+        bulletin_inner = (f'<div style="display:flex;align-items:center;gap:14px;padding:12px 2px;border-bottom:1px solid var(--od-ink);">'
                          f'<span class="pulse"></span>'
                          f'<span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.16em;color:var(--od-alert);white-space:nowrap;">&#9670; BULLETIN</span>'
                          f'<span style="font-size:16px;color:var(--od-ink-2);line-height:1.4;">Geomagnetic storm active, Kp <strong>{kp_display}</strong>. '
                          f'A faint aurora is possible on the northern horizon tonight; GPS may drift. '
                          f'<a href="https://spaceweather.gov" style="color:var(--od-accent);font-style:italic;border-bottom:1px solid #b7c3d3;">NOAA forecast</a></span></div>')
     else:
-        bulletin_html = ""
+        bulletin_inner = ""
+    bulletin_html = f'<div id="bulletin-slot">{bulletin_inner}</div>'
+
+    # Static fallback, one clause per Shoot Score mode -- used whenever the
+    # editorial call is unavailable (no API key) or returned something that
+    # failed JSON/shape validation. Keeps the tab-swap working in degraded
+    # mode instead of showing one static sentence for every mode.
+    FALLBACK_MODE_CLAUSES = {
+        "deep":      "Deep sky needs real darkness -- moonlight and light pollution decide the night outright.",
+        "planetary": "Moonlight doesn't matter here -- planetary and lunar targets live or die on steady air and how high they sit.",
+        "visual":    "Naked-eye stargazing tolerates some moon and light pollution -- cloud cover is what actually matters.",
+        "aurora":    "Aurora cares about geomagnetic activity and clear skies, not moonlight.",
+        "meteors":   "Meteors need a shower near its peak and a dark sky underneath it.",
+    }
+    mode_clauses_final = mode_clauses if mode_clauses else FALLBACK_MODE_CLAUSES
 
     # Lede
     if ed_p1:
@@ -1493,6 +1521,12 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
                    f'<span style="float:left;font-weight:600;font-size:70px;line-height:.72;padding:8px 12px 0 0;">{drop}</span>'
                    f'{rest1}</p>')
         p2_html = f'<p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">{esc(fallback[1])}</p>'
+
+    # Swappable per-mode clause -- rendered once server-side for the default
+    # mode ("deep") so it's never blank before JS runs; client JS swaps its
+    # textContent (not the surrounding lede) when the reader changes tabs.
+    clause_html = (f'<p id="lede-mode-clause" style="font-size:16px;line-height:1.5;color:var(--od-ink-3);font-style:italic;margin:0 0 16px;max-width:60ch;">'
+                   f'{esc(mode_clauses_final["deep"])}</p>')
 
     # SAI description — actionable, balanced, names the actual top driver
     top_driver_name, top_driver = max(sai_components.items(), key=lambda kv: kv[1]["score"])
@@ -1569,6 +1603,10 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         cloud_label = "Detecting your location..."
         cloud_detail = "Cloud cover data unavailable. Check local forecasts before heading out."
 
+    # Nationwide cloud% fallback for observing-mode signals, before a visitor's
+    # own location resolves client-side.
+    cloud_pct_js = str(c) if cloud_data else "null"
+
     # Humans in space -- group by craft for the tile tooltip
     if humans_list:
         by_craft = {}
@@ -1625,6 +1663,8 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
             "note":  (day_blurbs[i] if day_blurbs else forecast_note(d["score"], d.get("kp"))),
             "cloud": d.get("cloud_pct"),
             "rain":  d.get("raining", False),
+            "kp":    d.get("kp"),
+            "daysToShower": next_shower_days_from(d["dt"]),
             "flag":  (
                 next((str(sum(1 for l in launches if l.get("net","").startswith(d["dt"].strftime("%Y-%m-%d")))) + " LAUNCH" +
                       ("" if sum(1 for l in launches if l.get("net","").startswith(d["dt"].strftime("%Y-%m-%d"))) == 1 else "ES")
@@ -1700,14 +1740,6 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
     stocks_data  = stocks if stocks else [{"sym": s, "price": "--", "chg": "--", "color": "var(--od-faint-2)"} for s in ["RKLB","ASTS","LUNR","SPCE","LMT","BA"]]
     stocks_json  = json.dumps(stocks_data)
 
-    # History bar
-    hist_html = ""
-    if history:
-        href = f' <a href="{esc(history["url"])}" style="color:var(--od-accent);">Read more</a>' if history.get("url") else ""
-        hist_html = (f'<div style="background:#f5f3ee;border-bottom:1px solid var(--od-rule);padding:8px 26px;'
-                     f'font-family:var(--od-mono);font-size:11px;letter-spacing:.06em;color:var(--od-faint-2);text-align:center;">'
-                     f'<strong style="color:var(--od-ink);">{esc(str(history["year"]))}</strong> {esc(history["text"])}{href}</div>')
-
     # Lead story
     if lead_story:
         lead_html = (f'<a href="{esc(lead_story["url"])}" style="display:block;padding-bottom:16px;margin-bottom:4px;border-bottom:1px solid var(--od-rule-row);">'
@@ -1724,6 +1756,7 @@ def render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
         {"name": p["name"], "lat": p["lat"], "lon": p["lon"], "bortle": p["bortle"]}
         for p in DARK_SKY_PARKS
     ])
+    mode_clauses_json = json.dumps(mode_clauses_final)
 
     client_js = f"""
 var TILES_DATA    = {tiles_json};
@@ -1733,16 +1766,106 @@ var LAUNCHES_DATA = {launches_json};
 var WIRES_DATA    = {wires_json};
 var STOCKS_DATA   = {stocks_json};
 var DARK_PARKS    = {dark_sky_data};
+var MODE_CLAUSES  = {mode_clauses_json};
 var SERVER_KP          = {kp_val_js};
 var SERVER_MOON_ILLUM  = {round(moon_illum, 3)};
 var SERVER_DAYS_SHOWER = {days_shower_js};
 var SERVER_SCORE       = {server_score_js};
+var SERVER_CLOUD_PCT   = {cloud_pct_js};
 
 // helpers (same as Claude Design)
 function moonCx(i){{ return (50-(1-i)*48).toFixed(1); }}
-function band(s){{ return s<3?'var(--od-verdict-poor)':s<5?'var(--od-verdict-fair)':'var(--od-verdict-good)'; }}
-function rowTint(s){{ return s>=5?'rgba(47,125,62,.03)':s>=3?'rgba(160,117,8,.03)':'rgba(176,74,47,.03)'; }}
 function esc(s){{ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }}
+
+// ── Observing mode: map today's real signals onto the model's contract ────
+// transparency, seeing, jet, targetAlt, bzSouth and radiant have no data
+// source yet -- left unset so the model's own neutral-0.5 fallback applies.
+function clamp01(n){{ return n<0?0:n>1?1:n; }}
+function showerScore(daysShower){{
+  if(daysShower===null||daysShower===undefined) return 0;
+  if(daysShower<=1)       return 10;
+  if(daysShower<=7)       return 10-daysShower;
+  if(daysShower<=14)      return Math.max(0,5-(daysShower-7)*0.5);
+  return 0;
+}}
+function buildSignals(moonIllum, kp, cloudPct, daysShower, bortleInt){{
+  var kpVal = (kp==null ? SERVER_KP : kp);
+  var sig = {{
+    moonDark: clamp01(1 - moonIllum),
+    kpCalm:   clamp01(1 - kpVal/9),
+    kpActive: clamp01(kpVal/9),
+    shower:   showerScore(daysShower) / 10,
+    raw: {{ kp: kpVal, moonLitPct: Math.round(moonIllum*100) }}
+  }};
+  if(cloudPct!=null){{ sig.cloud = clamp01(1 - cloudPct/100); sig.raw.cloudPct = cloudPct; }}
+  if(bortleInt!=null){{ sig.bortle = clamp01((9-bortleInt)/8); sig.raw.bortle = bortleInt; }}
+  return sig;
+}}
+function verdictColor(tone){{ return tone==='good'?'var(--od-verdict-good)':tone==='fair'?'var(--od-verdict-fair)':'var(--od-verdict-poor)'; }}
+function verdictTint(tone){{ return tone==='good'?'rgba(47,125,62,.03)':tone==='fair'?'rgba(160,117,8,.03)':'rgba(176,74,47,.03)'; }}
+
+// One night's signals: real per-day illum/kp/cloud/daysToShower from
+// FORECAST_DATA where available, current location's bortle estimate once
+// known, SERVER_KP/SERVER_DAYS_SHOWER as fallbacks for days beyond forecast.
+function renderForecast(data, mode){{
+  document.getElementById('forecast').innerHTML = data.map(function(d, i){{
+    var cloudBadge = '';
+    if(d.rain){{
+      cloudBadge = '<span class="mono" style="color:var(--od-verdict-poor);font-size:11px;letter-spacing:.06em;margin-left:8px;">Rain</span>';
+    }} else if(d.cloud !== null && d.cloud !== undefined){{
+      var cc = d.cloud;
+      var cColor = cc>=70?'var(--od-verdict-poor)':cc>=40?'var(--od-verdict-fair)':'var(--od-faint-2)';
+      cloudBadge = '<span class="mono" style="color:'+cColor+';font-size:11px;letter-spacing:.06em;margin-left:8px;">'+cc+'% cloud</span>';
+    }}
+    var sig = buildSignals(d.illum, d.kp, d.cloud, (d.daysToShower!==undefined?d.daysToShower:SERVER_DAYS_SHOWER), currentBortle);
+    var s   = OD_ObservingMode.score(mode, sig);
+    var v   = OD_ObservingMode.verdict(s);
+    var cx1 = moonCx(d.illum);
+    // Independent of the launch-count flag on purpose -- cloud/Kp forecasts
+    // degrade past day 3-4, and a day can be both "launch day" and
+    // "low confidence"; the two badges must never clobber each other.
+    var lowConfidence = i >= 3 || d.kp == null;
+    return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 12px;border-top:1px solid var(--od-rule-row);background:'+verdictTint(v.tone)+';">'
+      +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
+      +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div>'
+      +'<div style="font-weight:700;font-size:24px;line-height:1;color:'+verdictColor(v.tone)+';margin-top:4px;">'+s.toFixed(1)+'</div></div>'
+      +'<svg viewBox="0 0 100 100" width="30" height="30" style="display:block;margin-top:2px;"><circle cx="50" cy="50" r="48" fill="var(--od-moon-shadow)"/>'
+      +'<circle cx="'+cx1+'" cy="50" r="48" fill="var(--od-moon-lit)" clip-path="url(#moonclip)"/></svg>'
+      +'<div>'
+      +'<div style="font-size:16px;color:var(--od-ink-2);line-height:1.4;">'+esc(OD_ObservingMode.summary(mode, sig, s))+'</div>'
+      +'<div style="margin-top:4px;">'+cloudBadge
+      +(d.flag?'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:6px;">'+esc(d.flag)+'</span>':'')
+      +(lowConfidence?'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:6px;">&middot; low confidence</span>':'')
+      +'</div></div></div>';
+  }}).join('');
+}}
+
+// Surface a client-built aurora bulletin when the visitor's own aurora score
+// crosses the same 7.5 threshold the score card uses, even in another mode --
+// but never clobber a real server-side bulletin (nationwide Kp>=5) already there.
+function checkAuroraBulletin(signals){{
+  var slot = document.getElementById('bulletin-slot');
+  if(!slot || slot.children.length) return;
+  var s = OD_ObservingMode.score('aurora', signals);
+  if(s < 7.5) return;
+  slot.innerHTML = '<div style="display:flex;align-items:center;gap:14px;padding:12px 2px;border-bottom:1px solid var(--od-ink);">'
+    +'<span class="pulse"></span>'
+    +'<span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.16em;color:var(--od-alert);white-space:nowrap;">&#9670; BULLETIN</span>'
+    +'<span style="font-size:16px;color:var(--od-ink-2);line-height:1.4;">Aurora odds are climbing for your sky -- observing mode score '+s.toFixed(1)+'/10. '
+    +'<a href="https://spaceweather.gov" style="color:var(--od-accent);font-style:italic;border-bottom:1px solid #b7c3d3;">NOAA forecast</a></span></div>';
+}}
+
+var currentBortle;   // unknown until geolocation resolves
+var latestForecastData = FORECAST_DATA;
+var latestSignals = buildSignals(SERVER_MOON_ILLUM, SERVER_KP, SERVER_CLOUD_PCT, SERVER_DAYS_SHOWER);
+var scoreCard = OD_ObservingMode.mount(document.getElementById('shoot-score'), {{
+  location: 'your location',
+  signals:  latestSignals,
+  modeClauses: MODE_CLAUSES,
+  clauseEl: document.getElementById('lede-mode-clause'),
+  onChange: function(mode){{ renderForecast(latestForecastData, mode); }}
+}});
+checkAuroraBulletin(latestSignals);
 
 // render tiles -- 4x2 grid, background border trick
 document.getElementById('tiles').innerHTML = TILES_DATA.map(function(t,i){{
@@ -1756,31 +1879,8 @@ document.getElementById('tiles').innerHTML = TILES_DATA.map(function(t,i){{
     +'<span class="tip '+(row===0?'below':'above')+'">'+esc(t.detail)+'</span></div>';
 }}).join('');
 
-// render forecast
-document.getElementById('forecast').innerHTML = FORECAST_DATA.map(function(d){{
-  var cloudBadge = '';
-  if(d.rain){{
-    cloudBadge = '<span class="mono" style="color:var(--od-verdict-poor);font-size:11px;letter-spacing:.06em;margin-left:8px;">Rain</span>';
-  }} else if(d.cloud !== null && d.cloud !== undefined){{
-    var cc = d.cloud;
-    var cColor = cc>=70?'var(--od-verdict-poor)':cc>=40?'var(--od-verdict-fair)':'var(--od-faint-2)';
-    cloudBadge = '<span class="mono" style="color:'+cColor+';font-size:11px;letter-spacing:.06em;margin-left:8px;">'+cc+'% cloud</span>';
-  }}
-  var bColor1=band(d.score);
-  var bg1=rowTint(d.score);
-  var cx1=moonCx(d.illum);
-  return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 12px;border-top:1px solid var(--od-rule-row);background:'+bg1+';">'
-    +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
-    +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div>'
-    +'<div style="font-weight:700;font-size:24px;line-height:1;color:'+bColor1+';margin-top:4px;">'+d.score.toFixed(1)+'</div></div>'
-    +'<svg viewBox="0 0 100 100" width="30" height="30" style="display:block;margin-top:2px;"><circle cx="50" cy="50" r="48" fill="var(--od-moon-shadow)"/>'
-    +'<circle cx="'+cx1+'" cy="50" r="48" fill="var(--od-moon-lit)" clip-path="url(#moonclip)"/></svg>'
-    +'<div>'
-    +'<div style="font-size:16px;color:var(--od-ink-2);line-height:1.4;">'+esc(d.note)+'</div>'
-    +'<div style="margin-top:4px;">'+cloudBadge
-    +(d.flag?'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:6px;">'+esc(d.flag)+'</span>':'')
-    +'</div></div></div>';
-}}).join('');
+// render forecast -- mode-aware, matches whatever the score card is showing
+renderForecast(FORECAST_DATA, scoreCard.get());
 
 // render gear -- no image placeholder
 document.getElementById('gear').innerHTML = GEAR_DATA.map(function(g){{
@@ -1878,26 +1978,6 @@ document.getElementById('sticky-dismiss').addEventListener('click', function(){{
 }});
 
 // location helpers
-// Score recomputation formula (mirrors Python astro_score)
-function computeLocalScore(moonIllum, kp, cloudPct, daysShower){{
-  var moonS  = 10.0 * (1.0 - moonIllum);
-  var kpS    = Math.max(0, 10.0 - (kp||2.0) * 1.4);
-  var cloudS = Math.max(0, 10.0 - cloudPct * 0.1);
-  var showerS = 0;
-  if(daysShower !== null){{
-    if(daysShower<=1)      showerS=10;
-    else if(daysShower<=7) showerS=10-daysShower;
-    else if(daysShower<=14)showerS=Math.max(0,5-(daysShower-7)*0.5);
-  }}
-  return Math.min(10,Math.max(0, moonS*0.40 + cloudS*0.30 + kpS*0.20 + showerS*0.10));
-}}
-
-function bandColor(s){{
-  return s>=5?'var(--od-verdict-good)':s>=3?'var(--od-verdict-fair)':'var(--od-verdict-poor)';
-}}
-function stampLabel(s){{
-  return s>=7?'EXCELLENT':s>=5?'GOOD':s>=3?'FAIR':'UNFAVOURABLE';
-}}
 function wxLabel(code){{
   if(code===0) return 'Clear sky';
   if(code<=3)  return 'Partly cloudy';
@@ -2014,39 +2094,12 @@ function applyLocation(lat, lon, label){{
       if(lblEl && cityName) lblEl.textContent = ' \u00b7 ' + cityName;
     }}
 
-    // ── Local score override ───────────────────────────────────────
+    // ── Localize observing-mode signals ──────────────────────────────
     if(avgC!==null){{
-      var localScore = computeLocalScore(SERVER_MOON_ILLUM, SERVER_KP, avgC, SERVER_DAYS_SHOWER);
-      var localScore1 = Math.round(localScore*10)/10;
-      var sLabel = stampLabel(localScore1);
-      var sColor = bandColor(localScore1);
-      var socked = raining || avgC>=70;
-
-      // Update stamp (legacy)
-      var sEl = document.getElementById('stamp-score');
-      var lEl = document.getElementById('stamp-label');
-      var warnEl = document.getElementById('stamp-warning');
-      var stampEl = sEl ? sEl.closest('.term') : null;
-      if(sEl) sEl.textContent = localScore1.toFixed(1);
-      if(lEl) lEl.textContent = sLabel;
-      if(stampEl){{ stampEl.style.borderColor=sColor; stampEl.style.color=sColor; }}
-      if(warnEl && socked) warnEl.style.display='block';
-
-      // Update rail score card (desktop + mobile)
-      ['rail-score','rail-score-mobile'].forEach(function(id){{
-        var el=document.getElementById(id);
-        if(el){{ el.textContent=localScore1.toFixed(1); el.style.color=sColor; }}
-      }});
-      ['rail-stamp','rail-stamp-mobile'].forEach(function(id){{
-        var el=document.getElementById(id);
-        if(el){{ el.textContent=sLabel; el.style.color=sColor; }}
-      }});
-      ['rail-score-label','rail-score-label-mobile'].forEach(function(id){{
-        var el=document.getElementById(id);
-        if(el) el.textContent=label||'your location';
-      }});
-      var rwEl=document.getElementById('rail-score-warning');
-      if(rwEl && socked) rwEl.style.display='block';
+      currentBortle = bortle;
+      latestSignals = buildSignals(SERVER_MOON_ILLUM, SERVER_KP, avgC, SERVER_DAYS_SHOWER, bortle);
+      scoreCard.refresh(latestSignals, label||'your location');
+      checkAuroraBulletin(latestSignals);
 
       // Update cloud card
       var wVal,wColor,wLabel;
@@ -2097,60 +2150,17 @@ function applyLocation(lat, lon, label){{
       var match = dDates[i];
       if(match && cloudByDate[match]){{
         var wd = cloudByDate[match];
-        var moonIllum = d.illum;
-        var dayKp = SERVER_KP; // use current Kp as best estimate
-        var newScore = computeLocalScore(moonIllum, dayKp, wd.cloud, SERVER_DAYS_SHOWER);
-        return Object.assign({{}}, d, {{ cloud: wd.cloud, rain: wd.rain, score: Math.round(newScore*10)/10 }});
+        return Object.assign({{}}, d, {{ cloud: wd.cloud, rain: wd.rain }});
       }}
       return d;
     }});
+    latestForecastData = updated;
 
     // Remove loading state
     var loadEl = document.getElementById('forecast-loading');
     if(loadEl) loadEl.style.display='none';
 
-
-    document.getElementById('forecast').innerHTML = updated.map(function(d){{
-      var cloudBadge='';
-      if(d.rain){{
-        cloudBadge='<span class="mono" style="color:var(--od-verdict-poor);font-size:11px;letter-spacing:.06em;margin-left:8px;">Rain</span>';
-      }} else if(d.cloud!==null&&d.cloud!==undefined){{
-        var cc=d.cloud;
-        var cColor=cc>=70?'var(--od-verdict-poor)':cc>=40?'var(--od-verdict-fair)':'var(--od-faint-2)';
-        cloudBadge='<span class="mono" style="color:'+cColor+';font-size:11px;letter-spacing:.06em;margin-left:8px;">'+cc+'% cloud</span>';
-      }}
-      function fNote(s){{
-        if(s>=9)   return 'Exceptional. As good as it gets.';
-        if(s>=8.5) return 'Prime window. Clear, dark, and calm.';
-        if(s>=8.0) return 'Excellent conditions. Get out.';
-        if(s>=7.5) return 'Strong night. Worth making the effort.';
-        if(s>=7.0) return 'Good window. Most deep-sky targets accessible.';
-        if(s>=6.5) return 'Solid. Push to a dark site if you can.';
-        if(s>=6.0) return 'Decent. Bright planets and clusters well-placed.';
-        if(s>=5.5) return 'Fair. Wide-field and bright targets.';
-        if(s>=5.0) return 'Usable. Stick to brighter objects.';
-        if(s>=4.5) return 'Marginal. Moon washing out faint targets.';
-        if(s>=4.0) return 'Tough. Planets and the moon itself only.';
-        if(s>=3.5) return 'Poor. Wide-field at best.';
-        if(s>=3.0) return 'Difficult. Low expectations.';
-        if(s>=2.0) return 'Very poor. Better nights ahead.';
-        return 'Skip it.';
-      }}
-      var cx=(50-(1-d.illum)*48).toFixed(1);
-      var bColor=d.score<3?'var(--od-verdict-poor)':d.score<5?'var(--od-verdict-fair)':'var(--od-verdict-good)';
-      var bg=d.score>=5?'rgba(47,125,62,.03)':d.score>=3?'rgba(160,117,8,.03)':'rgba(176,74,47,.03)';
-      return '<div style="display:grid;grid-template-columns:60px 36px 1fr;align-items:start;gap:12px;padding:14px 12px;border-top:1px solid var(--od-rule-row);background:'+bg+';">'
-        +'<div><div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.1em;">'+d.day+'</div>'
-        +'<div class="mono" style="font-size:11px;color:var(--od-faint);">'+d.date+'</div>'
-        +'<div style="font-weight:700;font-size:24px;line-height:1;color:'+bColor+';margin-top:4px;">'+d.score.toFixed(1)+'</div></div>'
-        +'<svg viewBox="0 0 100 100" width="30" height="30" style="display:block;margin-top:2px;"><circle cx="50" cy="50" r="48" fill="var(--od-moon-shadow)"/>'
-        +'<circle cx="'+cx+'" cy="50" r="48" fill="var(--od-moon-lit)" clip-path="url(#moonclip)"/></svg>'
-        +'<div>'
-        +'<div style="font-size:16px;color:var(--od-ink-2);line-height:1.4;">'+fNote(d.score)+'</div>'
-        +'<div style="margin-top:4px;">'+cloudBadge
-        +(d.flag?'<span class="mono" style="color:var(--od-faint-2);font-size:11px;letter-spacing:.08em;margin-left:6px;">'+d.flag+'</span>':'')
-        +'</div></div></div>';
-    }}).join('');
+    renderForecast(updated, scoreCard.get());
 
   }}).catch(function(){{}});
 }}
@@ -2336,13 +2346,12 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
       <span>{esc(date_str)}</span>
       <span style="flex:1;height:1px;background:var(--od-rule-mast);max-width:120px;"></span>
     </div>
-    <h1 style="font-family:var(--od-serif);font-style:italic;font-size:15px;color:var(--od-muted);margin-top:10px;">One score for how busy space is today, read over each morning before it goes out.</h1>
+    <h1 style="font-family:var(--od-serif);font-style:italic;font-size:15px;color:var(--od-muted);margin-top:10px;">One score for how busy space is, another for your sky tonight &mdash; read every morning before it goes out.</h1>
   </header>
 
   <div style="height:2px;background:var(--od-ink);margin:22px 0 0;"></div>
   <div style="height:1px;background:var(--od-ink);margin:3px 0 0;"></div>
 
-  {hist_html}
   {bulletin_html}
 
   <div style="background:#f5f3ee;border-bottom:1px solid var(--od-rule);padding:8px 16px;">
@@ -2368,14 +2377,6 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
         </div>
         <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:8px;max-width:200px;"><div style="width:{sai_score}%;height:100%;background:var(--od-accent);"></div></div>
       </div>
-      <div style="padding:14px 16px;border-bottom:1px solid var(--od-rule-row);">
-        <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:6px;">Shoot Score <span id="rail-score-label-mobile" style="color:var(--od-faint-2);letter-spacing:.06em;text-transform:none;font-size:10px;">global forecast</span></div>
-        <div style="display:flex;align-items:baseline;gap:6px;">
-          <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;color:{stamp_color};" id="rail-score-mobile">{score}</span>
-          <span class="mono" style="font-size:12px;color:var(--od-faint-2);">/10</span>
-          <span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;" id="rail-stamp-mobile" style="color:{stamp_color};">{esc(stamp_label)}</span>
-        </div>
-      </div>
       <div style="padding:14px 16px;">
         <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:6px;">Your sky tonight &middot; <span id="rail-city-mobile" style="letter-spacing:.04em;font-size:10px;text-transform:none;">detecting...</span></div>
         <div style="font-weight:700;font-size:28px;line-height:1;letter-spacing:-.02em;" id="rail-cloud-val-mobile" style="color:{cloud_color};">{cloud_val}</div>
@@ -2391,6 +2392,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
         <h2 style="font-size:52px;line-height:1.02;letter-spacing:-.025em;margin:0 0 18px;">{esc(headline)}</h2>
         {p1_html}
         {p2_html}
+        {clause_html}
         <div style="font-style:italic;font-size:16px;color:var(--od-muted);">the Orbital Daily desk</div>
       </div>
 
@@ -2406,18 +2408,6 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
           <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--od-accent);margin-top:4px;">{esc(sai_status.title())} skies</div>
           <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:10px;"><div style="width:{sai_score}%;height:100%;background:var(--od-accent);"></div></div>
           <span class="tip below">How awake the space world is tonight -- mostly how busy the launch pads are, plus the Sun&rsquo;s mood, how charged the sky is, and whether any asteroid is swinging close.</span>
-        </div>
-
-        <!-- Shoot score card -->
-        <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:12px;background:var(--od-field);">
-          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:8px;">Shoot Score &middot; <span id="rail-score-label" style="color:var(--od-faint-2);letter-spacing:.04em;font-size:10px;text-transform:none;font-weight:400;">global forecast</span></div>
-          <div style="display:flex;align-items:baseline;gap:6px;">
-            <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;color:{stamp_color};" id="rail-score">{score}</span>
-            <span class="mono" style="font-size:13px;color:var(--od-faint-2);">/10</span>
-          </div>
-          <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:{stamp_color};" id="rail-stamp">{esc(stamp_label)}</div>
-          <div id="rail-score-warning" style="display:none;font-family:var(--od-mono);font-size:10px;color:var(--od-verdict-poor);letter-spacing:.06em;margin-top:6px;">cloud override active</div>
-          <span class="tip below">Starts from the nationwide astrophotography score, then adjusts to match live cloud cover at your detected location. If your location wasn't detected, this is still the national figure.</span>
         </div>
 
         <!-- Cloud / weather card -->
@@ -2450,6 +2440,14 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
       <div id="sub-done-inline" style="display:none;font-style:italic;font-size:13px;color:var(--od-verdict-good);">You&rsquo;re on the list.</div>
     </div>
   </section>
+
+  <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
+    <div class="term eyebrow" data-tip style="margin-bottom:14px;display:flex;align-items:center;gap:3px;">Your Shoot Score<span class="idot">i</span>
+      <span class="tip below">Five numbers for five ways to look up &mdash; deep sky, planetary, naked eye, aurora, meteors &mdash; each weighted for what actually matters to it. The same night can be unfavourable for a galaxy and excellent for Jupiter.</span>
+    </div>
+    <div id="shoot-score"></div>
+  </section>
+
   <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
     <div class="activity-grid" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center;">
       <div class="term" data-tip tabindex="0" style="text-align:center;padding-right:32px;border-right:1px solid var(--od-rule-row);">
@@ -2583,6 +2581,7 @@ document.addEventListener('keydown',function(e){{if(e.key==='Escape')document.ge
     </div>
   </div>
 </div>
+<script src="observing-mode.js"></script>
 <script>
 {client_js}
 </script>
@@ -2635,7 +2634,6 @@ if __name__ == "__main__":
     news         = fetch_news();            print(f"  News: {len(news)}")
     launches     = fetch_launches();        print(f"  Launches: {len(launches)}")
     showers      = upcoming_showers()
-    history      = fetch_space_history(now)
     humans_n, humans_list = fetch_humans_in_space(); print(f"  Humans in space: {humans_n}")
     neos         = fetch_neo(now);          print(f"  NEOs: {len(neos)}")
     flares       = fetch_solar_flares(now); print(f"  Flares: {len(flares)}")
@@ -2669,11 +2667,13 @@ if __name__ == "__main__":
     seven_day = compute_7day(now, kp, kp_forecast, cloud_week)
     contracts = fetch_contracts(now);       print(f"  Contracts: {len(contracts)}")
     landings = fetch_landings();            print(f"  Landings: {len(landings)}")
-    ed_p1 = fetch_editorial(kp, score, launches, showers, moon_name, history, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_score=sai, sai_status=sai_status, landings=landings, contracts=contracts)
+    editorial = fetch_editorial(kp, score, launches, showers, moon_name, flares, neos, cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_score=sai, sai_status=sai_status, landings=landings, contracts=contracts)
+    ed_p1, ed_mode_clauses = editorial if editorial else (None, None)
     if ed_p1:
         import re as _re
         ed_p1 = _re.sub(r'^#+\s*.*?\n+', '', ed_p1)  # drop a leading markdown header line if Haiku adds one
         ed_p1 = _re.sub(r'\*+', '', ed_p1).strip()
+        ed_mode_clauses = {k: _re.sub(r'\*+', '', v).strip() for k, v in ed_mode_clauses.items()}
     week_sum, day_blurbs = fetch_week_narrative(seven_day, launches, showers)
 
     # Morning run (before noon UTC) sends email; afternoon run refreshes only
@@ -2694,10 +2694,11 @@ if __name__ == "__main__":
     print("  sai_history.json / editorial_history.json / prediction_history.json updated")
 
     html = render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
-                  neos, flares, history, ed_p1, now, sai, sai_status, sai_color,
+                  neos, flares, ed_p1, now, sai, sai_status, sai_color,
                   score, moon_illum, moon_name, moon_emoji, seven_day,
                   stocks=stocks, iss_pass=iss_pass, week_summary=week_sum,
-                  cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_trend=sai_trend, landings=landings, contracts=contracts)
+                  cloud_data=tonight_cloud, ovation_pct=ovation_pct, sai_trend=sai_trend, landings=landings, contracts=contracts,
+                  mode_clauses=ed_mode_clauses)
 
     with open("index.html","w",encoding="utf-8") as f: f.write(html)
     print("  index.html")
