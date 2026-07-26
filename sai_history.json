@@ -559,7 +559,7 @@
   },
   {
     "date": "2026-07-26",
-    "sai": 26,
+    "sai": 40,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -567,12 +567,12 @@
         "reason": "Falcon 9 Block 5 | NROL-95 (Government/Top Secret)"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
       },
       "solar": {
-        "score": 20,
-        "reason": "C2.7 flare detected"
+        "score": 65.6,
+        "reason": "M3.2 flare detected"
       },
       "neo": {
         "score": 5.5,
@@ -583,8 +583,8 @@
         "reason": "5 confirmed this month vs 42 avg"
       },
       "stock_volatility": {
-        "score": 0,
-        "reason": "No market data available"
+        "score": 100,
+        "reason": "RKLB moved 8.7% today"
       }
     }
   }
