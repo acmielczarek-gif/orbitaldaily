@@ -7,6 +7,10 @@ GitHub Secrets required:
   ANTHROPIC_API_KEY   — Claude editorial note
   BUTTONDOWN_API_KEY  — Daily email digest
   NASA_API_KEY        — NASA NeoWs + DONKI
+
+GitHub Secrets optional:
+  NTFY_TOPIC          — ntfy.sh topic for post-worthy build notifications
+                         (unset = notify_if_postworthy() silently skips)
 """
 
 import math, os, sys, json, requests
@@ -633,6 +637,13 @@ def sai_trend_callout(history, today_sai, today_date):
             d = datetime.strptime(since["date"], "%Y-%m-%d")
             return f"Quietest since {d.strftime('%b')} {d.day}"
         return f"Quietest in {window_days} days"
+    return None
+
+def sai_value_for_date(history, date_str):
+    """history = prior days only. Returns that day's SAI, or None if absent."""
+    for r in history:
+        if r["date"] == date_str:
+            return r["sai"]
     return None
 
 
@@ -2623,6 +2634,112 @@ Attribution: Orbital Daily (orbitaldaily.com)
     print("  llms.txt")
 
 
+# ── Post-worthy notifications (ntfy.sh) ─────────────────────────────────────────
+# Server-side port of observing-mode.js's mode scorer, run against the same
+# nationwide baseline signals the page itself falls back to before a visitor's
+# geolocation resolves (SERVER_KP / SERVER_MOON_ILLUM / SERVER_CLOUD_PCT /
+# SERVER_DAYS_SHOWER, no Bortle). Signals with no server-side data source
+# (transparency, seeing, jet, targetAlt, bzSouth, radiant, bortle) default to
+# the same neutral 0.5 observing-mode.js's own signal() fallback uses.
+
+SHOOT_MODES = [
+    {"key": "deep",      "label": "Deep sky",        "subreddit": "r/astrophotography",
+     "weights": {"bortle": .30, "transparency": .30, "cloud": .25, "kpCalm": .15},
+     "gate": ("moonDark", .85)},
+    {"key": "planetary", "label": "Planetary/lunar",  "subreddit": "r/telescopes or r/astrophotography",
+     "weights": {"seeing": .40, "jet": .25, "targetAlt": .20, "cloud": .15},
+     "gate": ("cloud", .60)},
+    {"key": "visual",    "label": "Just looking up",  "subreddit": "r/space",
+     "weights": {"cloud": .40, "transparency": .30, "bortle": .30},
+     "gate": ("moonDark", .28)},
+    {"key": "aurora",    "label": "Aurora",           "subreddit": "r/aurora",
+     "weights": {"kpActive": .55, "bzSouth": .30, "cloud": .15},
+     "gate": ("cloud", .30)},
+    {"key": "meteors",   "label": "Meteors",          "subreddit": "r/meteor or r/astrophotography",
+     "weights": {"shower": .45, "radiant": .30, "cloud": .25},
+     "gate": ("moonDark", .38)},
+]
+
+def _clamp01(n):
+    return 0.0 if n < 0 else 1.0 if n > 1 else n
+
+def _signal(signals, key):
+    v = signals.get(key)
+    return _clamp01(v) if isinstance(v, (int, float)) else 0.5
+
+def _shower_signal_score(days_to_shower):
+    d = days_to_shower
+    if d is None:  return 0
+    if d <= 1:     return 10
+    if d <= 7:     return 10 - d
+    if d <= 14:    return max(0, 5 - (d - 7) * 0.5)
+    return 0
+
+def _js_round(x):
+    # Math.round semantics (half away from zero), not Python's banker's rounding
+    return math.floor(x + 0.5) if x >= 0 else -math.floor(-x + 0.5)
+
+def compute_shoot_scores(moon_illum, kp, cloud_pct, days_to_shower):
+    """Mirrors observing-mode.js buildSignals()+score() for the nationwide
+    baseline (no visitor Bortle). Returns {mode_key: score 0.0-10.0}."""
+    kp_val = kp if kp is not None else 0
+    signals = {
+        "moonDark":  _clamp01(1 - moon_illum),
+        "kpCalm":    _clamp01(1 - kp_val / 9),
+        "kpActive":  _clamp01(kp_val / 9),
+        "shower":    _shower_signal_score(days_to_shower) / 10,
+    }
+    if cloud_pct is not None:
+        signals["cloud"] = _clamp01(1 - cloud_pct / 100)
+
+    scores = {}
+    for mode in SHOOT_MODES:
+        weights = mode["weights"]
+        total   = sum(weights.values())
+        base    = sum(_signal(signals, k) * w for k, w in weights.items()) / total if total else 0
+        gate_key, gate_exp = mode["gate"]
+        gate    = _signal(signals, gate_key) ** gate_exp
+        scores[mode["key"]] = _js_round(base * gate * 100) / 10
+    return scores
+
+def notify_if_postworthy(sai, sai_yesterday, shoot_scores, kp):
+    """Fires one ntfy.sh POST per met trigger. Reads NTFY_TOPIC from env --
+    unset means silently skip (not a build failure). Never raises: a failed
+    or non-200 ntfy POST is logged and swallowed, not fatal to the build."""
+    topic = os.environ.get("NTFY_TOPIC")
+    if not topic:
+        return
+
+    def post(title, body):
+        try:
+            r = requests.post("https://ntfy.sh/",
+                               json={"topic": topic, "title": title, "message": body},
+                               timeout=10)
+            if r.status_code != 200:
+                print(f"  ntfy: non-200 response ({r.status_code}) for '{title}'")
+        except Exception as e:
+            print(f"  ntfy: failed to send '{title}': {e}")
+
+    if sai >= 75:
+        post(f"\U0001F534 High SAI today — {sai}",
+             "Post to r/space: high solar activity driving today's score. Check orbitaldaily.com")
+
+    if sai_yesterday is not None and (sai - sai_yesterday) >= 15:
+        post(f"\U0001F534 SAI spike — {sai_yesterday}→{sai}",
+             "Post to r/space: high solar activity driving today's score. Check orbitaldaily.com")
+
+    for mode in SHOOT_MODES:
+        s = shoot_scores.get(mode["key"])
+        if s is not None and s >= 8.0:
+            post(f"\U0001F52D Excellent shoot tonight — {mode['label']} {s}",
+                 f"Post to {mode['subreddit']}: best {mode['label'].lower()} conditions today "
+                 f"— check Shoot Score. orbitaldaily.com")
+
+    if kp is not None and kp >= 5:
+        post(f"\U0001F30C Aurora alert — Kp {kp}",
+             "Post to r/aurora or r/space: geomagnetic storm tonight")
+
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -2686,12 +2803,20 @@ if __name__ == "__main__":
     print(f"  Run type: {'morning (newsletter)' if is_morning else 'afternoon (refresh only)'}")
 
     today_str = now.strftime("%Y-%m-%d")
-    sai_trend = sai_trend_callout(_load_json_history(SAI_HISTORY_FILE), sai, today_str)
+    sai_history_prior = _load_json_history(SAI_HISTORY_FILE)   # prior days only, today not yet logged
+    sai_trend = sai_trend_callout(sai_history_prior, sai, today_str)
     print(f"  SAI trend: {sai_trend}" if sai_trend else "  SAI trend: none (not enough history yet or nothing notable)")
     log_sai_history(today_str, sai, sai_status, sai_components)
     log_editorial_history(today_str, ed_p1)
     log_prediction_history(today_str, seven_day)
     print("  sai_history.json / editorial_history.json / prediction_history.json updated")
+
+    yesterday_str = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+    sai_yesterday = sai_value_for_date(sai_history_prior, yesterday_str)
+    shoot_scores  = compute_shoot_scores(moon_illum, kp,
+                        tonight_cloud["cloud_pct"] if tonight_cloud else None,
+                        showers[0][0] if showers else None)
+    notify_if_postworthy(sai, sai_yesterday, shoot_scores, kp)
 
     html = render(kp, kp_forecast, news, launches, showers, humans_n, humans_list,
                   neos, flares, ed_p1, now, sai, sai_status, sai_color,
