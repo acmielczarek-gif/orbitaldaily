@@ -649,5 +649,36 @@
         "reason": "LUNR moved 7.1% today"
       }
     }
+  },
+  {
+    "date": "2026-07-29",
+    "sai": 23,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 35.8,
+        "reason": "Falcon 9 Block 5 | NROL-95 (Government/Top Secret)"
+      },
+      "geomagnetic": {
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C3.3 flare detected"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "2012 DW60 passing at 30.7 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "5 confirmed this month vs 42 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "LUNR moved 7.1% today"
+      }
+    }
   }
 ]
