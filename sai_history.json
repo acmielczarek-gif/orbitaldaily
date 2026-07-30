@@ -683,7 +683,7 @@
   },
   {
     "date": "2026-07-30",
-    "sai": 28,
+    "sai": 37,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -691,24 +691,24 @@
         "reason": "Long March 6A | TJSW-27A & B (Government/Top Secret)"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 11.1,
+        "reason": "Kp 1.3, quiet geomagnetic field"
       },
       "solar": {
-        "score": 20,
-        "reason": "C3.3 flare detected"
+        "score": 55.2,
+        "reason": "M1.9 flare detected"
       },
       "neo": {
         "score": 0,
-        "reason": "No notable close approaches"
+        "reason": "2012 DW60 passing at 30.7 lunar distances"
       },
       "exoplanets": {
-        "score": 10,
-        "reason": "5 confirmed this month vs 42 avg"
+        "score": 25,
+        "reason": "28 confirmed this month vs 40 avg"
       },
       "stock_volatility": {
         "score": 100,
-        "reason": "RKLB moved 8.3% today"
+        "reason": "RKLB moved 10.4% today"
       }
     }
   }
