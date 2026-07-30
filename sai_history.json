@@ -680,5 +680,36 @@
         "reason": "RKLB moved 8.3% today"
       }
     }
+  },
+  {
+    "date": "2026-07-30",
+    "sai": 28,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 43.3,
+        "reason": "Long March 6A | TJSW-27A & B (Government/Top Secret)"
+      },
+      "geomagnetic": {
+        "score": 16.7,
+        "reason": "Kp 2.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C3.3 flare detected"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "No notable close approaches"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "5 confirmed this month vs 42 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "RKLB moved 8.3% today"
+      }
+    }
   }
 ]
