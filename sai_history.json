@@ -714,7 +714,7 @@
   },
   {
     "date": "2026-07-31",
-    "sai": 22,
+    "sai": 17,
     "status": "LOW",
     "components": {
       "launches": {
@@ -722,8 +722,8 @@
         "reason": "Spectrum | Onward and Upward (Test Flight)"
       },
       "geomagnetic": {
-        "score": 13.9,
-        "reason": "Kp 1.7, quiet geomagnetic field"
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -738,8 +738,8 @@
         "reason": "28 confirmed this month vs 40 avg"
       },
       "stock_volatility": {
-        "score": 100,
-        "reason": "RKLB moved 10.4% today"
+        "score": 30,
+        "reason": "SPCX moved 3.4% today"
       }
     }
   }
