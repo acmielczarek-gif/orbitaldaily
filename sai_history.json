@@ -745,7 +745,7 @@
   },
   {
     "date": "2026-08-01",
-    "sai": 16,
+    "sai": 14,
     "status": "LOW",
     "components": {
       "launches": {
@@ -753,8 +753,8 @@
         "reason": "Spectrum | Onward and Upward (Test Flight)"
       },
       "geomagnetic": {
-        "score": 11.1,
-        "reason": "Kp 1.3, quiet geomagnetic field"
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -765,8 +765,8 @@
         "reason": "2012 DW60 passing at 30.7 lunar distances"
       },
       "exoplanets": {
-        "score": 10,
-        "reason": "2 confirmed this month vs 41 avg"
+        "score": 0,
+        "reason": "No exoplanet data available"
       },
       "stock_volatility": {
         "score": 30,
