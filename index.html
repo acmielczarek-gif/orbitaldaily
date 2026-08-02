@@ -118,7 +118,7 @@
     <div style="font-family:var(--od-serif);font-weight:600;font-size:clamp(32px,8vw,64px);line-height:1;letter-spacing:-.02em;margin:0 0 8px;">Orbital Daily</div>
     <div style="display:flex;align-items:center;justify-content:center;gap:14px;font-family:var(--od-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-muted);padding-top:6px;">
       <span style="flex:1;height:1px;background:var(--od-rule-mast);max-width:120px;"></span>
-      <span>Sunday · August 2, 2026 · 08:08 UTC</span>
+      <span>Sunday · August 2, 2026 · 18:54 UTC</span>
       <span style="flex:1;height:1px;background:var(--od-rule-mast);max-width:120px;"></span>
     </div>
     <h1 style="font-family:var(--od-serif);font-style:italic;font-size:15px;color:var(--od-muted);margin-top:10px;">One score for how busy space is, another for your sky tonight &mdash; read every morning before it goes out.</h1>
@@ -127,7 +127,7 @@
   <div style="height:2px;background:var(--od-ink);margin:22px 0 0;"></div>
   <div style="height:1px;background:var(--od-ink);margin:3px 0 0;"></div>
 
-  <div id="bulletin-slot"></div>
+  <div id="bulletin-slot"><div style="display:flex;align-items:center;gap:14px;padding:12px 2px;border-bottom:1px solid var(--od-ink);"><span class="pulse"></span><span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.16em;color:var(--od-alert);white-space:nowrap;">&#9670; BULLETIN</span><span style="font-size:16px;color:var(--od-ink-2);line-height:1.4;">Geomagnetic storm active, Kp <strong>5.7</strong>. A faint aurora is possible on the northern horizon tonight; GPS may drift. <a href="https://spaceweather.gov" style="color:var(--od-accent);font-style:italic;border-bottom:1px solid #b7c3d3;">NOAA forecast</a></span></div></div>
 
   <div style="background:#f5f3ee;border-bottom:1px solid var(--od-rule);padding:8px 16px;">
     <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;row-gap:8px;">
@@ -146,11 +146,11 @@
       <div style="padding:14px 16px;border-bottom:1px solid var(--od-rule-row);">
         <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:10px;">Space Activity Index</div>
         <div style="display:flex;align-items:baseline;gap:6px;">
-          <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;">29</span>
+          <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;">36</span>
           <span class="mono" style="font-size:12px;color:var(--od-faint-2);">/100</span>
           <span class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-accent);margin-left:4px;">Moderate skies</span>
         </div>
-        <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:8px;max-width:200px;"><div style="width:29%;height:100%;background:var(--od-accent);"></div></div>
+        <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:8px;max-width:200px;"><div style="width:36%;height:100%;background:var(--od-accent);"></div></div>
       </div>
       <div style="padding:14px 16px;">
         <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:6px;">Your sky tonight &middot; <span id="rail-city-mobile" style="letter-spacing:.04em;font-size:10px;text-transform:none;">detecting...</span></div>
@@ -164,10 +164,10 @@
 
     <div class="lede-grid" style="display:grid;grid-template-columns:1fr 220px;gap:34px;align-items:start;">
       <div>
-        <h2 style="font-size:52px;line-height:1.02;letter-spacing:-.025em;margin:0 0 18px;">Worth a look tonight.</h2>
-        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 14px;max-width:60ch;"><span style="float:left;font-weight:600;font-size:70px;line-height:.72;padding:8px 12px 0 0;">N</span>ationally, space activity sits at a moderate 29/100, driven by an M1.9 solar flare, a successful Falcon 9 landing for Starlink, and Axiom Space&#x27;s $8.7M NASA contract award—a steady week of commercial and solar momentum. Tonight&#x27;s rain, however, makes observing impossible across the region, shutting down all ground-based work regardless of mode. The week ahead brings the Perseids in nine days and a Long March 8A launch on August 4, both worth tracking as conditions improve. For what this looks like from where you actually are, check your Shoot Score and Your Sky Tonight.</p>
+        <h2 style="font-size:52px;line-height:1.02;letter-spacing:-.025em;margin:0 0 18px;">Wait for a better window.</h2>
+        <p style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 14px;max-width:60ch;"><span style="float:left;font-weight:600;font-size:70px;line-height:.72;padding:8px 12px 0 0;">N</span>ationally, a moderate geomagnetic storm (Kp 5.7) and recent M1.9 solar flare have pushed the Space Activity Index to 36/100 today, marking genuine space weather disruption even as most of North America faces cloud cover. This activity signals solar variability worth monitoring—it&#x27;s the kind of uptick that often precedes larger events. The coming week brings a Long March 8A launch tomorrow and the onset of Perseid season in nine days, both significant for observers who can clear the weather. For what this looks like from where you actually are, check your Shoot Score and Your Sky Tonight.</p>
         
-        <p id="lede-mode-clause" style="font-size:16px;line-height:1.5;color:var(--od-ink-3);font-style:italic;margin:0 0 16px;max-width:60ch;">The waning gibbous moon and rain make deep sky a non-starter tonight.</p>
+        <p id="lede-mode-clause" style="font-size:16px;line-height:1.5;color:var(--od-ink-3);font-style:italic;margin:0 0 16px;max-width:60ch;">Rain and an 81%-lit moon eliminate the faint-galaxy work; come back when skies are dark and clear.</p>
         <div style="font-style:italic;font-size:16px;color:var(--od-muted);">the Orbital Daily desk</div>
       </div>
 
@@ -177,11 +177,11 @@
         <div class="term" data-tip style="border:1px solid var(--od-rule-row);border-radius:6px;padding:12px;background:var(--od-field);">
           <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:12px;">Space Activity Index &#9432;</div>
           <div style="display:flex;align-items:baseline;gap:6px;">
-            <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;">29</span>
+            <span style="font-weight:700;font-size:36px;line-height:1;letter-spacing:-.02em;">36</span>
             <span class="mono" style="font-size:13px;color:var(--od-faint-2);">/100</span>
           </div>
           <div class="mono" style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--od-accent);margin-top:4px;">Moderate skies</div>
-          <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:10px;"><div style="width:29%;height:100%;background:var(--od-accent);"></div></div>
+          <div style="height:4px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;margin-top:10px;"><div style="width:36%;height:100%;background:var(--od-accent);"></div></div>
           <span class="tip below">How awake the space world is tonight -- mostly how busy the launch pads are, plus the Sun&rsquo;s mood, how charged the sky is, and whether any asteroid is swinging close.</span>
         </div>
 
@@ -206,7 +206,7 @@
     <div id="inline-subscribe" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--od-rule-row);border-radius:6px;padding:14px 18px;background:var(--od-field);margin-top:20px;">
       <div style="flex:1;min-width:220px;">
         <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--od-faint);margin-bottom:4px;">Get the alert</div>
-        <p style="font-size:14px;line-height:1.4;color:var(--od-ink-2);margin:0;">Space Activity Index: 29/100 right now. Want to know when it spikes?</p>
+        <p style="font-size:14px;line-height:1.4;color:var(--od-ink-2);margin:0;">Space Activity Index: 36/100 right now. Want to know when it spikes?</p>
       </div>
       <form class="subscribe-form" id="subscribe-inline" style="display:flex;gap:8px;flex-wrap:wrap;">
         <input type="email" required placeholder="you@email.com" class="mono" style="font-size:13px;padding:10px 12px;background:var(--od-paper);border:1px solid var(--od-field-border);border-radius:4px;color:var(--od-ink);outline:none;width:220px;">
@@ -228,7 +228,7 @@
       <div class="term" data-tip tabindex="0" style="text-align:center;padding-right:32px;border-right:1px solid var(--od-rule-row);">
         <div class="mono" style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--od-faint);">Space Activity Index &#9432;</div>
         <div style="display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-top:12px;">
-          <span style="font-weight:700;font-size:72px;line-height:.85;letter-spacing:-.03em;">29</span>
+          <span style="font-weight:700;font-size:72px;line-height:.85;letter-spacing:-.03em;">36</span>
           <span style="font-weight:600;font-size:22px;color:var(--od-faint-2);padding-bottom:10px;">/100</span>
         </div>
         <div class="mono" style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--od-accent);margin-top:4px;">Moderate skies</div>
@@ -238,7 +238,7 @@
       <div>
         <p style="font-size:20px;line-height:1.5;color:var(--od-ink-2);margin:0 0 16px;max-width:54ch;">M1.9 flare detected. Conditions otherwise holding steady -- a good week to follow along.</p>
         <div style="height:6px;background:var(--od-rule-row);border-radius:999px;overflow:hidden;max-width:420px;">
-          <div style="width:29%;height:100%;background:var(--od-accent);"></div>
+          <div style="width:36%;height:100%;background:var(--od-accent);"></div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;row-gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--od-rule-row);flex-wrap:wrap;">
           <span class="pulse" id="iss-pulse" style="display:none;"></span>
@@ -258,7 +258,7 @@
     <div class="week-head" style="display:grid;grid-template-columns:1fr auto;gap:26px;align-items:start;margin-bottom:6px;">
       <div>
         <h3 style="font-size:32px;margin:0 0 10px;">The week ahead</h3>
-        <p id="week-sub" style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">This week trends sharply upward toward Saturday&#x27;s stellar 7.7/10, driven by a darkening moon and clearing skies. Early week turbulence from heavy clouds and launches gives way to pristine conditions by weekend. Two major launches bracket the forecast, Long March 8A on Tuesday and the Falcon 9 Starlink mission Saturday, with the latter arriving during the week&#x27;s best viewing window.</p>
+        <p id="week-sub" style="font-size:20px;line-height:1.62;color:var(--od-ink-2);margin:0 0 16px;max-width:60ch;">This week trends sharply upward to an exceptional Saturday finale. Sunday brings aurora risk under a bright moon, but clouds thicken midweek despite three launches (Long March 8A, Smart Dragon 3, Falcon 9 Starlink). Skip ahead to Saturday: nearly cloudless skies, new moon phase, and an 8.2/10 score make it the standout night of the week.</p>
       </div>
       <a class="tout" href="https://amzn.to/4v9UNan" target="_blank" rel="sponsored noopener" style="display:block;width:200px;border:1px solid #e2ddd0;border-radius:8px;padding:14px;background:#fdfcf8;flex-shrink:0;">
         <div class="mono" style="font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:8px;">Sponsored</div>
@@ -286,16 +286,12 @@
     </div>
     <div>
       <h3 style="font-size:32px;margin:0 0 16px;">From the wires</h3>
-      <a href="https://www.nasaspaceflight.com/2026/08/boeing-starliner-2026-iss/" style="display:block;padding-bottom:16px;margin-bottom:4px;border-bottom:1px solid var(--od-rule-row);"><div style="font-weight:600;font-size:23px;line-height:1.24;letter-spacing:-.01em;">Boeing’s Starliner set for potential 2026 cargo run to ISS</div><div class="mono" style="font-size:11px;letter-spacing:.06em;color:var(--od-faint);margin-top:6px;">NASASpaceflight</div></a>
+      
       <div id="wires"></div>
     </div>
   </section>
 
 
-  <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
-    <h3 style="font-size:28px;margin:0 0 14px;">Booster landings</h3>
-    <div style="padding:12px 0;border-bottom:1px solid var(--od-rule-row);"><span style="font-weight:600;">Falcon 9 Block 5 | Starlink Group 17-52</span> <span class="mono" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--od-verdict-good);">LANDED</span><br><span style="font-size:14px;color:var(--od-ink-2);">SpaceX &middot; Autonomous Spaceport Drone Ship at Of Course I Still Love You &middot; Aug 1</span></div>
-  </section>
   <section style="padding:30px 0;border-bottom:1px solid var(--od-rule);">
     <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
       <div>
@@ -308,7 +304,7 @@
     
     <div style="margin-top:22px;">
       <div class="mono" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--od-faint-2);margin-bottom:8px;">Contract awards</div>
-      <div style="padding:12px 0;border-bottom:1px solid var(--od-rule-row);"><span style="font-weight:600;">AXIOM SPACE INC</span> <span class="mono" style="font-size:11px;letter-spacing:.06em;color:var(--od-faint-2);">$8.7M</span><br><span style="font-size:14px;color:var(--od-ink-2);">The government is contracting for services to help astronauts conduct spacewalks and other work outside spacecraft during exploration missions.</span><br><span class="mono" style="font-size:11px;color:var(--od-faint-2);">National Aeronautics and Space Administration &middot; Jul 28</span></div>
+      <div style="padding:12px 0;border-bottom:1px solid var(--od-rule-row);"><span style="font-weight:600;">AXIOM SPACE INC</span> <span class="mono" style="font-size:11px;letter-spacing:.06em;color:var(--od-faint-2);">$8.7M</span><br><span style="font-size:14px;color:var(--od-ink-2);">The government is contracting for services to help astronauts conduct spacewalks and other activities outside their spacecraft during exploration missions.</span><br><span class="mono" style="font-size:11px;color:var(--od-faint-2);">National Aeronautics and Space Administration &middot; Jul 28</span></div>
     </div>
   </section>
 
@@ -326,7 +322,7 @@
 <!-- Sticky subscribe bar -->
 <div id="sticky-subscribe" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:150;background:var(--od-ink);border-top:1px solid var(--od-rule-mast);padding:12px 20px;">
   <div style="max-width:var(--od-max);margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-    <span style="font-family:var(--od-serif);font-size:16px;color:var(--od-paper);flex:1;min-width:180px;">SAI at 29 &mdash; get notified when it climbs.</span>
+    <span style="font-family:var(--od-serif);font-size:16px;color:var(--od-paper);flex:1;min-width:180px;">SAI at 36 &mdash; get notified when it climbs.</span>
     <form class="subscribe-form" id="subscribe-sticky" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
       <input type="email" required placeholder="you@email.com" class="mono" style="font-size:12px;padding:9px 12px;background:var(--od-paper);border:1px solid var(--od-field-border);border-radius:4px;color:var(--od-ink);outline:none;width:200px;max-width:60vw;">
       <button type="submit" class="mono" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--od-ink);background:var(--od-paper);padding:9px 18px;border-radius:4px;border:none;cursor:pointer;">Subscribe</button>
@@ -367,19 +363,19 @@
 <script src="observing-mode.js"></script>
 <script>
 
-var TILES_DATA    = [{"value": "15", "unit": "% dark", "label": "Moon darkness", "color": "var(--od-verdict-poor)", "href": "#moon", "first": true, "detail": "Moon is 85% illuminated tonight. Moon darkness is the single biggest factor in the shoot score -- a dark sky beats everything else."}, {"value": "0%", "unit": "", "label": "Aurora chance", "color": "var(--od-faint-2)", "href": "#aurora", "first": false, "detail": "NOAA Ovation model puts aurora probability at 0% here tonight. Unlikely to be visible tonight."}, {"value": "1.0", "unit": "Kp", "label": "Geomagnetic field", "color": "var(--od-ink)", "href": "#kp", "first": false, "detail": "Kp index from NOAA SWPC. Above 5 means a geomagnetic storm -- GPS may drift and aurora becomes visible at lower latitudes. Below 2 is ideal for imaging."}, {"value": "13.1", "unit": "LD", "label": "Closest asteroid", "color": "var(--od-ink)", "href": "#neo", "first": false, "detail": "173561 (2000 YV137, about 13x the Moon-Earth distance, passing at 16.2 km/s. No impact risk."}, {"value": "Venus", "unit": "", "label": "Planets up tonight", "color": "var(--od-ink)", "href": "#planets", "first": false, "detail": "Visible in the evening sky tonight: Venus (evening sky), Mars (morning sky), Saturn (morning sky)."}, {"value": "Cycle 25", "unit": "", "label": "Solar cycle -- Descending", "color": "var(--od-ink)", "href": "#solar", "first": false, "detail": "Past maximum. Activity gradually declining toward the next quiet period. We are 61% through Cycle 25."}, {"value": "Rain", "unit": "", "label": "Cloud cover tonight", "color": "var(--od-verdict-poor)", "href": "#clouds", "first": false, "id": "weather-tile", "detail": "Precipitation tonight -- 7.4mm expected. Observing is off the table. Check back tomorrow."}, {"value": "12", "unit": "in orbit", "label": "Humans in space", "color": "var(--od-ink)", "href": "#humans", "first": false, "detail": "9 aboard ISS: Oleg Kononenko, Nikolai Chub, Tracy Caldwell Dyson, Matthew Dominick, Michael Barratt, Jeanette Epps, Alexander Grebenkin, Butch Wilmore, Sunita Williams; 3 aboard Tiangong: Li Guangsu, Li Cong, Ye Guangfu."}];
-var FORECAST_DATA = [{"day": "SUN", "date": "Aug 2", "illum": 0.85, "score": 5.7, "note": "Bright moon, minimal clouds, aurora potential. 5.7/10", "cloud": 1, "rain": false, "kp": 1.0, "daysToShower": 9, "flag": ""}, {"day": "MON", "date": "Aug 3", "illum": 0.76, "score": 5.3, "note": "Waning gibbous still dominates, decent conditions. 5.3/10", "cloud": 19, "rain": false, "kp": null, "daysToShower": 8, "flag": "est."}, {"day": "TUE", "date": "Aug 4", "illum": 0.67, "score": 4.1, "note": "Heavy clouds eclipse opportunity despite launch activity. 4.1/10", "cloud": 65, "rain": true, "kp": null, "daysToShower": 7, "flag": "2 LAUNCHES"}, {"day": "WED", "date": "Aug 5", "illum": 0.56, "score": 5.2, "note": "Launch day with improving skies, half moon. 5.2/10", "cloud": 46, "rain": false, "kp": null, "daysToShower": 6, "flag": "2 LAUNCHES"}, {"day": "THU", "date": "Aug 6", "illum": 0.46, "score": 6.1, "note": "Moon shrinking fast, clearing trend accelerates. 6.1/10", "cloud": 34, "rain": true, "kp": null, "daysToShower": 5, "flag": "2 LAUNCHES"}, {"day": "FRI", "date": "Aug 7", "illum": 0.35, "score": 5.7, "note": "Clouds return mid week, patience required. 5.7/10", "cloud": 64, "rain": true, "kp": null, "daysToShower": 4, "flag": "est."}, {"day": "SAT", "date": "Aug 8", "illum": 0.26, "score": 7.7, "note": "Dark moon, clear skies, Starlink overhead. 7.7/10", "cloud": 13, "rain": false, "kp": null, "daysToShower": 3, "flag": "1 LAUNCH"}];
+var TILES_DATA    = [{"value": "19", "unit": "% dark", "label": "Moon darkness", "color": "var(--od-verdict-poor)", "href": "#moon", "first": true, "detail": "Moon is 81% illuminated tonight. Moon darkness is the single biggest factor in the shoot score -- a dark sky beats everything else."}, {"value": "0%", "unit": "", "label": "Aurora chance", "color": "var(--od-faint-2)", "href": "#aurora", "first": false, "detail": "NOAA Ovation model puts aurora probability at 0% here tonight. Unlikely to be visible tonight."}, {"value": "5.7", "unit": "Kp", "label": "Geomagnetic field", "color": "var(--od-verdict-poor)", "href": "#kp", "first": false, "detail": "Kp index from NOAA SWPC. Above 5 means a geomagnetic storm -- GPS may drift and aurora becomes visible at lower latitudes. Below 2 is ideal for imaging."}, {"value": "13.1", "unit": "LD", "label": "Closest asteroid", "color": "var(--od-ink)", "href": "#neo", "first": false, "detail": "173561 (2000 YV137, about 13x the Moon-Earth distance, passing at 16.2 km/s. No impact risk."}, {"value": "Venus", "unit": "", "label": "Planets up tonight", "color": "var(--od-ink)", "href": "#planets", "first": false, "detail": "Visible in the evening sky tonight: Venus (evening sky), Mars (morning sky), Saturn (morning sky)."}, {"value": "Cycle 25", "unit": "", "label": "Solar cycle -- Descending", "color": "var(--od-ink)", "href": "#solar", "first": false, "detail": "Past maximum. Activity gradually declining toward the next quiet period. We are 61% through Cycle 25."}, {"value": "Rain", "unit": "", "label": "Cloud cover tonight", "color": "var(--od-verdict-poor)", "href": "#clouds", "first": false, "id": "weather-tile", "detail": "Precipitation tonight -- 1.2mm expected. Observing is off the table. Check back tomorrow."}, {"value": "12", "unit": "in orbit", "label": "Humans in space", "color": "var(--od-ink)", "href": "#humans", "first": false, "detail": "9 aboard ISS: Oleg Kononenko, Nikolai Chub, Tracy Caldwell Dyson, Matthew Dominick, Michael Barratt, Jeanette Epps, Alexander Grebenkin, Butch Wilmore, Sunita Williams; 3 aboard Tiangong: Li Guangsu, Li Cong, Ye Guangfu."}];
+var FORECAST_DATA = [{"day": "SUN", "date": "Aug 2", "illum": 0.81, "score": 4.5, "note": "Aurora risk, bright moon, minimal cloud", "cloud": 2, "rain": false, "kp": 5.67, "daysToShower": 9, "flag": ""}, {"day": "MON", "date": "Aug 3", "illum": 0.72, "score": 5.6, "note": "Improving conditions, waning moon phase", "cloud": 13, "rain": false, "kp": null, "daysToShower": 8, "flag": "est."}, {"day": "TUE", "date": "Aug 4", "illum": 0.62, "score": 4.8, "note": "Long March 8A launch, heavy cloud cover", "cloud": 48, "rain": false, "kp": null, "daysToShower": 7, "flag": "2 LAUNCHES"}, {"day": "WED", "date": "Aug 5", "illum": 0.52, "score": 5.2, "note": "Smart Dragon 3 launch, persistent cloud", "cloud": 54, "rain": true, "kp": null, "daysToShower": 6, "flag": "2 LAUNCHES"}, {"day": "THU", "date": "Aug 6", "illum": 0.41, "score": 6.5, "note": "Best midweek window, thin moon phase", "cloud": 26, "rain": false, "kp": null, "daysToShower": 5, "flag": "2 LAUNCHES"}, {"day": "FRI", "date": "Aug 7", "illum": 0.31, "score": 5.9, "note": "Cloud surge, twilight satellite passes", "cloud": 64, "rain": true, "kp": null, "daysToShower": 4, "flag": "est."}, {"day": "SAT", "date": "Aug 8", "illum": 0.22, "score": 8.2, "note": "Near perfect, new moon, Falcon 9 Starlink", "cloud": 1, "rain": false, "kp": null, "daysToShower": 3, "flag": "1 LAUNCH"}];
 var GEAR_DATA     = [{"cat": "Plan your next session", "name": "The Night Sky 30-40 Degree Star Finder", "why": "A planisphere for your latitude. Learn what is up before the clouds clear.", "url": "https://amzn.to/4ym1J7k"}, {"cat": "The essential field guide", "name": "Turn Left at Orion", "why": "The book every visual observer keeps nearby. Learn the sky on nights like this.", "url": "https://amzn.to/4vQfWYt"}, {"cat": "Protect your gear on a wet night", "name": "Protective Telescope Cover", "why": "23.8\" diameter cover keeps moisture and dust off when the scope has to sit outside.", "url": "https://amzn.to/4gnWe1s"}];
-var LAUNCHES_DATA = [{"when": "AUG 4", "color": "var(--od-ink-2)", "title": "Long March 8A | Unknown Payload", "url": "https://www.rocketlaunch.live/launch/long-march-8a-unknown-payload"}, {"when": "AUG 4", "color": "var(--od-ink-2)", "title": "Falcon 9 Block 5 | Starlink Group 17-53", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-17-53"}, {"when": "AUG 5", "color": "var(--od-ink-2)", "title": "Smart Dragon 3 | Unknown Payload", "url": "https://www.rocketlaunch.live/launch/smart-dragon-3-unknown-payload"}, {"when": "AUG 5", "color": "var(--od-ink-2)", "title": "Falcon 9 Block 5 | BlueBird 11-13 (Block 2 #6-8)", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-bluebird-11-13-block-2-6-8"}, {"when": "AUG 6", "color": "var(--od-ink-2)", "title": "Spectrum | Onward and Upward", "url": "https://www.rocketlaunch.live/launch/spectrum-onward-and-upward"}, {"when": "AUG 6", "color": "var(--od-ink-2)", "title": "H3-22 | Michibiki 7 (QZS-7)", "url": "https://www.rocketlaunch.live/launch/h3-22-michibiki-7-qzs-7"}];
-var WIRES_DATA    = [{"title": "Boeing\u2019s Starliner set for potential 2026 cargo run to ISS", "source": "NASASpaceflight", "url": "https://www.nasaspaceflight.com/2026/08/boeing-starliner-2026-iss/"}, {"title": "Space Force awards K2 Space $22.9 million for orbital laser communications demonstration", "source": "SpaceNews", "url": "https://spacenews.com/space-force-awards-k2-space-22-9-million-for-orbital-laser-communications-demonstration/"}, {"title": "China launches secretive TJS-27 pair, orbits next-gen Tianlian relay sat", "source": "SpaceNews", "url": "https://spacenews.com/china-launches-secretive-tjs-27-pair-orbits-next-gen-tianlian-relay-sat/"}, {"title": "APOD: 2026 August 1 \u2013 Buck Moon and Belt of Venus", "source": "NASA", "url": "https://science.nasa.gov/image-article/apod-2026-august-1-buck-moon-and-belt-of-venus/"}, {"title": "What\u2019s Up: August 2026 Skywatching Tips from NASA", "source": "NASA", "url": "https://science.nasa.gov/solar-system/whats-up-august-2026-skywatching-tips-from-nasa/"}, {"title": "Starbase Pad 1 Retrofits Progress as Block 3 Flights Start", "source": "NASASpaceflight", "url": "https://www.nasaspaceflight.com/2026/07/pad-1-retrofits-block-3-flights/"}];
+var LAUNCHES_DATA = [{"when": "TOMORROW", "color": "var(--od-ink-2)", "title": "Long March 8A | Unknown Payload", "url": "https://www.rocketlaunch.live/launch/long-march-8a-unknown-payload"}, {"when": "TOMORROW", "color": "var(--od-ink-2)", "title": "Falcon 9 Block 5 | Starlink Group 17-53", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-starlink-group-17-53"}, {"when": "AUG 5", "color": "var(--od-ink-2)", "title": "Smart Dragon 3 | Unknown Payload", "url": "https://www.rocketlaunch.live/launch/smart-dragon-3-unknown-payload"}, {"when": "AUG 5", "color": "var(--od-ink-2)", "title": "Falcon 9 Block 5 | BlueBird 11-13 (Block 2 #6-8)", "url": "https://www.rocketlaunch.live/launch/falcon-9-block-5-bluebird-11-13-block-2-6-8"}, {"when": "AUG 6", "color": "var(--od-ink-2)", "title": "Spectrum | Onward and Upward", "url": "https://www.rocketlaunch.live/launch/spectrum-onward-and-upward"}, {"when": "AUG 6", "color": "var(--od-ink-2)", "title": "H3-22 | Michibiki 7 (QZS-7)", "url": "https://www.rocketlaunch.live/launch/h3-22-michibiki-7-qzs-7"}];
+var WIRES_DATA    = [];
 var STOCKS_DATA   = [{"sym": "RKLB", "price": "$64.95", "chg": "+0.4%", "color": "var(--od-verdict-good)", "pct": 0.4174397031539827}, {"sym": "ASTS", "price": "$58.98", "chg": "+0.9%", "color": "var(--od-verdict-good)", "pct": 0.9240246406570828}, {"sym": "LUNR", "price": "$12.34", "chg": "+0.7%", "color": "var(--od-verdict-good)", "pct": 0.7346938775510192}, {"sym": "SPCE", "price": "$2.55", "chg": "-0.4%", "color": "var(--od-verdict-poor)", "pct": -0.390625000000009}, {"sym": "LMT", "price": "$582.74", "chg": "+1.5%", "color": "var(--od-verdict-good)", "pct": 1.503196251589416}, {"sym": "BA", "price": "$216.14", "chg": "-2.2%", "color": "var(--od-verdict-poor)", "pct": -2.154821186057048}, {"sym": "SPCX", "price": "$108.37", "chg": "-3.4%", "color": "var(--od-verdict-poor)", "pct": -3.4135472370766475}];
 var DARK_PARKS    = [{"name": "Cherry Springs State Park", "lat": 41.66, "lon": -77.82, "bortle": 2}, {"name": "Headlands Dark Sky Park", "lat": 45.75, "lon": -84.63, "bortle": 3}, {"name": "Big Bend National Park", "lat": 29.25, "lon": -103.25, "bortle": 2}, {"name": "Death Valley National Park", "lat": 36.46, "lon": -117.02, "bortle": 2}, {"name": "Natural Bridges NM", "lat": 37.6, "lon": -109.99, "bortle": 2}, {"name": "Harriman State Park", "lat": 41.26, "lon": -74.14, "bortle": 4}, {"name": "Assateague Island", "lat": 38.05, "lon": -75.2, "bortle": 4}, {"name": "Anza-Borrego Desert", "lat": 33.22, "lon": -116.41, "bortle": 2}, {"name": "Canyonlands National Park", "lat": 38.2, "lon": -109.93, "bortle": 2}, {"name": "Glacier National Park", "lat": 48.5, "lon": -113.8, "bortle": 2}, {"name": "Great Basin National Park", "lat": 38.98, "lon": -114.26, "bortle": 2}, {"name": "Acadia National Park", "lat": 44.35, "lon": -68.21, "bortle": 4}, {"name": "Shenandoah National Park", "lat": 38.53, "lon": -78.35, "bortle": 4}, {"name": "Grand Canyon National Park", "lat": 36.1, "lon": -112.11, "bortle": 2}, {"name": "Joshua Tree National Park", "lat": 33.88, "lon": -115.9, "bortle": 3}, {"name": "Craters of the Moon NM", "lat": 43.42, "lon": -113.52, "bortle": 2}, {"name": "Black Canyon of the Gunnison", "lat": 38.57, "lon": -107.72, "bortle": 2}, {"name": "Dry Tortugas National Park", "lat": 24.63, "lon": -82.87, "bortle": 3}];
-var MODE_CLAUSES  = {"deep": "The waning gibbous moon and rain make deep sky a non-starter tonight.", "planetary": "Planetary observing depends entirely on steady air and target altitude, both irrelevant when clouds are complete.", "visual": "Rain eliminates naked-eye work tonight; wait for clearing skies tomorrow.", "aurora": "No geomagnetic storm is underway\u2014Kp 1.0 and 0% aurora probability guarantee nothing overhead regardless of cloud cover.", "meteors": "The Perseids don't peak until August 12; tonight's rain and current moon phase make any meteor watch futile."};
-var SERVER_KP          = 1.0;
-var SERVER_MOON_ILLUM  = 0.847;
+var MODE_CLAUSES  = {"deep": "Rain and an 81%-lit moon eliminate the faint-galaxy work; come back when skies are dark and clear.", "planetary": "Cloud cover is absolute; even a waning gibbous moon wouldn't stop Mars or Jupiter if air were steady, but tonight there is nothing to see through.", "visual": "Rain ends naked-eye work entirely; the moon's brightness is irrelevant when the sky is shut down.", "aurora": "Kp 5.7 supports aurora displays at high latitudes, but cloud cover blocks any light show before it reaches your eye.", "meteors": "Perseid activity is nine days away and rain erases faint meteors anyway; wait for both the shower peak and clear skies."};
+var SERVER_KP          = 5.7;
+var SERVER_MOON_ILLUM  = 0.811;
 var SERVER_DAYS_SHOWER = 9;
-var SERVER_SCORE       = 5.0;
-var SERVER_CLOUD_PCT   = 23;
+var SERVER_SCORE       = 4.0;
+var SERVER_CLOUD_PCT   = 18;
 
 // helpers (same as Claude Design)
 function moonCx(i){ return (50-(1-i)*48).toFixed(1); }

@@ -776,7 +776,7 @@
   },
   {
     "date": "2026-08-02",
-    "sai": 29,
+    "sai": 36,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -784,8 +784,8 @@
         "reason": "Spectrum | Onward and Upward (Test Flight)"
       },
       "geomagnetic": {
-        "score": 8.3,
-        "reason": "Kp 1.0, quiet geomagnetic field"
+        "score": 47.2,
+        "reason": "Kp 5.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 55.2,
