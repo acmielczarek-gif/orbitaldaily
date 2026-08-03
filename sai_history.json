@@ -807,16 +807,16 @@
   },
   {
     "date": "2026-08-03",
-    "sai": 32,
+    "sai": 34,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 31.7,
-        "reason": "H3-22 | Michibiki 7 (QZS-7) (Navigation)"
+        "score": 30.8,
+        "reason": "Falcon 9 Block 5 | Starlink Group 17-53 (Communications)"
       },
       "geomagnetic": {
-        "score": 22.2,
-        "reason": "Kp 2.7, quiet geomagnetic field"
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 55.2,
@@ -831,8 +831,8 @@
         "reason": "2 confirmed this month vs 41 avg"
       },
       "stock_volatility": {
-        "score": 30,
-        "reason": "SPCX moved 3.4% today"
+        "score": 100,
+        "reason": "SPCE moved 9.8% today"
       }
     }
   }
