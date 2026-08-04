@@ -838,16 +838,16 @@
   },
   {
     "date": "2026-08-04",
-    "sai": 23,
+    "sai": 20,
     "status": "LOW",
     "components": {
       "launches": {
-        "score": 30.8,
-        "reason": "Falcon 9 Block 5 | Starlink Group 17-53 (Communications)"
+        "score": 31.7,
+        "reason": "Long March 8A | SatNet LEO Group 23 (Communications)"
       },
       "geomagnetic": {
-        "score": 25.0,
-        "reason": "Kp 3.0, quiet geomagnetic field"
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -863,7 +863,7 @@
       },
       "stock_volatility": {
         "score": 100,
-        "reason": "SPCE moved 10.6% today"
+        "reason": "ASTS moved 11.4% today"
       }
     }
   }
