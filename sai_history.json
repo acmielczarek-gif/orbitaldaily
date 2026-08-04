@@ -835,5 +835,36 @@
         "reason": "SPCE moved 9.8% today"
       }
     }
+  },
+  {
+    "date": "2026-08-04",
+    "sai": 23,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 30.8,
+        "reason": "Falcon 9 Block 5 | Starlink Group 17-53 (Communications)"
+      },
+      "geomagnetic": {
+        "score": 25.0,
+        "reason": "Kp 3.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 26.9,
+        "reason": "2019 NY2 passing at 6.5 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "SPCE moved 10.6% today"
+      }
+    }
   }
 ]
