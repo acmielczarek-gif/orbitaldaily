@@ -866,5 +866,36 @@
         "reason": "ASTS moved 11.4% today"
       }
     }
+  },
+  {
+    "date": "2026-08-05",
+    "sai": 22,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 39.2,
+        "reason": "Smart Dragon 3 | OSE HS-01 & 02 (Earth Science)"
+      },
+      "geomagnetic": {
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 26.9,
+        "reason": "2019 NY2 passing at 6.5 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "ASTS moved 10.7% today"
+      }
+    }
   }
 ]
