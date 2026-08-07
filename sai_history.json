@@ -928,5 +928,36 @@
         "reason": "LUNR moved 6.7% today"
       }
     }
+  },
+  {
+    "date": "2026-08-07",
+    "sai": 20,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 38.3,
+        "reason": "Electron | The Grain Goddess Provides (iQPS Launch 7) (Earth Science)"
+      },
+      "geomagnetic": {
+        "score": 2.8,
+        "reason": "Kp 0.3, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 26.9,
+        "reason": "2019 NY2 passing at 6.5 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "4 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "LUNR moved 6.7% today"
+      }
+    }
   }
 ]
