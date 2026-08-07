@@ -931,16 +931,16 @@
   },
   {
     "date": "2026-08-07",
-    "sai": 20,
+    "sai": 21,
     "status": "LOW",
     "components": {
       "launches": {
-        "score": 38.3,
-        "reason": "Electron | The Grain Goddess Provides (iQPS Launch 7) (Earth Science)"
+        "score": 34.2,
+        "reason": "Zhuque-3 | Flight 2 (Test Flight)"
       },
       "geomagnetic": {
-        "score": 2.8,
-        "reason": "Kp 0.3, quiet geomagnetic field"
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -955,8 +955,8 @@
         "reason": "4 confirmed this month vs 41 avg"
       },
       "stock_volatility": {
-        "score": 60,
-        "reason": "LUNR moved 6.7% today"
+        "score": 100,
+        "reason": "SPCX moved 12.4% today"
       }
     }
   }
