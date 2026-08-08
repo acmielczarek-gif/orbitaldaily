@@ -962,7 +962,7 @@
   },
   {
     "date": "2026-08-08",
-    "sai": 22,
+    "sai": 23,
     "status": "LOW",
     "components": {
       "launches": {
@@ -970,16 +970,16 @@
         "reason": "Zhuque-3 | Flight 2 (Test Flight)"
       },
       "geomagnetic": {
-        "score": 13.9,
-        "reason": "Kp 1.7, quiet geomagnetic field"
+        "score": 30.6,
+        "reason": "Kp 3.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
         "reason": "No significant flare activity"
       },
       "neo": {
-        "score": 26.9,
-        "reason": "2019 NY2 passing at 6.5 lunar distances"
+        "score": 0,
+        "reason": "No notable close approaches"
       },
       "exoplanets": {
         "score": 10,
