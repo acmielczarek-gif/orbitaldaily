@@ -959,5 +959,36 @@
         "reason": "SPCX moved 12.4% today"
       }
     }
+  },
+  {
+    "date": "2026-08-08",
+    "sai": 22,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 34.2,
+        "reason": "Zhuque-3 | Flight 2 (Test Flight)"
+      },
+      "geomagnetic": {
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 26.9,
+        "reason": "2019 NY2 passing at 6.5 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "4 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "SPCX moved 15.8% today"
+      }
+    }
   }
 ]
