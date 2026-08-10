@@ -1024,16 +1024,16 @@
   },
   {
     "date": "2026-08-10",
-    "sai": 21,
+    "sai": 16,
     "status": "LOW",
     "components": {
       "launches": {
-        "score": 33.3,
-        "reason": "Zhuque-3 | Flight 2 (Test Flight)"
+        "score": 32.5,
+        "reason": "H3-22 | Michibiki 7 (QZS-7) (Navigation)"
       },
       "geomagnetic": {
-        "score": 8.3,
-        "reason": "Kp 1.0, quiet geomagnetic field"
+        "score": 2.8,
+        "reason": "Kp 0.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -1048,8 +1048,8 @@
         "reason": "4 confirmed this month vs 41 avg"
       },
       "stock_volatility": {
-        "score": 100,
-        "reason": "SPCX moved 15.8% today"
+        "score": 30,
+        "reason": "LUNR moved 4.0% today"
       }
     }
   }
