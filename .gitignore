@@ -1,2 +1,3 @@
 __pycache__/
 scripts/refersion_products_raw.json
+.env

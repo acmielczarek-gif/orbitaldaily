@@ -1,0 +1,92 @@
+[
+  {
+    "date": "2026-08-10",
+    "candidates_checked": 16,
+    "picks": [
+      {
+        "assignee": "Blue Origin Manufacturing, LLC",
+        "title": "INTEGRATED THERMIONIC DIODE AND MOLTEN OXIDE ELECTROLYSIS CELL",
+        "filing_date": "2026-03-17",
+        "plain_summary": "A combined device that extracts oxygen and metals from lunar regolith using heat and electricity.",
+        "why_it_matters": "In-situ resource extraction is the foundation for permanent lunar bases and deep-space missions \u2014 turning Moon dirt into fuel and building materials."
+      },
+      {
+        "assignee": "BLUE ORIGIN MANUFACTURING, LLC",
+        "title": "LASER MATERIAL FUSION UNDER VACUUM, AND ASSOCIATED SYSTEMS AND METHODS",
+        "filing_date": "2026-03-05",
+        "plain_summary": "A method for welding and fusing materials in the vacuum of space to build structures in orbit.",
+        "why_it_matters": "In-space manufacturing unlocks the ability to assemble large structures where they're needed instead of launching them fully built from Earth."
+      },
+      {
+        "assignee": "Blue Origin Manufacturing, LLC",
+        "title": "LOW EARTH ORBIT WITH ELECTRIC PROPULSION",
+        "filing_date": "2026-03-03",
+        "plain_summary": "Electric thrusters that let spacecraft maneuver efficiently in low Earth orbit for extended periods.",
+        "why_it_matters": "Orbital agility enables debris removal, satellite servicing, and station-keeping for constellations \u2014 the practical backbone of a working space economy."
+      },
+      {
+        "assignee": "BWXT Advanced Technologies LLC",
+        "title": "FUEL BUNDLE WITH TWISTED RIBBON FUEL RODLETS FOR NUCLEAR THERMAL PROPULSION APPLICATIONS, STRUCTURES FOR MANUFACTURE, AND METHODS OF MANUFACTURE",
+        "filing_date": "2026-03-27",
+        "plain_summary": "A nuclear reactor fuel design optimized for rapid heating and thrust in a nuclear thermal rocket.",
+        "why_it_matters": "Nuclear thermal propulsion gets crews to Mars in half the time of chemical rockets \u2014 the defining propulsion tech for human deep-space exploration."
+      },
+      {
+        "assignee": "HGP INTELLIGENT ENERGY, LLC",
+        "title": "GPU-ACCELERATED DIGITAL TWIN SYSTEM FOR REAL-TIME THERMAL-HYDRAULIC SIMULATION AND CONTROL OF SPACE NUCLEAR REACTORS",
+        "filing_date": "2026-03-11",
+        "plain_summary": "AI-powered simulation tools that let engineers monitor and control nuclear reactors powering spacecraft in real time.",
+        "why_it_matters": "Reliable nuclear propulsion and power systems require predictive control \u2014 this is the safety-critical backbone enabling nuclear-powered deep-space missions."
+      },
+      {
+        "assignee": "MITSUBISHI ELECTRIC CORPORATION",
+        "title": "SATELLITE CONSTELLATION FORMING SYSTEM",
+        "filing_date": "2026-03-10",
+        "plain_summary": "Automated coordination system that keeps multiple satellites in formation to act as a single distributed antenna or sensor array.",
+        "why_it_matters": "Satellite constellations are the near-term space infrastructure layer \u2014 coordinated swarms multiply what each satellite can do alone."
+      },
+      {
+        "assignee": "L'Garde, Inc.",
+        "title": "Solar Sail for Orbital Maneuvers",
+        "filing_date": "2026-02-23",
+        "plain_summary": "Thin reflective sails that use sunlight to push spacecraft without fuel, enabling long-distance maneuvers powered by light.",
+        "why_it_matters": "Solar sails are the bridge between fantasy and physics \u2014 plausible pathway to missions measured in decades instead of years, toward the outer solar system."
+      },
+      {
+        "assignee": "Digital Global Systems, Inc.",
+        "title": "SYSTEMS AND METHODS OF SENSOR DATA FUSION",
+        "filing_date": "2026-02-19",
+        "plain_summary": "Integration of signals from multiple sensors to create a unified real-time picture of activity in space.",
+        "why_it_matters": "Tracking and detection capability multiplies with sensor fusion \u2014 essential for debris avoidance, satellite servicing, and space situational awareness."
+      },
+      {
+        "assignee": "Digital Global Systems, Inc.",
+        "title": "SYSTEMS AND METHODS OF SENSOR DATA FUSION",
+        "filing_date": "2026-02-18",
+        "plain_summary": "Integration of signals from multiple sensors to create a unified real-time picture of activity in space.",
+        "why_it_matters": "Tracking and detection capability multiplies with sensor fusion \u2014 essential for debris avoidance, satellite servicing, and space situational awareness."
+      },
+      {
+        "assignee": "Digital Global Systems, Inc.",
+        "title": "SYSTEMS AND METHODS OF SENSOR DATA FUSION",
+        "filing_date": "2026-02-18",
+        "plain_summary": "Integration of signals from multiple sensors to create a unified real-time picture of activity in space.",
+        "why_it_matters": "Tracking and detection capability multiplies with sensor fusion \u2014 essential for debris avoidance, satellite servicing, and space situational awareness."
+      },
+      {
+        "assignee": "Digital Global Systems, Inc.",
+        "title": "SYSTEMS AND METHODS OF SENSOR DATA FUSION",
+        "filing_date": "2026-02-13",
+        "plain_summary": "Integration of signals from multiple sensors to create a unified real-time picture of activity in space.",
+        "why_it_matters": "Tracking and detection capability multiplies with sensor fusion \u2014 essential for debris avoidance, satellite servicing, and space situational awareness."
+      },
+      {
+        "assignee": "Honeybee Robotics, LLC",
+        "title": "SYSTEM FOR IN SITU RESOURCE UTILIZATION IN EXTRATERRESTRIAL ENVIRONMENTS",
+        "filing_date": "2026-02-11",
+        "plain_summary": "Mining and processing equipment that extracts water and minerals from the Moon or other worlds for use by human crews.",
+        "why_it_matters": "In-situ resource utilization is the enabling layer for Moon bases and Mars settlements \u2014 the difference between visiting and staying."
+      }
+    ]
+  }
+]
