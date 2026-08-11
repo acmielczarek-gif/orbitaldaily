@@ -1055,16 +1055,16 @@
   },
   {
     "date": "2026-08-11",
-    "sai": 22,
-    "status": "LOW",
+    "sai": 28,
+    "status": "MODERATE",
     "components": {
       "launches": {
         "score": 38.3,
         "reason": "Falcon 9 Block 5 | USSF-366 (Government/Top Secret)"
       },
       "geomagnetic": {
-        "score": 5.6,
-        "reason": "Kp 0.7, quiet geomagnetic field"
+        "score": 27.8,
+        "reason": "Kp 3.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
@@ -1079,8 +1079,8 @@
         "reason": "4 confirmed this month vs 41 avg"
       },
       "stock_volatility": {
-        "score": 30,
-        "reason": "ASTS moved 4.4% today"
+        "score": 60,
+        "reason": "SPCX moved 5.5% today"
       }
     }
   }
