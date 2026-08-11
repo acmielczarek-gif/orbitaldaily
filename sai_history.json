@@ -1052,5 +1052,36 @@
         "reason": "LUNR moved 4.0% today"
       }
     }
+  },
+  {
+    "date": "2026-08-11",
+    "sai": 23,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 38.3,
+        "reason": "Falcon 9 Block 5 | USSF-366 (Government/Top Secret)"
+      },
+      "geomagnetic": {
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C2.4 flare detected"
+      },
+      "neo": {
+        "score": 11.2,
+        "reason": "2013 QC11 passing at 14.4 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "4 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "ASTS moved 4.4% today"
+      }
+    }
   }
 ]
