@@ -20,7 +20,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests anthropic
 
       - name: Generate site
         run: python generate.py
@@ -32,11 +32,19 @@ jobs:
           FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
 
+      - name: Run patent agent
+        if: github.event.schedule == '0 6 * * *' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        run: python patent_agent.py
+        env:
+          USPTO_API_KEY: ${{ secrets.USPTO_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
       - name: Commit and push
         run: |
           git config user.name  "Orbital Daily Bot"
           git config user.email "bot@orbitaldaily.com"
-          git add index.html sitemap.xml llms.txt sai_history.json editorial_history.json prediction_history.json
+          git add index.html sitemap.xml llms.txt sai_history.json editorial_history.json prediction_history.json patent_history.json patent_agent_seen.json
           git diff --staged --quiet || (
             git commit -m "Daily update $(date -u +%Y-%m-%dT%H:%M)"
             git push
