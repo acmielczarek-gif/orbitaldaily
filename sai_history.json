@@ -1083,5 +1083,36 @@
         "reason": "SPCX moved 5.5% today"
       }
     }
+  },
+  {
+    "date": "2026-08-12",
+    "sai": 28,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 46.7,
+        "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
+      },
+      "geomagnetic": {
+        "score": 22.2,
+        "reason": "Kp 2.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C2.4 flare detected"
+      },
+      "neo": {
+        "score": 11.2,
+        "reason": "2013 QC11 passing at 14.4 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "4 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "LUNR moved 4.4% today"
+      }
+    }
   }
 ]
