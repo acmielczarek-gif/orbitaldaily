@@ -1086,16 +1086,16 @@
   },
   {
     "date": "2026-08-12",
-    "sai": 28,
+    "sai": 29,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 46.7,
+        "score": 45.8,
         "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
       },
       "geomagnetic": {
-        "score": 22.2,
-        "reason": "Kp 2.7, quiet geomagnetic field"
+        "score": 11.1,
+        "reason": "Kp 1.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
@@ -1110,8 +1110,8 @@
         "reason": "4 confirmed this month vs 41 avg"
       },
       "stock_volatility": {
-        "score": 30,
-        "reason": "LUNR moved 4.4% today"
+        "score": 100,
+        "reason": "SPCX moved 11.5% today"
       }
     }
   }
