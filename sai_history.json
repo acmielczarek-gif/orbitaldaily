@@ -1117,7 +1117,7 @@
   },
   {
     "date": "2026-08-13",
-    "sai": 30,
+    "sai": 26,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -1125,8 +1125,8 @@
         "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
@@ -1141,8 +1141,8 @@
         "reason": "4 confirmed this month vs 41 avg"
       },
       "stock_volatility": {
-        "score": 100,
-        "reason": "SPCX moved 9.6% today"
+        "score": 60,
+        "reason": "SPCE moved 6.7% today"
       }
     }
   }
