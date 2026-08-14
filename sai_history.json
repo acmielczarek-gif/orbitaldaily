@@ -1148,20 +1148,20 @@
   },
   {
     "date": "2026-08-14",
-    "sai": 26,
-    "status": "MODERATE",
+    "sai": 24,
+    "status": "LOW",
     "components": {
       "launches": {
-        "score": 45.8,
-        "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
+        "score": 38.3,
+        "reason": "Falcon 9 Block 5 | USSF-366 (Government/Top Secret)"
       },
       "geomagnetic": {
-        "score": 19.4,
-        "reason": "Kp 2.3, quiet geomagnetic field"
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
-        "reason": "C2.4 flare detected"
+        "reason": "C4.1 flare detected"
       },
       "neo": {
         "score": 0,
@@ -1172,8 +1172,8 @@
         "reason": "4 confirmed this month vs 41 avg"
       },
       "stock_volatility": {
-        "score": 30,
-        "reason": "SPCE moved 4.8% today"
+        "score": 60,
+        "reason": "LUNR moved 7.9% today"
       }
     }
   }
