@@ -1145,5 +1145,36 @@
         "reason": "SPCE moved 6.7% today"
       }
     }
+  },
+  {
+    "date": "2026-08-14",
+    "sai": 26,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 45.8,
+        "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
+      },
+      "geomagnetic": {
+        "score": 19.4,
+        "reason": "Kp 2.3, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C2.4 flare detected"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "357621 (2005 EG94 passing at 32.1 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "4 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "SPCE moved 4.8% today"
+      }
+    }
   }
 ]
