@@ -1269,5 +1269,36 @@
         "reason": "LUNR moved 5.9% today"
       }
     }
+  },
+  {
+    "date": "2026-08-18",
+    "sai": 33,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 49.2,
+        "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
+      },
+      "geomagnetic": {
+        "score": 41.7,
+        "reason": "Kp 5.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C2.0 flare detected"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "357621 (2005 EG94 passing at 32.1 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "4 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "LUNR moved 7.2% today"
+      }
+    }
   }
 ]
