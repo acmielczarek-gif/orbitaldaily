@@ -1303,7 +1303,7 @@
   },
   {
     "date": "2026-08-19",
-    "sai": 32,
+    "sai": 27,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -1311,8 +1311,8 @@
         "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
       },
       "geomagnetic": {
-        "score": 41.7,
-        "reason": "Kp 5.0, quiet geomagnetic field"
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
@@ -1328,7 +1328,7 @@
       },
       "stock_volatility": {
         "score": 60,
-        "reason": "ASTS moved 5.7% today"
+        "reason": "LUNR moved 6.3% today"
       }
     }
   }
