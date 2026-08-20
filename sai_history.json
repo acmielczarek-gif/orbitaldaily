@@ -1331,5 +1331,36 @@
         "reason": "LUNR moved 6.3% today"
       }
     }
+  },
+  {
+    "date": "2026-08-20",
+    "sai": 37,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 60.0,
+        "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
+      },
+      "geomagnetic": {
+        "score": 16.7,
+        "reason": "Kp 2.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 48.0,
+        "reason": "M1.0 flare detected"
+      },
+      "neo": {
+        "score": 3.2,
+        "reason": "523609 (2005 PJ2 passing at 18.4 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "4 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "RKLB moved 4.2% today"
+      }
+    }
   }
 ]
