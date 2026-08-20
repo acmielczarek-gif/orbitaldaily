@@ -1334,11 +1334,11 @@
   },
   {
     "date": "2026-08-20",
-    "sai": 37,
+    "sai": 39,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 60.0,
+        "score": 51.7,
         "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
       },
       "geomagnetic": {
@@ -1346,8 +1346,8 @@
         "reason": "Kp 2.0, quiet geomagnetic field"
       },
       "solar": {
-        "score": 48.0,
-        "reason": "M1.0 flare detected"
+        "score": 63.2,
+        "reason": "M2.9 flare detected"
       },
       "neo": {
         "score": 3.2,
@@ -1355,11 +1355,11 @@
       },
       "exoplanets": {
         "score": 10,
-        "reason": "4 confirmed this month vs 41 avg"
+        "reason": "11 confirmed this month vs 42 avg"
       },
       "stock_volatility": {
-        "score": 30,
-        "reason": "RKLB moved 4.2% today"
+        "score": 60,
+        "reason": "SPCX moved 5.2% today"
       }
     }
   }
