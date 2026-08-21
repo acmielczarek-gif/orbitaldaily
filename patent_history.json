@@ -151,5 +151,18 @@
     "date": "2026-08-20",
     "candidates_checked": 0,
     "picks": []
+  },
+  {
+    "date": "2026-08-21",
+    "candidates_checked": 2,
+    "picks": [
+      {
+        "assignee": "REPRISE SPACE SOLUTIONS, LLC",
+        "title": "PAYLOAD SEPARATION DEVICE AND METHOD",
+        "filing_date": "2026-04-09",
+        "plain_summary": "A mechanism to reliably separate payloads from launch vehicles or orbital platforms.",
+        "why_it_matters": "Payload separation is foundational to multi-satellite deployment, orbital refueling, and servicing missions \u2014 the kind of reliable, repeatable mechanism that unlocks new mission architectures."
+      }
+    ]
   }
 ]
