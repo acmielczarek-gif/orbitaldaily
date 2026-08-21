@@ -1365,20 +1365,20 @@
   },
   {
     "date": "2026-08-21",
-    "sai": 40,
+    "sai": 35,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 51.7,
+        "score": 54.2,
         "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
       },
       "geomagnetic": {
-        "score": 19.4,
-        "reason": "Kp 2.3, quiet geomagnetic field"
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
       },
       "solar": {
-        "score": 63.2,
-        "reason": "M2.9 flare detected"
+        "score": 52.8,
+        "reason": "M1.6 flare detected"
       },
       "neo": {
         "score": 21.4,
@@ -1390,7 +1390,7 @@
       },
       "stock_volatility": {
         "score": 30,
-        "reason": "SPCE moved 4.0% today"
+        "reason": "ASTS moved 4.4% today"
       }
     }
   }
