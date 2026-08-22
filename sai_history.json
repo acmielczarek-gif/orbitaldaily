@@ -1393,5 +1393,36 @@
         "reason": "ASTS moved 4.4% today"
       }
     }
+  },
+  {
+    "date": "2026-08-22",
+    "sai": 37,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 54.2,
+        "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
+      },
+      "geomagnetic": {
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 52.8,
+        "reason": "M1.6 flare detected"
+      },
+      "neo": {
+        "score": 21.4,
+        "reason": "221455 (2006 BC10 passing at 9.3 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "11 confirmed this month vs 42 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "ASTS moved 5.5% today"
+      }
+    }
   }
 ]

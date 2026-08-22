@@ -164,5 +164,10 @@
         "why_it_matters": "Payload separation is foundational to multi-satellite deployment, orbital refueling, and servicing missions \u2014 the kind of reliable, repeatable mechanism that unlocks new mission architectures."
       }
     ]
+  },
+  {
+    "date": "2026-08-22",
+    "candidates_checked": 0,
+    "picks": []
   }
 ]
