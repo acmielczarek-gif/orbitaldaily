@@ -1396,16 +1396,16 @@
   },
   {
     "date": "2026-08-22",
-    "sai": 37,
+    "sai": 39,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 54.2,
+        "score": 59.2,
         "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
       },
       "geomagnetic": {
-        "score": 5.6,
-        "reason": "Kp 0.7, quiet geomagnetic field"
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 52.8,
