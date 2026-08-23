@@ -1427,16 +1427,16 @@
   },
   {
     "date": "2026-08-23",
-    "sai": 29,
+    "sai": 26,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 59.2,
-        "reason": "Long March 5 | Chang'e 7 (Planetary Science)"
+        "score": 58.3,
+        "reason": "Falcon Heavy | Nancy Grace Roman Space Telescope (Astrophysics)"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
