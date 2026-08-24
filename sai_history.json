@@ -1455,5 +1455,36 @@
         "reason": "ASTS moved 5.5% today"
       }
     }
+  },
+  {
+    "date": "2026-08-24",
+    "sai": 26,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 53.3,
+        "reason": "Falcon Heavy | Nancy Grace Roman Space Telescope (Astrophysics)"
+      },
+      "geomagnetic": {
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 22.7,
+        "reason": "2017 RH16 passing at 8.7 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "11 confirmed this month vs 42 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "ASTS moved 5.5% today"
+      }
+    }
   }
 ]
