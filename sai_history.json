@@ -1517,5 +1517,36 @@
         "reason": "SPCX moved 2.5% today"
       }
     }
+  },
+  {
+    "date": "2026-08-26",
+    "sai": 29,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 55.8,
+        "reason": "Falcon Heavy | Nancy Grace Roman Space Telescope (Astrophysics)"
+      },
+      "geomagnetic": {
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C4.7 flare detected"
+      },
+      "neo": {
+        "score": 22.7,
+        "reason": "2017 RH16 passing at 8.7 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "11 confirmed this month vs 42 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "SPCX moved 2.2% today"
+      }
+    }
   }
 ]
