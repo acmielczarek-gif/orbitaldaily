@@ -1520,11 +1520,11 @@
   },
   {
     "date": "2026-08-26",
-    "sai": 29,
+    "sai": 36,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 55.8,
+        "score": 59.2,
         "reason": "Falcon Heavy | Nancy Grace Roman Space Telescope (Astrophysics)"
       },
       "geomagnetic": {
@@ -1532,8 +1532,8 @@
         "reason": "Kp 0.7, quiet geomagnetic field"
       },
       "solar": {
-        "score": 20,
-        "reason": "C4.7 flare detected"
+        "score": 48.0,
+        "reason": "M1.0 flare detected"
       },
       "neo": {
         "score": 22.7,
@@ -1545,7 +1545,7 @@
       },
       "stock_volatility": {
         "score": 30,
-        "reason": "SPCX moved 2.2% today"
+        "reason": "LUNR moved 3.4% today"
       }
     }
   }
