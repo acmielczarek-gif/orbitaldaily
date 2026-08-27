@@ -189,5 +189,18 @@
     "date": "2026-08-26",
     "candidates_checked": 0,
     "picks": []
+  },
+  {
+    "date": "2026-08-27",
+    "candidates_checked": 1,
+    "picks": [
+      {
+        "assignee": "ICEYE OY",
+        "title": "EARTH MONITORING SYSTEM AND METHOD OF MANAGING A SATELLITE CONSTELLATION",
+        "filing_date": "2026-04-08",
+        "plain_summary": "A system for coordinating a fleet of satellites to monitor Earth continuously and systematically, distributing imaging tasks across the constellation.",
+        "why_it_matters": "Constellation management is foundational infrastructure for responsive Earth imaging and early-warning systems \u2014 the backbone of next-gen satellite services that compete with traditional ground-based monitoring."
+      }
+    ]
   }
 ]
