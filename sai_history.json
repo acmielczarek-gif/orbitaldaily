@@ -1675,7 +1675,7 @@
   },
   {
     "date": "2026-08-31",
-    "sai": 28,
+    "sai": 26,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -1683,12 +1683,12 @@
         "reason": "Electron | Owl Around The World (StriX Launch 11) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 27.8,
-        "reason": "Kp 3.3, quiet geomagnetic field"
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
       },
       "solar": {
-        "score": 0,
-        "reason": "No significant flare activity"
+        "score": 20,
+        "reason": "C1.0 flare detected"
       },
       "neo": {
         "score": 22.7,
@@ -1699,8 +1699,8 @@
         "reason": "11 confirmed this month vs 42 avg"
       },
       "stock_volatility": {
-        "score": 60,
-        "reason": "ASTS moved 5.5% today"
+        "score": 0,
+        "reason": "ASTS moved 1.8% today"
       }
     }
   }
