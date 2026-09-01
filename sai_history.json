@@ -1706,32 +1706,32 @@
   },
   {
     "date": "2026-09-01",
-    "sai": 25,
-    "status": "MODERATE",
+    "sai": 24,
+    "status": "LOW",
     "components": {
       "launches": {
-        "score": 49.2,
+        "score": 55.0,
         "reason": "Electron | Owl Around The World (StriX Launch 11) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
       },
       "solar": {
-        "score": 20,
-        "reason": "C1.0 flare detected"
+        "score": 0,
+        "reason": "No significant flare activity"
       },
       "neo": {
         "score": 1.1,
         "reason": "2018 RD2 passing at 19.4 lunar distances"
       },
       "exoplanets": {
-        "score": 10,
-        "reason": "0 confirmed this month vs 41 avg"
+        "score": 0,
+        "reason": "No exoplanet data available"
       },
       "stock_volatility": {
-        "score": 0,
-        "reason": "ASTS moved 1.8% today"
+        "score": 60,
+        "reason": "ASTS moved 5.6% today"
       }
     }
   }
