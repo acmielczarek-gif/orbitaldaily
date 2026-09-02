@@ -1745,8 +1745,8 @@
         "reason": "Electron | Owl Around The World (StriX Launch 11) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 19.4,
-        "reason": "Kp 2.3, quiet geomagnetic field"
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -1761,8 +1761,8 @@
         "reason": "0 confirmed this month vs 41 avg"
       },
       "stock_volatility": {
-        "score": 60,
-        "reason": "ASTS moved 5.6% today"
+        "score": 100,
+        "reason": "ASTS moved 11.8% today"
       }
     }
   }
