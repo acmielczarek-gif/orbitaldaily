@@ -1768,20 +1768,20 @@
   },
   {
     "date": "2026-09-03",
-    "sai": 39,
+    "sai": 28,
     "status": "MODERATE",
     "components": {
       "launches": {
         "score": 51.7,
-        "reason": "Electron | Owl Around The World (StriX Launch 11) (Earth Science)"
+        "reason": "GSLV Mk II | GISAT-1A (EOS-05) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 5.6,
-        "reason": "Kp 0.7, quiet geomagnetic field"
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
       },
       "solar": {
-        "score": 64.0,
-        "reason": "M3.0 flare detected"
+        "score": 20,
+        "reason": "C2.2 flare detected"
       },
       "neo": {
         "score": 0,
@@ -1789,11 +1789,11 @@
       },
       "exoplanets": {
         "score": 10,
-        "reason": "0 confirmed this month vs 41 avg"
+        "reason": "0 confirmed this month vs 42 avg"
       },
       "stock_volatility": {
-        "score": 100,
-        "reason": "ASTS moved 11.8% today"
+        "score": 60,
+        "reason": "SPCX moved 6.4% today"
       }
     }
   }
