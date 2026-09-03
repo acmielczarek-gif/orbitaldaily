@@ -1765,5 +1765,36 @@
         "reason": "ASTS moved 11.8% today"
       }
     }
+  },
+  {
+    "date": "2026-09-03",
+    "sai": 39,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 51.7,
+        "reason": "Electron | Owl Around The World (StriX Launch 11) (Earth Science)"
+      },
+      "geomagnetic": {
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 64.0,
+        "reason": "M3.0 flare detected"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "2014 FV32 passing at 31.9 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "0 confirmed this month vs 41 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "ASTS moved 11.8% today"
+      }
+    }
   }
 ]

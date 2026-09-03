@@ -232,5 +232,18 @@
     "date": "2026-09-02",
     "candidates_checked": 0,
     "picks": []
+  },
+  {
+    "date": "2026-09-03",
+    "candidates_checked": 1,
+    "picks": [
+      {
+        "assignee": "Blue Origin Manufacturing, LLC",
+        "title": "VACUUM SPRAY BOILER",
+        "filing_date": "2026-04-22",
+        "plain_summary": "A boiler system that works in the vacuum of space to convert heat into usable power or propulsion.",
+        "why_it_matters": "Thermal power generation in vacuum is essential for long-duration missions, deep-space stations, and efficient propulsion \u2014 this is infrastructure for sustained human presence beyond Earth."
+      }
+    ]
   }
 ]
