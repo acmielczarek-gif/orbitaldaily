@@ -1799,20 +1799,20 @@
   },
   {
     "date": "2026-09-04",
-    "sai": 27,
+    "sai": 30,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 51.7,
+        "score": 46.7,
         "reason": "GSLV Mk II | GISAT-1A (EOS-05) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 8.3,
-        "reason": "Kp 1.0, quiet geomagnetic field"
+        "score": 2.8,
+        "reason": "Kp 0.3, quiet geomagnetic field"
       },
       "solar": {
-        "score": 20,
-        "reason": "C2.2 flare detected"
+        "score": 49.6,
+        "reason": "M1.2 flare detected"
       },
       "neo": {
         "score": 0,
@@ -1823,8 +1823,8 @@
         "reason": "0 confirmed this month vs 42 avg"
       },
       "stock_volatility": {
-        "score": 60,
-        "reason": "SPCX moved 6.4% today"
+        "score": 30,
+        "reason": "SPCE moved 2.4% today"
       }
     }
   }
