@@ -1830,7 +1830,7 @@
   },
   {
     "date": "2026-09-05",
-    "sai": 26,
+    "sai": 30,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -1838,12 +1838,12 @@
         "reason": "Falcon 9 Block 5 | USSF-153 (Government/Top Secret)"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 2.8,
+        "reason": "Kp 0.3, quiet geomagnetic field"
       },
       "solar": {
-        "score": 20,
-        "reason": "C6.7 flare detected"
+        "score": 48.0,
+        "reason": "M1.0 flare detected"
       },
       "neo": {
         "score": 0,
