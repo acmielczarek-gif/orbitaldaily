@@ -2889,5 +2889,54 @@
     "days_ahead": 6,
     "score": 5.9,
     "estimated": true
+  },
+  {
+    "predicted_on": "2026-09-05",
+    "predicted_for": "2026-09-05",
+    "days_ahead": 0,
+    "score": 5.8,
+    "estimated": false
+  },
+  {
+    "predicted_on": "2026-09-05",
+    "predicted_for": "2026-09-06",
+    "days_ahead": 1,
+    "score": 5.8,
+    "estimated": true
+  },
+  {
+    "predicted_on": "2026-09-05",
+    "predicted_for": "2026-09-07",
+    "days_ahead": 2,
+    "score": 6.4,
+    "estimated": true
+  },
+  {
+    "predicted_on": "2026-09-05",
+    "predicted_for": "2026-09-08",
+    "days_ahead": 3,
+    "score": 6.2,
+    "estimated": true
+  },
+  {
+    "predicted_on": "2026-09-05",
+    "predicted_for": "2026-09-09",
+    "days_ahead": 4,
+    "score": 5.7,
+    "estimated": true
+  },
+  {
+    "predicted_on": "2026-09-05",
+    "predicted_for": "2026-09-10",
+    "days_ahead": 5,
+    "score": 6.0,
+    "estimated": true
+  },
+  {
+    "predicted_on": "2026-09-05",
+    "predicted_for": "2026-09-11",
+    "days_ahead": 6,
+    "score": 6.2,
+    "estimated": true
   }
 ]
