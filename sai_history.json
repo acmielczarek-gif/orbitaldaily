@@ -1889,5 +1889,36 @@
         "reason": "SPCE moved 2.7% today"
       }
     }
+  },
+  {
+    "date": "2026-09-07",
+    "sai": 30,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 48.3,
+        "reason": "Falcon 9 Block 5 | USSF-153 (Government/Top Secret)"
+      },
+      "geomagnetic": {
+        "score": 27.8,
+        "reason": "Kp 3.3, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C5.0 flare detected"
+      },
+      "neo": {
+        "score": 21.3,
+        "reason": "2010 FX9 passing at 9.3 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "0 confirmed this month vs 42 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "SPCE moved 2.7% today"
+      }
+    }
   }
 ]
