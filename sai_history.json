@@ -1892,16 +1892,16 @@
   },
   {
     "date": "2026-09-07",
-    "sai": 30,
+    "sai": 35,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 48.3,
-        "reason": "Falcon 9 Block 5 | USSF-153 (Government/Top Secret)"
+        "score": 60.8,
+        "reason": "Crewed mission on manifest: Falcon 9 Block 5 | Crew-13"
       },
       "geomagnetic": {
-        "score": 27.8,
-        "reason": "Kp 3.3, quiet geomagnetic field"
+        "score": 30.6,
+        "reason": "Kp 3.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
