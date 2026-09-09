@@ -1954,20 +1954,20 @@
   },
   {
     "date": "2026-09-09",
-    "sai": 29,
+    "sai": 32,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 45.8,
+        "score": 51.7,
         "reason": "Falcon 9 Block 5 | USSF-153 (Government/Top Secret)"
       },
       "geomagnetic": {
-        "score": 19.4,
-        "reason": "Kp 2.3, quiet geomagnetic field"
+        "score": 25.0,
+        "reason": "Kp 3.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
-        "reason": "C2.4 flare detected"
+        "reason": "C3.4 flare detected"
       },
       "neo": {
         "score": 21.3,
@@ -1979,7 +1979,7 @@
       },
       "stock_volatility": {
         "score": 60,
-        "reason": "ASTS moved 6.1% today"
+        "reason": "ASTS moved 5.6% today"
       }
     }
   }
