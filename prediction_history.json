@@ -3188,49 +3188,49 @@
     "predicted_on": "2026-09-11",
     "predicted_for": "2026-09-11",
     "days_ahead": 0,
-    "score": 7.7,
+    "score": 8.1,
     "estimated": false
   },
   {
     "predicted_on": "2026-09-11",
     "predicted_for": "2026-09-12",
     "days_ahead": 1,
-    "score": 7.7,
+    "score": 7.3,
     "estimated": true
   },
   {
     "predicted_on": "2026-09-11",
     "predicted_for": "2026-09-13",
     "days_ahead": 2,
-    "score": 6.9,
+    "score": 6.5,
     "estimated": true
   },
   {
     "predicted_on": "2026-09-11",
     "predicted_for": "2026-09-14",
     "days_ahead": 3,
-    "score": 6.6,
+    "score": 6.4,
     "estimated": true
   },
   {
     "predicted_on": "2026-09-11",
     "predicted_for": "2026-09-15",
     "days_ahead": 4,
-    "score": 5.0,
+    "score": 5.1,
     "estimated": true
   },
   {
     "predicted_on": "2026-09-11",
     "predicted_for": "2026-09-16",
     "days_ahead": 5,
-    "score": 5.2,
+    "score": 4.7,
     "estimated": true
   },
   {
     "predicted_on": "2026-09-11",
     "predicted_for": "2026-09-17",
     "days_ahead": 6,
-    "score": 6.7,
+    "score": 4.6,
     "estimated": true
   }
 ]

@@ -2016,12 +2016,12 @@
   },
   {
     "date": "2026-09-11",
-    "sai": 25,
-    "status": "MODERATE",
+    "sai": 23,
+    "status": "LOW",
     "components": {
       "launches": {
-        "score": 55.0,
-        "reason": "Falcon 9 Block 5 | USSF-153 (Government/Top Secret)"
+        "score": 49.2,
+        "reason": "Electron | Happily Ever Faster (BlackSky Gen-3 5) (Earth Science)"
       },
       "geomagnetic": {
         "score": 13.9,
@@ -2037,11 +2037,11 @@
       },
       "exoplanets": {
         "score": 10,
-        "reason": "0 confirmed this month vs 42 avg"
+        "reason": "2 confirmed this month vs 43 avg"
       },
       "stock_volatility": {
         "score": 30,
-        "reason": "ASTS moved 4.0% today"
+        "reason": "BA moved 2.8% today"
       }
     }
   }
