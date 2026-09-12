@@ -2047,7 +2047,7 @@
   },
   {
     "date": "2026-09-12",
-    "sai": 28,
+    "sai": 25,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -2055,8 +2055,8 @@
         "reason": "Vega-C | Sentinel-3C & FLEX (Earth Science)"
       },
       "geomagnetic": {
-        "score": 25.0,
-        "reason": "Kp 3.0, quiet geomagnetic field"
+        "score": 11.1,
+        "reason": "Kp 1.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
