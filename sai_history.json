@@ -2044,5 +2044,36 @@
         "reason": "BA moved 2.8% today"
       }
     }
+  },
+  {
+    "date": "2026-09-12",
+    "sai": 28,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 43.3,
+        "reason": "Vega-C | Sentinel-3C & FLEX (Earth Science)"
+      },
+      "geomagnetic": {
+        "score": 25.0,
+        "reason": "Kp 3.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C3.4 flare detected"
+      },
+      "neo": {
+        "score": 21.3,
+        "reason": "2010 FX9 passing at 9.3 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 43 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "BA moved 2.8% today"
+      }
+    }
   }
 ]
