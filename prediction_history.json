@@ -3286,7 +3286,7 @@
     "predicted_on": "2026-09-13",
     "predicted_for": "2026-09-13",
     "days_ahead": 0,
-    "score": 7.3,
+    "score": 7.2,
     "estimated": false
   },
   {
@@ -3300,35 +3300,35 @@
     "predicted_on": "2026-09-13",
     "predicted_for": "2026-09-15",
     "days_ahead": 2,
-    "score": 4.9,
+    "score": 4.8,
     "estimated": true
   },
   {
     "predicted_on": "2026-09-13",
     "predicted_for": "2026-09-16",
     "days_ahead": 3,
-    "score": 4.6,
+    "score": 4.5,
     "estimated": true
   },
   {
     "predicted_on": "2026-09-13",
     "predicted_for": "2026-09-17",
     "days_ahead": 4,
-    "score": 4.4,
+    "score": 4.8,
     "estimated": true
   },
   {
     "predicted_on": "2026-09-13",
     "predicted_for": "2026-09-18",
     "days_ahead": 5,
-    "score": 5.3,
+    "score": 6.1,
     "estimated": true
   },
   {
     "predicted_on": "2026-09-13",
     "predicted_for": "2026-09-19",
     "days_ahead": 6,
-    "score": 4.6,
+    "score": 3.2,
     "estimated": true
   }
 ]
