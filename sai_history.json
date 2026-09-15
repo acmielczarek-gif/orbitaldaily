@@ -2137,5 +2137,36 @@
         "reason": "SPCE moved 3.4% today"
       }
     }
+  },
+  {
+    "date": "2026-09-15",
+    "sai": 18,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 43.3,
+        "reason": "Vega-C | Sentinel-3C & FLEX (Earth Science)"
+      },
+      "geomagnetic": {
+        "score": 2.8,
+        "reason": "Kp 0.3, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "2010 JA passing at 26.2 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 43 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "SPCE moved 3.4% today"
+      }
+    }
   }
 ]
