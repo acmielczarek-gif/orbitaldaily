@@ -2148,8 +2148,8 @@
         "reason": "Vega-C | Sentinel-3C & FLEX (Earth Science)"
       },
       "geomagnetic": {
-        "score": 2.8,
-        "reason": "Kp 0.3, quiet geomagnetic field"
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -2165,7 +2165,7 @@
       },
       "stock_volatility": {
         "score": 30,
-        "reason": "SPCE moved 3.4% today"
+        "reason": "SPCX moved 3.1% today"
       }
     }
   }
