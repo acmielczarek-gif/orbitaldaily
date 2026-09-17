@@ -310,5 +310,32 @@
     "date": "2026-09-16",
     "candidates_checked": 0,
     "picks": []
+  },
+  {
+    "date": "2026-09-17",
+    "candidates_checked": 9,
+    "picks": [
+      {
+        "assignee": "Atlas Devices LLC",
+        "title": "BODY SEALING APPROACH TO ENABLE PRESSURIZED PARTIAL SPACE SUIT OPERATIONS",
+        "filing_date": "2026-05-19",
+        "plain_summary": "A new space suit design that lets astronauts work in partial-pressure gear instead of bulky full-pressure suits.",
+        "why_it_matters": "Lighter, more mobile EVA capability means longer and more frequent spacewalks for construction, repair, and exploration tasks."
+      },
+      {
+        "assignee": "SATED Space LLC",
+        "title": "WORKSTATION FOR MICROGRAVITY ENVIRONMENTS",
+        "filing_date": "2026-05-14",
+        "plain_summary": "A workstation designed so astronauts can do productive work in microgravity without being strapped down.",
+        "why_it_matters": "Making microgravity habitable for extended missions \u2014 the difference between visits and sustained presence in orbit or on the Moon."
+      },
+      {
+        "assignee": "MITSUBISHI ELECTRIC CORPORATION",
+        "title": "SATELLITE CONSTELLATION FORMING SYSTEM, MEGA-CONSTELLATION BUSINESS DEVICE, AND GROUND FACILITY",
+        "filing_date": "2026-05-13",
+        "plain_summary": "An integrated system for launching and coordinating large constellations of satellites as a managed business platform.",
+        "why_it_matters": "Space telecom infrastructure at scale \u2014 the backbone for global broadband, IoT, and Earth observation services from orbit."
+      }
+    ]
   }
 ]
