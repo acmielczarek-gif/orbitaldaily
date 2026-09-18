@@ -2233,16 +2233,16 @@
   },
   {
     "date": "2026-09-18",
-    "sai": 24,
+    "sai": 19,
     "status": "LOW",
     "components": {
       "launches": {
-        "score": 50.0,
-        "reason": "Soyuz 2.1b/Fregat | Kosmos (Unknown Payload) (Government/Top Secret)"
+        "score": 40.0,
+        "reason": "Electron | Owl By The Dozen (StriX Launch 12) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -2258,7 +2258,7 @@
       },
       "stock_volatility": {
         "score": 60,
-        "reason": "LUNR moved 6.6% today"
+        "reason": "ASTS moved 6.7% today"
       }
     }
   }
