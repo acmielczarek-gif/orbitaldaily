@@ -2230,5 +2230,36 @@
         "reason": "LUNR moved 6.6% today"
       }
     }
+  },
+  {
+    "date": "2026-09-18",
+    "sai": 24,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 50.0,
+        "reason": "Soyuz 2.1b/Fregat | Kosmos (Unknown Payload) (Government/Top Secret)"
+      },
+      "geomagnetic": {
+        "score": 16.7,
+        "reason": "Kp 2.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "2010 JA passing at 26.2 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 43 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "LUNR moved 6.6% today"
+      }
+    }
   }
 ]
