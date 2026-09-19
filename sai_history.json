@@ -2261,5 +2261,36 @@
         "reason": "ASTS moved 6.7% today"
       }
     }
+  },
+  {
+    "date": "2026-09-19",
+    "sai": 7,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 0.0,
+        "reason": "No launches on the manifest"
+      },
+      "geomagnetic": {
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "2010 JA passing at 26.2 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 43 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "ASTS moved 6.7% today"
+      }
+    }
   }
 ]
