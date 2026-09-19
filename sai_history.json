@@ -2264,12 +2264,12 @@
   },
   {
     "date": "2026-09-19",
-    "sai": 7,
+    "sai": 24,
     "status": "LOW",
     "components": {
       "launches": {
-        "score": 0.0,
-        "reason": "No launches on the manifest"
+        "score": 50.8,
+        "reason": "Electron | Owl By The Dozen (StriX Launch 12) (Earth Science)"
       },
       "geomagnetic": {
         "score": 13.9,
