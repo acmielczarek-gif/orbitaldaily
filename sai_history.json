@@ -2295,16 +2295,16 @@
   },
   {
     "date": "2026-09-20",
-    "sai": 29,
+    "sai": 25,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 51.7,
-        "reason": "Long March 2D | PIESAT-2 13-16 (Earth Science)"
+        "score": 46.7,
+        "reason": "Kinetica 1 | 9 satellites (Earth Science)"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 2.8,
+        "reason": "Kp 0.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
