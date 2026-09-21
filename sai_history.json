@@ -2326,16 +2326,16 @@
   },
   {
     "date": "2026-09-21",
-    "sai": 28,
-    "status": "MODERATE",
+    "sai": 14,
+    "status": "LOW",
     "components": {
       "launches": {
-        "score": 55.8,
-        "reason": "Crewed mission on manifest: Falcon 9 Block 5 | Crew-13"
+        "score": 0.0,
+        "reason": "No launches on the manifest"
       },
       "geomagnetic": {
-        "score": 2.8,
-        "reason": "Kp 0.3, quiet geomagnetic field"
+        "score": 16.7,
+        "reason": "Kp 0.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 20,
@@ -2350,8 +2350,8 @@
         "reason": "2 confirmed this month vs 43 avg"
       },
       "stock_volatility": {
-        "score": 60,
-        "reason": "ASTS moved 6.7% today"
+        "score": 100,
+        "reason": "LUNR moved 12.9% today"
       }
     }
   }
