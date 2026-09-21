@@ -2323,5 +2323,36 @@
         "reason": "ASTS moved 6.7% today"
       }
     }
+  },
+  {
+    "date": "2026-09-21",
+    "sai": 28,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 55.8,
+        "reason": "Crewed mission on manifest: Falcon 9 Block 5 | Crew-13"
+      },
+      "geomagnetic": {
+        "score": 2.8,
+        "reason": "Kp 0.3, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 20,
+        "reason": "C3.3 flare detected"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "2010 JA passing at 26.2 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 43 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "ASTS moved 6.7% today"
+      }
+    }
   }
 ]
