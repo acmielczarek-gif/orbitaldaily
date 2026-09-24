@@ -367,5 +367,25 @@
     "date": "2026-09-23",
     "candidates_checked": 0,
     "picks": []
+  },
+  {
+    "date": "2026-09-24",
+    "candidates_checked": 2,
+    "picks": [
+      {
+        "assignee": "Blue Origin Manufacturing, LLC",
+        "title": "MODULAR NEUTRON SPECTROMETER",
+        "filing_date": "2026-05-21",
+        "plain_summary": "A portable neutron detector that can be reconfigured for different measurement tasks in space environments.",
+        "why_it_matters": "Modular instrumentation for in-situ resource assessment \u2014 essential for lunar/asteroid mining and determining water/mineral deposits before committing to extraction infrastructure."
+      },
+      {
+        "assignee": "MITSUBISHI ELECTRIC CORPORATION",
+        "title": "SPACE TRAFFIC MANAGEMENT SYSTEM, SPACE TRAFFIC MANAGEMENT METHOD, AND OADR",
+        "filing_date": "2026-04-14",
+        "plain_summary": "A coordinated system to track and manage collision avoidance between all objects in orbit, with automated conflict resolution.",
+        "why_it_matters": "Space traffic control is the unglamorous backbone that makes mega-constellations and orbital operations safe enough to scale \u2014 without it, the debris problem makes everything riskier."
+      }
+    ]
   }
 ]
