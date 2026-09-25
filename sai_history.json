@@ -2447,5 +2447,36 @@
         "reason": "RKLB moved 4.7% today"
       }
     }
+  },
+  {
+    "date": "2026-09-25",
+    "sai": 32,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 62.5,
+        "reason": "Crewed mission on manifest: Falcon 9 Block 5 | Crew-13"
+      },
+      "geomagnetic": {
+        "score": 33.3,
+        "reason": "Kp 4.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 30.0,
+        "reason": "2018 SP2 passing at 5.0 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 43 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "RKLB moved 4.7% today"
+      }
+    }
   }
 ]
