@@ -2512,16 +2512,16 @@
   },
   {
     "date": "2026-09-27",
-    "sai": 29,
+    "sai": 25,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 67.5,
+        "score": 62.5,
         "reason": "Crewed mission on manifest: Falcon 9 Block 5 | Crew-13"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 2.8,
+        "reason": "Kp 0.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
