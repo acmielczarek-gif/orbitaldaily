@@ -2543,7 +2543,7 @@
   },
   {
     "date": "2026-09-28",
-    "sai": 26,
+    "sai": 29,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -2551,8 +2551,8 @@
         "reason": "Crewed mission on manifest: Falcon 9 Block 5 | Crew-13"
       },
       "geomagnetic": {
-        "score": 11.1,
-        "reason": "Kp 1.3, quiet geomagnetic field"
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -2567,8 +2567,8 @@
         "reason": "8 confirmed this month vs 43 avg"
       },
       "stock_volatility": {
-        "score": 0,
-        "reason": "ASTS moved 1.2% today"
+        "score": 60,
+        "reason": "BA moved 6.9% today"
       }
     }
   }
