@@ -2571,5 +2571,36 @@
         "reason": "BA moved 6.9% today"
       }
     }
+  },
+  {
+    "date": "2026-09-29",
+    "sai": 28,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 62.5,
+        "reason": "Crewed mission on manifest: Falcon 9 Block 5 | Crew-13"
+      },
+      "geomagnetic": {
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 30.0,
+        "reason": "2018 SP2 passing at 5.0 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "8 confirmed this month vs 43 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "BA moved 6.9% today"
+      }
+    }
   }
 ]
