@@ -2578,12 +2578,12 @@
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 62.5,
+        "score": 63.3,
         "reason": "Crewed mission on manifest: Falcon 9 Block 5 | Crew-13"
       },
       "geomagnetic": {
-        "score": 5.6,
-        "reason": "Kp 0.7, quiet geomagnetic field"
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -2598,8 +2598,8 @@
         "reason": "8 confirmed this month vs 43 avg"
       },
       "stock_volatility": {
-        "score": 60,
-        "reason": "BA moved 6.9% today"
+        "score": 30,
+        "reason": "LUNR moved 4.3% today"
       }
     }
   }
