@@ -2633,5 +2633,36 @@
         "reason": "LUNR moved 4.3% today"
       }
     }
+  },
+  {
+    "date": "2026-10-16",
+    "sai": 24,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 50.0,
+        "reason": "H3-24 | Martian Moons eXploration (MMX) (Planetary Science)"
+      },
+      "geomagnetic": {
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 6.2,
+        "reason": "2017 UX7 passing at 16.9 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 51 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "RKLB moved 6.6% today"
+      }
+    }
   }
 ]
