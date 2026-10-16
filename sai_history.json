@@ -2636,16 +2636,16 @@
   },
   {
     "date": "2026-10-16",
-    "sai": 24,
-    "status": "LOW",
+    "sai": 28,
+    "status": "MODERATE",
     "components": {
       "launches": {
         "score": 50.0,
         "reason": "H3-24 | Martian Moons eXploration (MMX) (Planetary Science)"
       },
       "geomagnetic": {
-        "score": 13.9,
-        "reason": "Kp 1.7, quiet geomagnetic field"
+        "score": 27.8,
+        "reason": "Kp 3.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -2660,8 +2660,8 @@
         "reason": "2 confirmed this month vs 51 avg"
       },
       "stock_volatility": {
-        "score": 60,
-        "reason": "RKLB moved 6.6% today"
+        "score": 100,
+        "reason": "ASTS moved 8.5% today"
       }
     }
   }
