@@ -2667,16 +2667,16 @@
   },
   {
     "date": "2026-10-17",
-    "sai": 23,
-    "status": "LOW",
+    "sai": 25,
+    "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 45.0,
+        "score": 44.2,
         "reason": "H3-24 | Martian Moons eXploration (MMX) (Planetary Science)"
       },
       "geomagnetic": {
-        "score": 5.6,
-        "reason": "Kp 0.7, quiet geomagnetic field"
+        "score": 22.2,
+        "reason": "Kp 2.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
