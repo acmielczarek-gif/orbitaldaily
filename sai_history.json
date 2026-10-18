@@ -2698,7 +2698,7 @@
   },
   {
     "date": "2026-10-18",
-    "sai": 24,
+    "sai": 23,
     "status": "LOW",
     "components": {
       "launches": {
@@ -2706,8 +2706,8 @@
         "reason": "H3-24 | Martian Moons eXploration (MMX) (Planetary Science)"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -2718,8 +2718,8 @@
         "reason": "2017 UX7 passing at 16.9 lunar distances"
       },
       "exoplanets": {
-        "score": 10,
-        "reason": "2 confirmed this month vs 51 avg"
+        "score": 0,
+        "reason": "No exoplanet data available"
       },
       "stock_volatility": {
         "score": 100,
