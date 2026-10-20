@@ -2757,5 +2757,36 @@
         "reason": "SPCE moved 3.7% today"
       }
     }
+  },
+  {
+    "date": "2026-10-20",
+    "sai": 19,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 44.2,
+        "reason": "H3-24 | Martian Moons eXploration (MMX) (Planetary Science)"
+      },
+      "geomagnetic": {
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 6.2,
+        "reason": "2017 UX7 passing at 16.9 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 51 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "SPCE moved 3.7% today"
+      }
+    }
   }
 ]
