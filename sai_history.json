@@ -2791,16 +2791,16 @@
   },
   {
     "date": "2026-10-21",
-    "sai": 19,
+    "sai": 11,
     "status": "LOW",
     "components": {
       "launches": {
-        "score": 40.8,
-        "reason": "Ceres-1S | Xiguang-4 01 (Earth Science)"
+        "score": 0.0,
+        "reason": "No launches on the manifest"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 27.8,
+        "reason": "Kp 3.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -2815,8 +2815,8 @@
         "reason": "2 confirmed this month vs 51 avg"
       },
       "stock_volatility": {
-        "score": 0,
-        "reason": "LUNR moved 1.9% today"
+        "score": 60,
+        "reason": "SPCX moved 7.8% today"
       }
     }
   }
