@@ -2822,16 +2822,16 @@
   },
   {
     "date": "2026-10-22",
-    "sai": 22,
-    "status": "LOW",
+    "sai": 25,
+    "status": "MODERATE",
     "components": {
       "launches": {
         "score": 35.8,
         "reason": "Electron | We're Not Hawking Around (3x HawkEye 360) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 25.0,
-        "reason": "Kp 3.0, quiet geomagnetic field"
+        "score": 30.6,
+        "reason": "Kp 3.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -2846,8 +2846,8 @@
         "reason": "2 confirmed this month vs 51 avg"
       },
       "stock_volatility": {
-        "score": 60,
-        "reason": "SPCX moved 7.8% today"
+        "score": 100,
+        "reason": "SPCX moved 9.1% today"
       }
     }
   }
