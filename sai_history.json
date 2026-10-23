@@ -2850,5 +2850,36 @@
         "reason": "SPCX moved 9.1% today"
       }
     }
+  },
+  {
+    "date": "2026-10-23",
+    "sai": 22,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 35.8,
+        "reason": "Electron | We're Not Hawking Around (3x HawkEye 360) (Earth Science)"
+      },
+      "geomagnetic": {
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 17.9,
+        "reason": "2018 GS1 passing at 11.0 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 51 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "SPCX moved 9.1% today"
+      }
+    }
   }
 ]
