@@ -2857,12 +2857,12 @@
     "status": "LOW",
     "components": {
       "launches": {
-        "score": 35.8,
+        "score": 41.7,
         "reason": "Electron | We're Not Hawking Around (3x HawkEye 360) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 13.9,
-        "reason": "Kp 1.7, quiet geomagnetic field"
+        "score": 22.2,
+        "reason": "Kp 2.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -2877,8 +2877,8 @@
         "reason": "2 confirmed this month vs 51 avg"
       },
       "stock_volatility": {
-        "score": 100,
-        "reason": "SPCX moved 9.1% today"
+        "score": 30,
+        "reason": "RKLB moved 2.7% today"
       }
     }
   }
