@@ -2884,16 +2884,16 @@
   },
   {
     "date": "2026-10-24",
-    "sai": 19,
+    "sai": 20,
     "status": "LOW",
     "components": {
       "launches": {
-        "score": 43.3,
-        "reason": "Long March 6A | Yaogan 50-03 (Government/Top Secret)"
+        "score": 40.0,
+        "reason": "Electron | The Sea God Surveys (iQPS Launch 9) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 5.6,
-        "reason": "Kp 0.7, quiet geomagnetic field"
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
