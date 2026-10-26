@@ -2946,16 +2946,16 @@
   },
   {
     "date": "2026-10-26",
-    "sai": 22,
+    "sai": 7,
     "status": "LOW",
     "components": {
       "launches": {
-        "score": 50.8,
-        "reason": "Electron | The Sea God Surveys (iQPS Launch 9) (Earth Science)"
+        "score": 0.0,
+        "reason": "No launches on the manifest"
       },
       "geomagnetic": {
-        "score": 8.3,
-        "reason": "Kp 1.0, quiet geomagnetic field"
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -2970,8 +2970,8 @@
         "reason": "2 confirmed this month vs 51 avg"
       },
       "stock_volatility": {
-        "score": 30,
-        "reason": "RKLB moved 2.7% today"
+        "score": 60,
+        "reason": "LMT moved 5.1% today"
       }
     }
   }
