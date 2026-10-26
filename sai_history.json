@@ -2943,5 +2943,36 @@
         "reason": "RKLB moved 2.7% today"
       }
     }
+  },
+  {
+    "date": "2026-10-26",
+    "sai": 22,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 50.8,
+        "reason": "Electron | The Sea God Surveys (iQPS Launch 9) (Earth Science)"
+      },
+      "geomagnetic": {
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 17.9,
+        "reason": "2018 GS1 passing at 11.0 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 51 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "RKLB moved 2.7% today"
+      }
+    }
   }
 ]
