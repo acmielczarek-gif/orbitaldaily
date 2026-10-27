@@ -2974,5 +2974,36 @@
         "reason": "LMT moved 5.1% today"
       }
     }
+  },
+  {
+    "date": "2026-10-27",
+    "sai": 25,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 49.2,
+        "reason": "Falcon 9 Block 5 | USSF-432 (Government/Top Secret)"
+      },
+      "geomagnetic": {
+        "score": 13.9,
+        "reason": "Kp 1.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 17.9,
+        "reason": "2018 GS1 passing at 11.0 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 51 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "LMT moved 5.1% today"
+      }
+    }
   }
 ]
