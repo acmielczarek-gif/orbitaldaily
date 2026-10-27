@@ -2977,7 +2977,7 @@
   },
   {
     "date": "2026-10-27",
-    "sai": 25,
+    "sai": 27,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -2985,8 +2985,8 @@
         "reason": "Falcon 9 Block 5 | USSF-432 (Government/Top Secret)"
       },
       "geomagnetic": {
-        "score": 13.9,
-        "reason": "Kp 1.7, quiet geomagnetic field"
+        "score": 16.7,
+        "reason": "Kp 2.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -3001,8 +3001,8 @@
         "reason": "2 confirmed this month vs 51 avg"
       },
       "stock_volatility": {
-        "score": 60,
-        "reason": "LMT moved 5.1% today"
+        "score": 100,
+        "reason": "BA moved 10.7% today"
       }
     }
   }
