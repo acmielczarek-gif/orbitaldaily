@@ -3008,12 +3008,12 @@
   },
   {
     "date": "2026-10-28",
-    "sai": 28,
-    "status": "MODERATE",
+    "sai": 23,
+    "status": "LOW",
     "components": {
       "launches": {
-        "score": 49.2,
-        "reason": "Falcon 9 Block 5 | USSF-432 (Government/Top Secret)"
+        "score": 45.0,
+        "reason": "Electron | The Sea God Surveys (iQPS Launch 9) (Earth Science)"
       },
       "geomagnetic": {
         "score": 19.4,
@@ -3032,8 +3032,8 @@
         "reason": "2 confirmed this month vs 51 avg"
       },
       "stock_volatility": {
-        "score": 100,
-        "reason": "BA moved 10.7% today"
+        "score": 30,
+        "reason": "SPCX moved 2.3% today"
       }
     }
   }
