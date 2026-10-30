@@ -3067,5 +3067,36 @@
         "reason": "BA moved 3.3% today"
       }
     }
+  },
+  {
+    "date": "2026-10-30",
+    "sai": 22,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 45.0,
+        "reason": "Electron | The Sea God Surveys (iQPS Launch 9) (Earth Science)"
+      },
+      "geomagnetic": {
+        "score": 19.4,
+        "reason": "Kp 2.3, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 8.9,
+        "reason": "2017 WJ2 passing at 15.6 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 51 avg"
+      },
+      "stock_volatility": {
+        "score": 30,
+        "reason": "BA moved 3.3% today"
+      }
+    }
   }
 ]
