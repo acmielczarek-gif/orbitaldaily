@@ -3101,16 +3101,16 @@
   },
   {
     "date": "2026-10-31",
-    "sai": 27,
+    "sai": 31,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 44.2,
+        "score": 43.3,
         "reason": "Electron | The Sea God Surveys (iQPS Launch 9) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 27.8,
-        "reason": "Kp 3.3, quiet geomagnetic field"
+        "score": 52.8,
+        "reason": "Kp 3.3, G2 storm watch"
       },
       "solar": {
         "score": 0,
