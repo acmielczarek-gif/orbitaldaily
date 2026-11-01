@@ -3132,7 +3132,7 @@
   },
   {
     "date": "2026-11-01",
-    "sai": 25,
+    "sai": 26,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -3140,8 +3140,8 @@
         "reason": "Electron | The Sea God Surveys (iQPS Launch 9) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 27.8,
-        "reason": "Kp 3.3, quiet geomagnetic field"
+        "score": 25.0,
+        "reason": "Kp 3.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -3152,8 +3152,8 @@
         "reason": "2017 WJ2 passing at 15.6 lunar distances"
       },
       "exoplanets": {
-        "score": 0,
-        "reason": "No exoplanet data available"
+        "score": 10,
+        "reason": "0 confirmed this month vs 48 avg"
       },
       "stock_volatility": {
         "score": 100,
