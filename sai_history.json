@@ -3194,12 +3194,12 @@
   },
   {
     "date": "2026-11-03",
-    "sai": 26,
-    "status": "MODERATE",
+    "sai": 24,
+    "status": "LOW",
     "components": {
       "launches": {
-        "score": 48.3,
-        "reason": "Electron | The Sea God Surveys (iQPS Launch 9) (Earth Science)"
+        "score": 46.7,
+        "reason": "Falcon 9 Block 5 | USSF-432 (Government/Top Secret)"
       },
       "geomagnetic": {
         "score": 13.9,
@@ -3218,8 +3218,8 @@
         "reason": "0 confirmed this month vs 48 avg"
       },
       "stock_volatility": {
-        "score": 100,
-        "reason": "ASTS moved 11.3% today"
+        "score": 60,
+        "reason": "LUNR moved 6.3% today"
       }
     }
   }
