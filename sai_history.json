@@ -3287,12 +3287,12 @@
   },
   {
     "date": "2026-11-06",
-    "sai": 12,
-    "status": "LOW",
+    "sai": 28,
+    "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 0.0,
-        "reason": "No launches on the manifest"
+        "score": 50.0,
+        "reason": "Falcon 9 Block 5 | USSF-432 (Government/Top Secret)"
       },
       "geomagnetic": {
         "score": 19.4,
@@ -3312,7 +3312,7 @@
       },
       "stock_volatility": {
         "score": 100,
-        "reason": "ASTS moved 15.2% today"
+        "reason": "LUNR moved 21.5% today"
       }
     }
   }
