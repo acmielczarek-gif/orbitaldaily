@@ -3349,16 +3349,16 @@
   },
   {
     "date": "2026-11-08",
-    "sai": 28,
+    "sai": 30,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 45.0,
+        "score": 49.2,
         "reason": "Falcon 9 Block 5 | USSF-627 (Government/Top Secret)"
       },
       "geomagnetic": {
-        "score": 27.8,
-        "reason": "Kp 3.3, quiet geomagnetic field"
+        "score": 33.3,
+        "reason": "Kp 4.0, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
