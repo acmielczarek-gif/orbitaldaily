@@ -5393,21 +5393,21 @@
     "predicted_on": "2026-11-10",
     "predicted_for": "2026-11-10",
     "days_ahead": 0,
-    "score": 8.5,
+    "score": 8.7,
     "estimated": false
   },
   {
     "predicted_on": "2026-11-10",
     "predicted_for": "2026-11-11",
     "days_ahead": 1,
-    "score": 8.2,
+    "score": 8.0,
     "estimated": true
   },
   {
     "predicted_on": "2026-11-10",
     "predicted_for": "2026-11-12",
     "days_ahead": 2,
-    "score": 7.8,
+    "score": 8.1,
     "estimated": true
   },
   {
@@ -5421,14 +5421,14 @@
     "predicted_on": "2026-11-10",
     "predicted_for": "2026-11-14",
     "days_ahead": 4,
-    "score": 6.1,
+    "score": 5.5,
     "estimated": true
   },
   {
     "predicted_on": "2026-11-10",
     "predicted_for": "2026-11-15",
     "days_ahead": 5,
-    "score": 5.7,
+    "score": 5.1,
     "estimated": true
   },
   {
