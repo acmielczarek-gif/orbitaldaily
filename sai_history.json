@@ -3419,8 +3419,8 @@
         "reason": "Falcon 9 Block 5 | USSF-627 (Government/Top Secret)"
       },
       "geomagnetic": {
-        "score": 16.7,
-        "reason": "Kp 2.0, quiet geomagnetic field"
+        "score": 22.2,
+        "reason": "Kp 2.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -3431,8 +3431,8 @@
         "reason": "2015 VH65 passing at 9.7 lunar distances"
       },
       "exoplanets": {
-        "score": 10,
-        "reason": "0 confirmed this month vs 50 avg"
+        "score": 0,
+        "reason": "No exoplanet data available"
       },
       "stock_volatility": {
         "score": 100,
