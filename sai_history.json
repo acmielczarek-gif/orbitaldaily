@@ -3501,5 +3501,36 @@
         "reason": "LUNR moved 7.0% today"
       }
     }
+  },
+  {
+    "date": "2026-11-13",
+    "sai": 23,
+    "status": "LOW",
+    "components": {
+      "launches": {
+        "score": 50.8,
+        "reason": "Electron | The Mountain God Rises (iQPS Launch 10) (Earth Science)"
+      },
+      "geomagnetic": {
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 6.8,
+        "reason": "2018 NE1 passing at 16.6 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "1 confirmed this month vs 51 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "LUNR moved 7.0% today"
+      }
+    }
   }
 ]
