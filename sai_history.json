@@ -3504,16 +3504,16 @@
   },
   {
     "date": "2026-11-13",
-    "sai": 23,
-    "status": "LOW",
+    "sai": 25,
+    "status": "MODERATE",
     "components": {
       "launches": {
         "score": 50.8,
         "reason": "Electron | The Mountain God Rises (iQPS Launch 10) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 8.3,
-        "reason": "Kp 1.0, quiet geomagnetic field"
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -3528,8 +3528,8 @@
         "reason": "1 confirmed this month vs 51 avg"
       },
       "stock_volatility": {
-        "score": 60,
-        "reason": "LUNR moved 7.0% today"
+        "score": 100,
+        "reason": "SPCE moved 31.1% today"
       }
     }
   }
