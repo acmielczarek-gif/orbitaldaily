@@ -3659,16 +3659,16 @@
   },
   {
     "date": "2026-11-18",
-    "sai": 28,
+    "sai": 25,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 50.8,
+        "score": 50.0,
         "reason": "Falcon 9 Block 5 | USSF-317 (Government/Top Secret)"
       },
       "geomagnetic": {
-        "score": 25.0,
-        "reason": "Kp 3.0, quiet geomagnetic field"
+        "score": 19.4,
+        "reason": "Kp 2.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -3683,8 +3683,8 @@
         "reason": "1 confirmed this month vs 51 avg"
       },
       "stock_volatility": {
-        "score": 100,
-        "reason": "SPCE moved 16.7% today"
+        "score": 60,
+        "reason": "SPCE moved 5.4% today"
       }
     }
   }
