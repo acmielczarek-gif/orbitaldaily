@@ -3656,5 +3656,36 @@
         "reason": "SPCE moved 9.0% today"
       }
     }
+  },
+  {
+    "date": "2026-11-18",
+    "sai": 28,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 50.8,
+        "reason": "Falcon 9 Block 5 | USSF-317 (Government/Top Secret)"
+      },
+      "geomagnetic": {
+        "score": 25.0,
+        "reason": "Kp 3.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 6.8,
+        "reason": "2018 NE1 passing at 16.6 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "1 confirmed this month vs 51 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "SPCE moved 16.7% today"
+      }
+    }
   }
 ]
