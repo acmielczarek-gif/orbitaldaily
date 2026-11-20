@@ -3718,5 +3718,36 @@
         "reason": "SPCE moved 5.8% today"
       }
     }
+  },
+  {
+    "date": "2026-11-20",
+    "sai": 26,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 63.3,
+        "reason": "Crewed mission on manifest: Long March 2F/G | Shenzhou 24"
+      },
+      "geomagnetic": {
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "2019 VF1 passing at 23.4 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 51 avg"
+      },
+      "stock_volatility": {
+        "score": 60,
+        "reason": "SPCX moved 5.2% today"
+      }
+    }
   }
 ]
