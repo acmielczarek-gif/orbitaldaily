@@ -3780,5 +3780,36 @@
         "reason": "RKLB moved 10.9% today"
       }
     }
+  },
+  {
+    "date": "2026-11-22",
+    "sai": 27,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 62.5,
+        "reason": "Crewed mission on manifest: Long March 2F/G | Shenzhou 24"
+      },
+      "geomagnetic": {
+        "score": 2.8,
+        "reason": "Kp 0.3, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "217628 Lugh (1990 HA passing at 27.5 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 51 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "RKLB moved 10.9% today"
+      }
+    }
   }
 ]
