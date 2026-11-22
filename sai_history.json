@@ -3783,7 +3783,7 @@
   },
   {
     "date": "2026-11-22",
-    "sai": 27,
+    "sai": 28,
     "status": "MODERATE",
     "components": {
       "launches": {
@@ -3791,8 +3791,8 @@
         "reason": "Crewed mission on manifest: Long March 2F/G | Shenzhou 24"
       },
       "geomagnetic": {
-        "score": 2.8,
-        "reason": "Kp 0.3, quiet geomagnetic field"
+        "score": 5.6,
+        "reason": "Kp 0.7, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
