@@ -3842,5 +3842,36 @@
         "reason": "ASTS moved 11.6% today"
       }
     }
+  },
+  {
+    "date": "2026-11-24",
+    "sai": 26,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 56.7,
+        "reason": "Crewed mission on manifest: Long March 2F/G | Shenzhou 24"
+      },
+      "geomagnetic": {
+        "score": 8.3,
+        "reason": "Kp 1.0, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 0,
+        "reason": "217628 Lugh (1990 HA passing at 27.5 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 51 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "LUNR moved 11.1% today"
+      }
+    }
   }
 ]
