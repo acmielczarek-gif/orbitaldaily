@@ -3938,16 +3938,16 @@
   },
   {
     "date": "2026-11-27",
-    "sai": 32,
+    "sai": 28,
     "status": "MODERATE",
     "components": {
       "launches": {
-        "score": 50.8,
-        "reason": "Long March 2D | Yaogan 49 Group 01 (Government/Top Secret)"
+        "score": 48.3,
+        "reason": "Electron | Night Owls Never Sleep (StriX Launch 14) (Earth Science)"
       },
       "geomagnetic": {
-        "score": 19.4,
-        "reason": "Kp 2.3, quiet geomagnetic field"
+        "score": 2.8,
+        "reason": "Kp 0.3, quiet geomagnetic field"
       },
       "solar": {
         "score": 0,
@@ -3963,7 +3963,7 @@
       },
       "stock_volatility": {
         "score": 100,
-        "reason": "ASTS moved 10.3% today"
+        "reason": "LUNR moved 9.6% today"
       }
     }
   }
