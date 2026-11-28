@@ -3966,5 +3966,36 @@
         "reason": "LUNR moved 9.6% today"
       }
     }
+  },
+  {
+    "date": "2026-11-28",
+    "sai": 33,
+    "status": "MODERATE",
+    "components": {
+      "launches": {
+        "score": 54.2,
+        "reason": "Long March 6A | Yaogan 50-04 (Government/Top Secret)"
+      },
+      "geomagnetic": {
+        "score": 19.4,
+        "reason": "Kp 2.3, quiet geomagnetic field"
+      },
+      "solar": {
+        "score": 0,
+        "reason": "No significant flare activity"
+      },
+      "neo": {
+        "score": 62.9,
+        "reason": "2019 XF2 passing at 3.1 lunar distances"
+      },
+      "exoplanets": {
+        "score": 10,
+        "reason": "2 confirmed this month vs 51 avg"
+      },
+      "stock_volatility": {
+        "score": 100,
+        "reason": "LUNR moved 9.4% today"
+      }
+    }
   }
 ]
